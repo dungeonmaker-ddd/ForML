@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>机器学习入门笔记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f0e8;
+    --ink: #2c1810;
+    --ink-light: #5a4a3a;
+    --ink-faint: #9a8a7a;
+    --vermillion: #c41e3a;
+    --blue-ink: #2a4a6b;
+    --green-ink: #2a6b4a;
+    --gold: #b8943e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1612;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    color: var(--ink);
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, #2a2320 0%, #1a1612 70%);
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: min(720px, 92vw);
+    padding: 60px 48px;
+    background:
+      var(--paper)
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    border-radius: 4px 12px 12px 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.08);
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .header .label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .header h1 {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 12px 0 8px;
+    line-height: 1.4;
+  }
+
+  .header .en {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  .ornament {
+    width: 60px; height: 1px;
+    background: var(--gold);
+    margin: 20px auto;
+    position: relative;
+  }
+  .ornament::before, .ornament::after {
+    content: '';
+    position: absolute;
+    width: 5px; height: 5px;
+    border: 1px solid var(--gold);
+    top: -2px;
+    transform: rotate(45deg);
+  }
+  .ornament::before { left: -8px; }
+  .ornament::after  { right: -8px; }
+
+  .chapters {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .chapter-link {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 20px 16px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    text-decoration: none;
+    color: var(--ink);
+    transition: all .25s;
+    border-radius: 4px;
+  }
+
+  .chapter-link:hover {
+    background: rgba(196,30,58,.04);
+    border-color: transparent;
+    transform: translateX(4px);
+  }
+
+  .chapter-link:last-child { border-bottom: none; }
+
+  .ch-num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--vermillion);
+    opacity: .4;
+    min-width: 56px;
+    text-align: right;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .ch-info {
+    flex: 1;
+  }
+
+  .ch-title {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.5;
+    margin-bottom: 4px;
+  }
+
+  .ch-desc {
+    font-size: 13px;
+    color: var(--ink-faint);
+    line-height: 1.6;
+  }
+
+  .ch-arrow {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    color: var(--ink-faint);
+    opacity: .3;
+    transition: all .25s;
+    flex-shrink: 0;
+  }
+
+  .chapter-link:hover .ch-arrow {
+    opacity: .8;
+    color: var(--vermillion);
+    transform: translateX(4px);
+  }
+
+  .chapter-link:hover .ch-num { opacity: .7; }
+
+  .chapter-link.disabled {
+    opacity: .35;
+    pointer-events: none;
+  }
+
+  .footer {
+    text-align: center;
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,.06);
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .container > * {
+    animation: fadeUp .5s ease both;
+  }
+  .container > *:nth-child(1) { animation-delay: .05s; }
+  .container > *:nth-child(2) { animation-delay: .15s; }
+  .container > *:nth-child(3) { animation-delay: .25s; }
+  .container > *:nth-child(4) { animation-delay: .35s; }
+
+  .chapters .chapter-link:nth-child(1) { animation: fadeUp .5s ease .2s both; }
+  .chapters .chapter-link:nth-child(2) { animation: fadeUp .5s ease .28s both; }
+  .chapters .chapter-link:nth-child(3) { animation: fadeUp .5s ease .36s both; }
+  .chapters .chapter-link:nth-child(4) { animation: fadeUp .5s ease .44s both; }
+  .chapters .chapter-link:nth-child(5) { animation: fadeUp .5s ease .52s both; }
+  .chapters .chapter-link:nth-child(6) { animation: fadeUp .5s ease .60s both; }
+
+  @media (max-width: 600px) {
+    .container { padding: 40px 24px; }
+    .header h1 { font-size: 28px; }
+    .ch-num { font-size: 24px; min-width: 40px; }
+    .ch-title { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="label">Machine Learning Notes</div>
+    <h1>机器学习入门笔记</h1>
+    <div class="en">Introduction to Machine Learning</div>
+  </div>
+
+  <div class="ornament"></div>
+
+  <div class="chapters">
+    <a class="chapter-link" href="ch01-book.html">
+      <div class="ch-num">01</div>
+      <div class="ch-info">
+        <div class="ch-title">人工智能三大概念</div>
+        <div class="ch-desc">AI / ML / DL 嵌套关系, 线性模型 y=wx+b, 从数据到预测</div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>
+    </a>
+    <a class="chapter-link disabled">
+      <div class="ch-num">02</div>
+      <div class="ch-info">
+        <div class="ch-title">机器学习常用术语</div>
+        <div class="ch-desc">样本, 特征, 标签, 训练集与测试集</div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>
+    </a>
+    <a class="chapter-link" href="ch03-book.html">
+      <div class="ch-num">03</div>
+      <div class="ch-info">
+        <div class="ch-title">机器学习算法分类</div>
+        <div class="ch-desc">监督学习, 无监督学习, 半监督学习, 强化学习</div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>
+    </a>
+    <a class="chapter-link" href="ch04-book.html">
+      <div class="ch-num">04</div>
+      <div class="ch-info">
+        <div class="ch-title">机器学习建模流程</div>
+        <div class="ch-desc">获取数据 &rarr; 数据处理 &rarr; 特征工程 &rarr; 模型训练 &rarr; 模型评估</div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>
+    </a>
+    <a class="chapter-link" href="ch05-book.html">
+      <div class="ch-num">05</div>
+      <div class="ch-info">
+        <div class="ch-title">特征工程概念入门</div>
+        <div class="ch-desc">特征提取, 预处理, 降维, 选择, 组合 &mdash; 决定 ML 上限的关键</div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>
+    </a>
+    <a class="chapter-link" href="ch06-book.html">
+      <div class="ch-num">06</div>
+      <div class="ch-info">
+        <div class="ch-title">模型拟合问题</div>
+        <div class="ch-desc">欠拟合, 过拟合, Loss 曲线诊断, 泛化与奥卡姆剃刀</div>
+      </div>
+      <div class="ch-arrow">&rarr;</div>
+    </a>
+  </div>
+
+  <div class="footer">Scholar's Desk &middot; ML Study Notes &middot; 2026</div>
+</div>
+</body>
+</html>

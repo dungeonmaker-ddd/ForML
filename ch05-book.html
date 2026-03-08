@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 05 — 特征工程概念入门</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f0e8;
+    --paper-dark: #e8e0d0;
+    --ink: #2c1810;
+    --ink-light: #5a4a3a;
+    --ink-faint: #9a8a7a;
+    --vermillion: #c41e3a;
+    --vermillion-soft: #d4556a;
+    --gold: #b8943e;
+    --gold-light: #d4b86a;
+    --blue-ink: #2a4a6b;
+    --green-ink: #2a6b4a;
+    --page-w: min(680px, 92vw);
+    --page-h: min(880px, 85vh);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1612;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    color: var(--ink);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ─── desk surface ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, #2a2320 0%, #1a1612 70%),
+      repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(0,0,0,.03) 100px, rgba(0,0,0,.03) 101px);
+    z-index: 0;
+  }
+
+  /* ─── book container ─── */
+  .book-scene {
+    perspective: 1800px;
+    width: var(--page-w);
+    height: var(--page-h);
+    position: relative;
+    z-index: 1;
+  }
+
+  .book {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  /* ─── each page ─── */
+  .page {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    border-radius: 2px 8px 8px 2px;
+    overflow: hidden;
+    transition: transform .8s cubic-bezier(.645,.045,.355,1),
+                opacity .4s ease;
+    transform-origin: left center;
+    cursor: pointer;
+  }
+
+  .page-inner {
+    width: 100%; height: 100%;
+    padding: 48px 44px 40px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-faint) transparent;
+  }
+
+  /* paper texture */
+  .page::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      var(--paper)
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    z-index: 0;
+  }
+
+  /* page edge shadow */
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 24px;
+    background: linear-gradient(90deg, rgba(0,0,0,.08), transparent);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .page-inner > * { position: relative; z-index: 1; }
+
+  /* page stacking & flip */
+  .page[data-state="current"] { transform: rotateY(0deg); z-index: 10; }
+  .page[data-state="flipped"]  { transform: rotateY(-180deg); z-index: 5; pointer-events: none; }
+  .page[data-state="stacked"] { transform: rotateY(0deg); z-index: 1; }
+
+  /* ─── page number ─── */
+  .page-num {
+    position: absolute;
+    bottom: 20px; right: 36px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
+    z-index: 3;
+  }
+  .page-num::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--ink-faint);
+    vertical-align: middle;
+    margin-right: 8px;
+    opacity: .5;
+  }
+
+  /* ─── navigation ─── */
+  .nav-bar {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .nav-btn {
+    background: rgba(245,240,232,.1);
+    border: 1px solid rgba(245,240,232,.15);
+    color: var(--paper-dark);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    padding: 8px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .25s;
+    letter-spacing: 1px;
+    backdrop-filter: blur(4px);
+  }
+  .nav-btn:hover { background: rgba(245,240,232,.18); color: #fff; }
+  .nav-btn:disabled { opacity: .25; cursor: default; }
+
+  .nav-dots {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(245,240,232,.15);
+    transition: all .35s;
+    cursor: pointer;
+  }
+  .nav-dot.active {
+    background: var(--vermillion);
+    box-shadow: 0 0 8px rgba(196,30,58,.4);
+    transform: scale(1.3);
+  }
+
+  /* ─── typography ─── */
+  .ch-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  h1.page-title {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+
+  h2.section-title {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink-faint);
+    line-height: 1.5;
+  }
+
+  .subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-light);
+    margin-bottom: 32px;
+    letter-spacing: .5px;
+  }
+
+  .body-text {
+    font-size: 15px;
+    line-height: 2;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+  }
+
+  .body-text strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .highlight {
+    color: var(--vermillion);
+    font-weight: 600;
+  }
+
+  .blue { color: var(--blue-ink); font-weight: 600; }
+  .green { color: var(--green-ink); font-weight: 600; }
+  .gold { color: var(--gold); font-weight: 600; }
+
+  .note-box {
+    background: rgba(196,30,58,.04);
+    border-left: 3px solid var(--vermillion);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+  }
+
+  .note-box .label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--vermillion);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .insight-box {
+    background: rgba(42,74,107,.05);
+    border-left: 3px solid var(--blue-ink);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+  }
+
+  /* ─── cover page (prologue) ─── */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 48px;
+  }
+
+  .cover-ornament {
+    width: 60px; height: 1px;
+    background: var(--gold);
+    margin: 20px auto;
+    position: relative;
+  }
+  .cover-ornament::before,
+  .cover-ornament::after {
+    content: '';
+    position: absolute;
+    width: 5px; height: 5px;
+    border: 1px solid var(--gold);
+    top: -2px;
+    transform: rotate(45deg);
+  }
+  .cover-ornament::before { left: -8px; }
+  .cover-ornament::after  { right: -8px; }
+
+  .cover .ch-num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--vermillion);
+    line-height: 1;
+    opacity: .18;
+    margin-bottom: -10px;
+  }
+
+  .cover h1 {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 8px 0;
+  }
+
+  .cover .en-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+
+  .cover .toc {
+    text-align: left;
+    margin-top: 36px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .cover .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 0;
+    font-size: 14px;
+    color: var(--ink-light);
+    border-bottom: 1px dotted rgba(0,0,0,.1);
+    line-height: 1.6;
+  }
+
+  .cover .toc-item .num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--vermillion-soft);
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+
+  /* ─── comparison table ─── */
+  .compare-row {
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+  }
+
+  .compare-card {
+    flex: 1;
+    padding: 16px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    line-height: 1.9;
+  }
+
+  .compare-card.rule-card {
+    background: rgba(0,0,0,.03);
+    border: 1px solid rgba(0,0,0,.08);
+  }
+
+  .compare-card.ml-card {
+    background: rgba(196,30,58,.03);
+    border: 1px solid rgba(196,30,58,.12);
+  }
+
+  .compare-card .card-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  /* ─── data table ─── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13.5px;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--ink);
+    color: var(--ink);
+  }
+
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .data-table .col-feature { color: var(--blue-ink); font-weight: 600; }
+  .data-table .col-label { color: var(--vermillion); font-weight: 600; }
+
+  /* ─── formula ─── */
+  .formula-block {
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(0,0,0,.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(0,0,0,.1);
+  }
+
+  .formula {
+    font-family: 'Crimson Pro', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: 2px;
+  }
+
+  .formula .param-w { color: var(--blue-ink); }
+  .formula .param-b { color: var(--green-ink); }
+
+  .formula-desc {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    line-height: 1.8;
+  }
+
+  /* ─── param cards ─── */
+  .param-cards {
+    display: flex; gap: 16px;
+    margin: 16px 0;
+  }
+
+  .param-card {
+    flex: 1;
+    padding: 16px;
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .param-card.w-card {
+    background: rgba(42,74,107,.06);
+    border: 1px solid rgba(42,74,107,.15);
+  }
+
+  .param-card.b-card {
+    background: rgba(42,107,74,.06);
+    border: 1px solid rgba(42,107,74,.15);
+  }
+
+  .param-card .param-symbol {
+    font-family: 'Crimson Pro', serif;
+    font-size: 36px;
+    font-weight: 300;
+    margin-bottom: 4px;
+  }
+
+  .param-card .param-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .param-card .param-detail {
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.8;
+  }
+
+  /* ─── flow chart ─── */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 10px 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 0;
+  }
+
+  .flow-step .step-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .flow-step .step-icon.s1 { background: var(--blue-ink); }
+  .flow-step .step-icon.s2 { background: var(--green-ink); }
+  .flow-step .step-icon.s3 { background: var(--vermillion); }
+  .flow-step .step-icon.s4 { background: var(--gold); }
+
+  .flow-step .step-icon::after {
+    content: '';
+    position: absolute;
+    top: 36px; left: 50%;
+    width: 1px; height: 18px;
+    background: var(--ink-faint);
+    opacity: .3;
+  }
+  .flow-step:last-child .step-icon::after { display: none; }
+
+  .flow-step .step-text {
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    padding-top: 6px;
+  }
+
+  .flow-step .step-text strong {
+    color: var(--ink);
+    display: block;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+
+  /* ─── summary list ─── */
+  .summary-list {
+    list-style: none;
+    counter-reset: sum;
+    margin: 10px 0;
+  }
+
+  .summary-list li {
+    counter-increment: sum;
+    padding: 10px 0 10px 36px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+
+  .summary-list li::before {
+    content: counter(sum);
+    position: absolute;
+    left: 0; top: 10px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--vermillion);
+    color: #fff;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .summary-list li:last-child { border-bottom: none; }
+
+  /* ─── responsive ─── */
+  @media (max-width: 600px) {
+    .page-inner { padding: 32px 24px 36px; }
+    h1.page-title { font-size: 28px; }
+    h2.section-title { font-size: 19px; }
+    .cover h1 { font-size: 30px; }
+    .compare-row { flex-direction: column; }
+    .param-cards { flex-direction: column; }
+    .formula { font-size: 26px; }
+  }
+
+  /* ─── entrance animations ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page[data-state="current"] .page-inner > * {
+    animation: fadeUp .5s ease both;
+  }
+  .page[data-state="current"] .page-inner > *:nth-child(1) { animation-delay: .1s; }
+  .page[data-state="current"] .page-inner > *:nth-child(2) { animation-delay: .18s; }
+  .page[data-state="current"] .page-inner > *:nth-child(3) { animation-delay: .26s; }
+  .page[data-state="current"] .page-inner > *:nth-child(4) { animation-delay: .34s; }
+  .page[data-state="current"] .page-inner > *:nth-child(5) { animation-delay: .42s; }
+  .page[data-state="current"] .page-inner > *:nth-child(6) { animation-delay: .50s; }
+  .page[data-state="current"] .page-inner > *:nth-child(7) { animation-delay: .56s; }
+  .page[data-state="current"] .page-inner > *:nth-child(8) { animation-delay: .62s; }
+  .page[data-state="current"] .page-inner > *:nth-child(9) { animation-delay: .68s; }
+  .page[data-state="current"] .page-inner > *:nth-child(10) { animation-delay: .72s; }
+</style>
+</head>
+<body>
+
+<div class="book-scene">
+  <div class="book" id="book">
+
+    <!-- ═══════════ 序章 PROLOGUE ═══════════ -->
+    <div class="page" data-index="0" data-state="current">
+      <div class="page-inner cover">
+        <div class="ch-label">Machine Learning Notes</div>
+        <div class="ch-num">05</div>
+        <div class="cover-ornament"></div>
+        <h1>特征工程概念入门</h1>
+        <div class="en-title">Introduction to Feature Engineering</div>
+        <div class="cover-ornament"></div>
+
+        <div class="toc">
+          <div class="toc-item"><span class="num">1</span>特征工程的定义与核心地位</div>
+          <div class="toc-item"><span class="num">2</span>特征提取 &amp; 特征预处理</div>
+          <div class="toc-item"><span class="num">3</span>归一化 vs 标准化</div>
+          <div class="toc-item"><span class="num">4</span>特征降维 &amp; PCA</div>
+          <div class="toc-item"><span class="num">5</span>特征选择 &amp; 特征组合</div>
+          <div class="toc-item"><span class="num">6</span>章节小结</div>
+        </div>
+      </div>
+      <div class="page-num">序章</div>
+    </div>
+
+    <!-- ═══════════ PAGE 1: 特征工程的定义与核心地位 ═══════════ -->
+    <div class="page" data-index="1" data-state="stacked">
+      <div class="page-inner">
+        <div class="ch-label">Chapter 05 &middot; Page 1</div>
+        <h2 class="section-title">特征工程的定义与核心地位</h2>
+
+        <p class="body-text">
+          <strong>特征工程 (Feature Engineering)</strong> 是利用<span class="highlight">专业背景知识和技巧</span>处理数据的过程，目的是让机器学习算法更容易学习到数据中的规律，使模型效果更好。
+        </p>
+
+        <div class="note-box">
+          <div class="label">核心原则</div>
+          数据和特征决定了机器学习的<strong>上限</strong>，而模型和算法只是逼近这个上限而已。<br>
+          好的特征工程直接决定模型的天花板。
+        </div>
+
+        <p class="body-text">
+          <strong>鸢尾花案例：</strong>鸢尾花分类为何不用颜色作特征？因为需要<span class="highlight">专业人员根据领域知识</span>选择有区分力的特征。颜色对分类区分力不够，而花瓣长度、花萼宽度等特征才是有效的。特征选择依赖领域专业知识，不是特征越多越好。
+        </p>
+
+        <div class="insight-box">
+          <strong>五大子领域概览</strong><br>
+          <span class="blue">特征提取</span> &rarr; 从原始数据中提取任务相关特征<br>
+          <span class="blue">特征预处理</span> &rarr; 消除量纲差异，统一影响力<br>
+          <span class="blue">特征降维</span> &rarr; 压缩维度，保留主要信息<br>
+          <span class="blue">特征选择</span> &rarr; 挑选任务相关特征子集<br>
+          <span class="blue">特征组合</span> &rarr; 合并多个特征，构造新特征
+        </div>
+      </div>
+      <div class="page-num">1 / 6</div>
+    </div>
+
+    <!-- ═══════════ PAGE 2: 特征提取 & 特征预处理 ═══════════ -->
+    <div class="page" data-index="2" data-state="stacked">
+      <div class="page-inner">
+        <div class="ch-label">Chapter 05 &middot; Page 2</div>
+        <h2 class="section-title">特征提取 &amp; 特征预处理</h2>
+
+        <p class="body-text">
+          <strong>特征提取 (Feature Extraction)</strong>：从原始数据中提取与任务相关的特征，并转成<span class="highlight">特征向量</span>。原始数据可能是图片、文本等非结构化数据，需要转化为模型能处理的数值向量。
+        </p>
+
+        <p class="body-text">
+          <strong>特征预处理 (Feature Preprocessing)</strong>：解决不同特征对模型影响<span class="highlight">一致性</span>的问题。核心问题在于量纲差异 —— 不同特征的数值量级可能相差巨大。
+        </p>
+
+        <div class="note-box">
+          <div class="label">量纲问题</div>
+          <strong>量级大的特征</strong>对模型影响大，<strong>量级小的特征</strong>影响小。<br>
+          模型倾向于<span class="highlight">优先学习量纲大的特征</span>，忽略量纲小的特征与标签的相关性。<br><br>
+          例如：收入（万元级）和年龄（十位数级）作为特征时，模型会过度关注收入而忽视年龄的作用，即使年龄对预测同样重要。
+        </div>
+
+        <div class="compare-row">
+          <div class="compare-card rule-card">
+            <div class="card-title" style="color:var(--blue-ink)">特征提取</div>
+            提取任务相关特征<br>
+            转成数值<strong>特征向量</strong><br>
+            处理非结构化数据<br>
+            是特征工程的<strong>第一步</strong>
+          </div>
+          <div class="compare-card ml-card">
+            <div class="card-title" style="color:var(--vermillion)">特征预处理</div>
+            消除<strong>量纲差异</strong><br>
+            让特征影响力一致<br>
+            方法：归一化 / 标准化<br>
+            保证模型公平学习每个特征
+          </div>
+        </div>
+      </div>
+      <div class="page-num">2 / 6</div>
+    </div>
+
+    <!-- ═══════════ PAGE 3: 归一化 vs 标准化 ═══════════ -->
+    <div class="page" data-index="3" data-state="stacked">
+      <div class="page-inner">
+        <div class="ch-label">Chapter 05 &middot; Page 3</div>
+        <h2 class="section-title">归一化 vs 标准化</h2>
+
+        <p class="body-text">
+          <strong>归一化 (MinMaxScaler)</strong>：将数据缩放到固定范围（通常 0~1）。适用于<span class="highlight">图像、像素、已知范围的传感器数据</span>（如 0-255）。
+        </p>
+
+        <p class="body-text">
+          <strong>标准化 (StandardScaler)</strong>：将数据转换为均值为 0、标准差为 1 的分布。适用于<span class="highlight">大多数机器学习任务、表格数据</span>。数据有明显异常值时也推荐用标准化。
+        </p>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th>推荐方法</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>大多数机器学习任务（表格数据）</td>
+              <td class="col-feature">优先用标准化 StandardScaler</td>
+            </tr>
+            <tr>
+              <td>图像、像素、已知范围传感器数据 0-255</td>
+              <td class="col-label">用归一化 MinMaxScaler</td>
+            </tr>
+            <tr>
+              <td>数据有明显异常值</td>
+              <td class="col-feature">标准化</td>
+            </tr>
+            <tr>
+              <td>不确定用哪个？</td>
+              <td>先试标准化，再对比归一化效果（交叉验证）</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note-box" style="margin-top: 16px;">
+          <div class="label">实践建议</div>
+          不确定用哪个时，<strong>先试标准化</strong>，再对比归一化效果。通过<span class="highlight">交叉验证</span>来决定最终方案。标准化对异常值更鲁棒，是更安全的默认选择。
+        </div>
+      </div>
+      <div class="page-num">3 / 6</div>
+    </div>
+
+    <!-- ═══════════ PAGE 4: 特征降维 & PCA ═══════════ -->
+    <div class="page" data-index="4" data-state="stacked">
+      <div class="page-inner">
+        <div class="ch-label">Chapter 05 &middot; Page 4</div>
+        <h2 class="section-title">特征降维 &amp; PCA</h2>
+
+        <p class="body-text">
+          <strong>特征降维 (Feature Decomposition)</strong>：将原始数据的维度降低，保证<span class="highlight">主要信息保留</span>的同时减少数据量，消除冗余特征，降低计算成本。
+        </p>
+
+        <p class="body-text">
+          <strong>PCA 主成分分析</strong>：一种纯数学优化方法，<span class="highlight">无语义目标</span>。新特征融合多个原始特征的信息，但可能没有明确的物理定义。PCA 仅限于<span class="blue">线性组合</span>。
+        </p>
+
+        <div class="formula-block">
+          <div class="formula" style="font-size:22px;">
+            PC1 = 0.7 &times; <span class="param-w">标准化身高</span> + 0.7 &times; <span class="param-b">标准化体重</span>
+          </div>
+          <div class="formula-desc">
+            身高和体重两个特征 &rarr; 压缩为一个新特征"体型大小"<br>
+            新特征<strong>无单位</strong>，将 2 维压缩为 1 维
+          </div>
+        </div>
+
+        <div class="insight-box">
+          <strong>PCA 特点总结</strong><br>
+          &bull; 纯数学优化，自动找到数据方差最大的方向<br>
+          &bull; 新特征是原始特征的线性组合<br>
+          &bull; 融合多个特征信息，但通常<span class="highlight">不可解释</span><br>
+          &bull; 适用于高维数据的降维压缩
+        </div>
+      </div>
+      <div class="page-num">4 / 6</div>
+    </div>
+
+    <!-- ═══════════ PAGE 5: 特征选择 & 特征组合 ═══════════ -->
+    <div class="page" data-index="5" data-state="stacked">
+      <div class="page-inner">
+        <div class="ch-label">Chapter 05 &middot; Page 5</div>
+        <h2 class="section-title">特征选择 &amp; 特征组合</h2>
+
+        <p class="body-text">
+          <strong>特征选择 (Feature Selection)</strong>：根据专业知识从众多特征中挑选<span class="highlight">重要特征</span>。原始数据特征很多，相关的只是子集。特征选择不会改变原始数据，只是选取。
+        </p>
+
+        <p class="body-text">
+          <strong>特征组合 (Feature Crosses)</strong>：把多个特征合并成单个特征，利用<span class="blue">乘法或加法</span>完成。引入领域知识，构造有明确语义的新特征。
+        </p>
+
+        <div class="formula-block">
+          <div class="formula" style="font-size:24px;">
+            BMI = 体重(kg) / 身高(m)&sup2;
+          </div>
+          <div class="formula-desc">
+            新特征"肥胖程度" &rarr; 有医学定义，<strong>高可解释性</strong>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>对比维度</th>
+              <th>特征组合</th>
+              <th>PCA 降维</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>首要目标</strong></td>
+              <td>引入领域知识，构造有明确语义的新特征</td>
+              <td>去除冗余，压缩维度（无语义目标）</td>
+            </tr>
+            <tr>
+              <td><strong>是否可解释</strong></td>
+              <td class="col-feature">高可解释性</td>
+              <td class="col-label">否（通常）</td>
+            </tr>
+            <tr>
+              <td><strong>是否线性</strong></td>
+              <td class="col-feature">任意函数形式</td>
+              <td class="col-label">仅限线性组合</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="page-num">5 / 6</div>
+    </div>
+
+    <!-- ═══════════ PAGE 6: 章节小结 ═══════════ -->
+    <div class="page" data-index="6" data-state="stacked">
+      <div class="page-inner">
+        <div class="ch-label">Chapter 05 &middot; Page 6</div>
+        <h2 class="section-title">章节小结</h2>
+
+        <ul class="summary-list">
+          <li>
+            <strong>特征提取</strong>：从原始数据（图片、文本等）中提取任务相关特征，转成特征向量，是特征工程的第一步。
+          </li>
+          <li>
+            <strong>特征预处理</strong>：解决量纲问题，消除不同特征量级差异对模型的不公平影响。方法包括归一化和标准化。
+          </li>
+          <li>
+            <strong>特征降维</strong>：将高维数据压缩到低维，保留主要信息。PCA 是代表方法，通过线性组合融合特征，但通常不可解释。
+          </li>
+          <li>
+            <strong>特征选择</strong>：根据专业知识挑选与任务相关的特征子集，不改变原数据，去除无关特征以减少噪声。
+          </li>
+          <li>
+            <strong>特征组合</strong>：利用乘法或加法将多个特征合并为新特征（如 BMI），引入领域知识，构造有明确语义、高可解释性的特征。
+          </li>
+        </ul>
+
+        <div class="note-box" style="margin-top: 20px;">
+          <div class="label">核心原则</div>
+          数据和特征决定了机器学习的<strong>上限</strong>，而模型和算法只是逼近这个上限而已。
+        </div>
+
+        <div class="insight-box" style="margin-top: 12px;">
+          <strong>下一章预告</strong><br>
+          模型拟合问题 —— 欠拟合与过拟合的概念、成因与应对策略。
+        </div>
+      </div>
+      <div class="page-num">6 / 6</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- navigation -->
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn" disabled>&larr; 上一页</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn" id="nextBtn">下一页 &rarr;</button>
+</div>
+
+<script>
+(function() {
+  const pages = document.querySelectorAll('.page');
+  const total = pages.length;
+  let current = 0;
+
+  // build dots
+  const dotsContainer = document.getElementById('navDots');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function updatePages() {
+    pages.forEach((p, i) => {
+      if (i < current) p.dataset.state = 'flipped';
+      else if (i === current) p.dataset.state = 'current';
+      else p.dataset.state = 'stacked';
+    });
+    // dots
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    // buttons
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    current = idx;
+    updatePages();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  // keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  // swipe support
+  let startX = 0;
+  document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
