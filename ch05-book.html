@@ -517,6 +517,7 @@
   .flow-step .step-icon.s2 { background: var(--green-ink); }
   .flow-step .step-icon.s3 { background: var(--vermillion); }
   .flow-step .step-icon.s4 { background: var(--gold); }
+  .flow-step .step-icon.s5 { background: #6b4a8a; }
 
   .flow-step .step-icon::after {
     content: '';
@@ -606,6 +607,12 @@
   .page[data-state="current"] .page-inner > *:nth-child(8) { animation-delay: .62s; }
   .page[data-state="current"] .page-inner > *:nth-child(9) { animation-delay: .68s; }
   .page[data-state="current"] .page-inner > *:nth-child(10) { animation-delay: .72s; }
+
+  /* ─── glossary ─── */
+  .glossary { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.08); }
+  .glossary-title { font-family: 'Crimson Pro', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .glossary-item { display: flex; gap: 8px; font-size: 12px; line-height: 1.7; padding: 2px 0; color: var(--ink-faint); }
+  .glossary-term { color: var(--ink-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
 </style>
 </head>
 <body>
@@ -642,26 +649,51 @@
         <h2 class="section-title">特征工程的定义与核心地位</h2>
 
         <p class="body-text">
-          <strong>特征工程 (Feature Engineering)</strong> 是利用<span class="highlight">专业背景知识和技巧</span>处理数据的过程，目的是让机器学习算法更容易学习到数据中的规律，使模型效果更好。
+          <strong>特征工程 (Feature Engineering)</strong> 是指<span class="highlight">利用专业背景知识和技巧处理数据</span>，使机器学习算法更容易学习到数据中的规律，从而获得更好的效果。
         </p>
 
         <div class="note-box">
-          <div class="label">核心原则</div>
-          数据和特征决定了机器学习的<strong>上限</strong>，而模型和算法只是逼近这个上限而已。<br>
-          好的特征工程直接决定模型的天花板。
+          <div class="label">Core Principle</div>
+          数据和特征决定了机器学习的<strong>上限</strong>，模型和算法只是逼近这个上限。
         </div>
 
         <p class="body-text">
-          <strong>鸢尾花案例：</strong>鸢尾花分类为何不用颜色作特征？因为需要<span class="highlight">专业人员根据领域知识</span>选择有区分力的特征。颜色对分类区分力不够，而花瓣长度、花萼宽度等特征才是有效的。特征选择依赖领域专业知识，不是特征越多越好。
+          以鸢尾花 (Iris) 分类为例：为什么不用颜色作为特征？因为<strong>领域专家</strong>判断颜色对鸢尾花分类的区分力不够。特征选择依赖领域知识，<span class="highlight">不是特征越多越好</span>。
         </p>
 
-        <div class="insight-box">
-          <strong>五大子领域概览</strong><br>
-          <span class="blue">特征提取</span> &rarr; 从原始数据中提取任务相关特征<br>
-          <span class="blue">特征预处理</span> &rarr; 消除量纲差异，统一影响力<br>
-          <span class="blue">特征降维</span> &rarr; 压缩维度，保留主要信息<br>
-          <span class="blue">特征选择</span> &rarr; 挑选任务相关特征子集<br>
-          <span class="blue">特征组合</span> &rarr; 合并多个特征，构造新特征
+        <p class="body-text">
+          特征工程包含五个并列的子领域：
+        </p>
+
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-icon s1">&bull;</div>
+            <div class="step-text"><strong>特征提取</strong>从原始数据中提取任务相关特征</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-icon s2">&bull;</div>
+            <div class="step-text"><strong>特征预处理</strong>消除量纲差异，统一特征尺度</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-icon s3">&bull;</div>
+            <div class="step-text"><strong>特征降维</strong>压缩信息，保留主成分</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-icon s4">&bull;</div>
+            <div class="step-text"><strong>特征选择</strong>挑选任务相关的特征子集</div>
+          </div>
+          <div class="flow-step">
+            <div class="step-icon s5">&bull;</div>
+            <div class="step-text"><strong>特征组合</strong>合并多个特征，增强表达力</div>
+          </div>
+        </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">特征工程 (Feature Engineering)</span>
+            <span>处理数据让算法更易学规律</span>
+          </div>
         </div>
       </div>
       <div class="page-num">1 / 6</div>
@@ -678,30 +710,27 @@
         </p>
 
         <p class="body-text">
-          <strong>特征预处理 (Feature Preprocessing)</strong>：解决不同特征对模型影响<span class="highlight">一致性</span>的问题。核心问题在于量纲差异 —— 不同特征的数值量级可能相差巨大。
+          <strong>特征预处理 (Feature Preprocessing)</strong>：核心目标是解决<span class="highlight">量纲问题</span>，让不同特征对模型的影响保持一致。
         </p>
 
         <div class="note-box">
-          <div class="label">量纲问题</div>
-          <strong>量级大的特征</strong>对模型影响大，<strong>量级小的特征</strong>影响小。<br>
-          模型倾向于<span class="highlight">优先学习量纲大的特征</span>，忽略量纲小的特征与标签的相关性。<br><br>
-          例如：收入（万元级）和年龄（十位数级）作为特征时，模型会过度关注收入而忽视年龄的作用，即使年龄对预测同样重要。
+          <div class="label">量纲问题详解</div>
+          不同特征的量级和单位差异会导致问题：<strong>量级大的特征</strong>对模型的影响大，量级小的影响小。模型会倾向于优先学习量纲大的特征，而忽略量纲小的特征与标签的相关性。
         </div>
 
-        <div class="compare-row">
-          <div class="compare-card rule-card">
-            <div class="card-title" style="color:var(--blue-ink)">特征提取</div>
-            提取任务相关特征<br>
-            转成数值<strong>特征向量</strong><br>
-            处理非结构化数据<br>
-            是特征工程的<strong>第一步</strong>
+        <p class="body-text">
+          例如，当一个特征的取值范围是 0&ndash;1，另一个特征的取值范围是 0&ndash;10000 时，模型会被量级大的特征主导。预处理就是通过<strong>缩放</strong>将所有特征拉到同一量级，让模型公平地学习每个特征的贡献。
+        </p>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">特征向量 (Feature Vector)</span>
+            <span>将特征转化为数值向量</span>
           </div>
-          <div class="compare-card ml-card">
-            <div class="card-title" style="color:var(--vermillion)">特征预处理</div>
-            消除<strong>量纲差异</strong><br>
-            让特征影响力一致<br>
-            方法：归一化 / 标准化<br>
-            保证模型公平学习每个特征
+          <div class="glossary-item">
+            <span class="glossary-term">量纲 (Scale/Dimension)</span>
+            <span>不同特征的量级和单位差异</span>
           </div>
         </div>
       </div>
@@ -714,44 +743,56 @@
         <div class="ch-label">Chapter 05 &middot; Page 3</div>
         <h2 class="section-title">归一化 vs 标准化</h2>
 
-        <p class="body-text">
-          <strong>归一化 (MinMaxScaler)</strong>：将数据缩放到固定范围（通常 0~1）。适用于<span class="highlight">图像、像素、已知范围的传感器数据</span>（如 0-255）。
-        </p>
+        <div class="compare-row">
+          <div class="compare-card rule-card">
+            <div class="card-title" style="color:var(--blue-ink)">归一化 MinMaxScaler</div>
+            将数据缩放到 <strong>0&ndash;1</strong> 固定范围<br>
+            适用：图像像素、传感器数据<br>
+            典型场景：已知范围 0&ndash;255
+          </div>
+          <div class="compare-card ml-card">
+            <div class="card-title" style="color:var(--vermillion)">标准化 StandardScaler</div>
+            转换为<strong>均值 0、标准差 1</strong><br>
+            适用：大多数 ML 任务、表格数据<br>
+            优势：对异常值更鲁棒
+          </div>
+        </div>
 
-        <p class="body-text">
-          <strong>标准化 (StandardScaler)</strong>：将数据转换为均值为 0、标准差为 1 的分布。适用于<span class="highlight">大多数机器学习任务、表格数据</span>。数据有明显异常值时也推荐用标准化。
-        </p>
+        <div class="insight-box">
+          <strong>选择策略</strong><br>
+          不确定时，先试<span class="highlight">标准化</span>，再对比归一化效果，用交叉验证评估哪种更优。
+        </div>
 
         <table class="data-table">
           <thead>
             <tr>
               <th>场景</th>
               <th>推荐方法</th>
+              <th>原因</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>大多数机器学习任务（表格数据）</td>
-              <td class="col-feature">优先用标准化 StandardScaler</td>
-            </tr>
-            <tr>
-              <td>图像、像素、已知范围传感器数据 0-255</td>
-              <td class="col-label">用归一化 MinMaxScaler</td>
-            </tr>
-            <tr>
-              <td>数据有明显异常值</td>
-              <td class="col-feature">标准化</td>
-            </tr>
-            <tr>
-              <td>不确定用哪个？</td>
-              <td>先试标准化，再对比归一化效果（交叉验证）</td>
-            </tr>
+            <tr><td>图像像素 (0&ndash;255)</td><td class="col-feature">归一化</td><td>范围已知且固定</td></tr>
+            <tr><td>表格数据 / 常规 ML</td><td class="col-label">标准化</td><td>适用性最广</td></tr>
+            <tr><td>数据含明显异常值</td><td class="col-label">标准化</td><td>对异常值更鲁棒</td></tr>
+            <tr><td>传感器数据 (固定范围)</td><td class="col-feature">归一化</td><td>范围已知，缩放直观</td></tr>
           </tbody>
         </table>
 
-        <div class="note-box" style="margin-top: 16px;">
-          <div class="label">实践建议</div>
-          不确定用哪个时，<strong>先试标准化</strong>，再对比归一化效果。通过<span class="highlight">交叉验证</span>来决定最终方案。标准化对异常值更鲁棒，是更安全的默认选择。
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">归一化 (Normalization)</span>
+            <span>缩放到固定范围 (MinMaxScaler)</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">标准化 (Standardization)</span>
+            <span>转换为均值 0 标准差 1 (StandardScaler)</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">交叉验证 (Cross-validation)</span>
+            <span>用不同数据子集反复验证效果</span>
+          </div>
         </div>
       </div>
       <div class="page-num">3 / 6</div>
@@ -764,11 +805,11 @@
         <h2 class="section-title">特征降维 &amp; PCA</h2>
 
         <p class="body-text">
-          <strong>特征降维 (Feature Decomposition)</strong>：将原始数据的维度降低，保证<span class="highlight">主要信息保留</span>的同时减少数据量，消除冗余特征，降低计算成本。
+          <strong>特征降维 (Feature Decomposition)</strong>：将原始数据的维度降低，在保证<span class="highlight">主要信息保留</span>的前提下减少数据量，降低计算复杂度。
         </p>
 
         <p class="body-text">
-          <strong>PCA 主成分分析</strong>：一种纯数学优化方法，<span class="highlight">无语义目标</span>。新特征融合多个原始特征的信息，但可能没有明确的物理定义。PCA 仅限于<span class="blue">线性组合</span>。
+          <strong>PCA (Principal Component Analysis)</strong> 主成分分析是最经典的降维方法。它是<span class="highlight">纯数学优化</span>，无语义目标；新特征融合了多个原始特征的信息，但可能没有明确的物理定义；仅限<strong>线性组合</strong>，通常不可解释。
         </p>
 
         <div class="formula-block">
@@ -776,17 +817,26 @@
             PC1 = 0.7 &times; <span class="param-w">标准化身高</span> + 0.7 &times; <span class="param-b">标准化体重</span>
           </div>
           <div class="formula-desc">
-            身高和体重两个特征 &rarr; 压缩为一个新特征"体型大小"<br>
-            新特征<strong>无单位</strong>，将 2 维压缩为 1 维
+            身高 + 体重两个特征 &rarr; 一个新特征"体型大小"（无单位）<br>
+            效果：2 维压缩为 1 维，保留了主要变异信息
           </div>
         </div>
 
-        <div class="insight-box">
-          <strong>PCA 特点总结</strong><br>
-          &bull; 纯数学优化，自动找到数据方差最大的方向<br>
-          &bull; 新特征是原始特征的线性组合<br>
-          &bull; 融合多个特征信息，但通常<span class="highlight">不可解释</span><br>
-          &bull; 适用于高维数据的降维压缩
+        <div class="note-box">
+          <div class="label">PCA 特点</div>
+          PCA 产生的新特征是原始特征的线性组合，不引入领域知识，结果通常<strong>不可解释</strong>。它只做数学上的信息压缩，不关心语义。
+        </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">特征降维 (Feature Decomposition)</span>
+            <span>将高维数据降到低维</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">PCA (Principal Component Analysis)</span>
+            <span>主成分分析</span>
+          </div>
         </div>
       </div>
       <div class="page-num">4 / 6</div>
@@ -799,19 +849,19 @@
         <h2 class="section-title">特征选择 &amp; 特征组合</h2>
 
         <p class="body-text">
-          <strong>特征选择 (Feature Selection)</strong>：根据专业知识从众多特征中挑选<span class="highlight">重要特征</span>。原始数据特征很多，相关的只是子集。特征选择不会改变原始数据，只是选取。
+          <strong>特征选择 (Feature Selection)</strong>：根据专业知识从众多特征中挑选<span class="highlight">重要特征</span>。原始数据特征很多，任务相关的只是子集。特征选择<strong>不改变原数据</strong>，只做选取，减少噪声。
         </p>
 
         <p class="body-text">
-          <strong>特征组合 (Feature Crosses)</strong>：把多个特征合并成单个特征，利用<span class="blue">乘法或加法</span>完成。引入领域知识，构造有明确语义的新特征。
+          <strong>特征组合 (Feature Crosses)</strong>：把多个特征用<span class="blue">乘法或加法</span>合并成一个新特征，引入领域知识，构造有明确语义的新特征。
         </p>
 
         <div class="formula-block">
-          <div class="formula" style="font-size:24px;">
-            BMI = 体重(kg) / 身高(m)&sup2;
+          <div class="formula" style="font-size:22px;">
+            BMI = <span class="param-w">体重(kg)</span> / <span class="param-b">身高(m)</span>&sup2;
           </div>
           <div class="formula-desc">
-            新特征"肥胖程度" &rarr; 有医学定义，<strong>高可解释性</strong>
+            新特征：肥胖程度 &mdash; 有医学定义，高可解释性
           </div>
         </div>
 
@@ -824,23 +874,24 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td><strong>首要目标</strong></td>
-              <td>引入领域知识，构造有明确语义的新特征</td>
-              <td>去除冗余，压缩维度（无语义目标）</td>
-            </tr>
-            <tr>
-              <td><strong>是否可解释</strong></td>
-              <td class="col-feature">高可解释性</td>
-              <td class="col-label">否（通常）</td>
-            </tr>
-            <tr>
-              <td><strong>是否线性</strong></td>
-              <td class="col-feature">任意函数形式</td>
-              <td class="col-label">仅限线性组合</td>
-            </tr>
+            <tr><td>知识来源</td><td class="col-feature">引入领域知识</td><td>纯数学优化</td></tr>
+            <tr><td>语义</td><td class="col-feature">有明确语义</td><td>无语义</td></tr>
+            <tr><td>可解释性</td><td class="col-feature">高</td><td>通常不可解释</td></tr>
+            <tr><td>函数形式</td><td class="col-feature">任意（乘法、除法等）</td><td>仅限线性组合</td></tr>
           </tbody>
         </table>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">特征选择 (Feature Selection)</span>
+            <span>挑选任务相关特征子集</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">特征组合 (Feature Crosses)</span>
+            <span>合并多个特征为新特征</span>
+          </div>
+        </div>
       </div>
       <div class="page-num">5 / 6</div>
     </div>
@@ -853,30 +904,30 @@
 
         <ul class="summary-list">
           <li>
-            <strong>特征提取</strong>：从原始数据（图片、文本等）中提取任务相关特征，转成特征向量，是特征工程的第一步。
+            <strong>特征提取</strong>：从原始数据中提取任务相关特征，转成特征向量，让数据变得可计算。
           </li>
           <li>
-            <strong>特征预处理</strong>：解决量纲问题，消除不同特征量级差异对模型的不公平影响。方法包括归一化和标准化。
+            <strong>特征预处理</strong>：通过归一化或标准化解决量纲问题，让不同特征对模型影响一致。
           </li>
           <li>
-            <strong>特征降维</strong>：将高维数据压缩到低维，保留主要信息。PCA 是代表方法，通过线性组合融合特征，但通常不可解释。
+            <strong>特征降维</strong>：用 PCA 等方法将高维数据压缩到低维，保留主要信息，降低复杂度。
           </li>
           <li>
-            <strong>特征选择</strong>：根据专业知识挑选与任务相关的特征子集，不改变原数据，去除无关特征以减少噪声。
+            <strong>特征选择</strong>：依据领域知识挑选重要特征子集，不改变原数据，去除噪声。
           </li>
           <li>
-            <strong>特征组合</strong>：利用乘法或加法将多个特征合并为新特征（如 BMI），引入领域知识，构造有明确语义、高可解释性的特征。
+            <strong>特征组合</strong>：用乘法/加法等合并特征，引入领域知识构造有语义的新特征（如 BMI）。
           </li>
         </ul>
 
         <div class="note-box" style="margin-top: 20px;">
-          <div class="label">核心原则</div>
-          数据和特征决定了机器学习的<strong>上限</strong>，而模型和算法只是逼近这个上限而已。
+          <div class="label">Core Principle</div>
+          数据和特征决定了机器学习的<strong>上限</strong>，模型和算法只是逼近这个上限。好的特征工程直接决定模型的天花板。
         </div>
 
         <div class="insight-box" style="margin-top: 12px;">
           <strong>下一章预告</strong><br>
-          模型拟合问题 —— 欠拟合与过拟合的概念、成因与应对策略。
+          模型拟合问题 &mdash; 欠拟合与过拟合的判别与处理方法。
         </div>
       </div>
       <div class="page-num">6 / 6</div>

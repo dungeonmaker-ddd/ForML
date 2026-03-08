@@ -691,6 +691,12 @@
   .page[data-state="current"] .page-inner > *:nth-child(8) { animation-delay: .62s; }
   .page[data-state="current"] .page-inner > *:nth-child(9) { animation-delay: .68s; }
   .page[data-state="current"] .page-inner > *:nth-child(10) { animation-delay: .72s; }
+
+  /* ─── glossary footnotes ─── */
+  .glossary { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.08); }
+  .glossary-title { font-family: 'Crimson Pro', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .glossary-item { display: flex; gap: 8px; font-size: 12px; line-height: 1.7; padding: 2px 0; color: var(--ink-faint); }
+  .glossary-term { color: var(--ink-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
 </style>
 </head>
 <body>
@@ -757,6 +763,13 @@
           <div class="label">Key</div>
           AI 包含 ML，ML 包含 DL。三者是严格的嵌套包含关系。
         </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Terms</div>
+          <div class="glossary-item"><span class="glossary-term">AI (Artificial Intelligence)</span>人工智能，让机器表现出智能行为的技术总称</div>
+          <div class="glossary-item"><span class="glossary-term">ML (Machine Learning)</span>机器学习，从数据中自动学习规律的方法</div>
+          <div class="glossary-item"><span class="glossary-term">DL (Deep Learning)</span>深度学习，基于神经网络的机器学习方法</div>
+        </div>
       </div>
       <div class="page-num">1 / 6</div>
     </div>
@@ -768,7 +781,7 @@
         <h2 class="section-title">机器学习的本质 — 从数据中自动学习</h2>
 
         <p class="body-text">
-          机器学习的核心思想：利用<span class="highlight">数学表达式</span>，<strong>自动地</strong>从数据中获取规律，产生模型。这就是"机器自动学习"。
+          机器学习的核心思想：利用<span class="highlight">线性表达式</span>，<strong>自动地</strong>从数据中获取规律，产生模型。这就是"机器自动学习"。
         </p>
 
         <div class="compare-row">
@@ -797,6 +810,12 @@
         <p class="body-text" style="margin-top:12px;">
           ML 包含的典型算法：<span class="blue">回归</span>、<span class="blue">分类</span>、<span class="blue">聚类</span>、<span class="blue">决策树</span>、<span class="blue">贝叶斯模型</span>、<span class="blue">支持向量机</span>、自适应增强算法、最大期望算法等。
         </p>
+
+        <div class="glossary">
+          <div class="glossary-title">Terms</div>
+          <div class="glossary-item"><span class="glossary-term">基于规则的系统 (Rule-based)</span>由人工编写 if-else 规则的传统程序方式</div>
+          <div class="glossary-item"><span class="glossary-term">数据驱动 (Data-driven)</span>让数据而非人工规则主导学习过程</div>
+        </div>
       </div>
       <div class="page-num">2 / 6</div>
     </div>
@@ -842,6 +861,13 @@
           <strong>输入 &rarr; 模型 &rarr; 输出</strong><br>
           面积（特征） &rarr; 学习到的模型 &rarr; 售价（标签）<br>
           特征是已知条件，标签是预测目标。
+        </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Terms</div>
+          <div class="glossary-item"><span class="glossary-term">样本 (Sample)</span>数据集中的一行数据，又称一条记录</div>
+          <div class="glossary-item"><span class="glossary-term">特征 (Feature)</span>数据集中的一列，模型的输入信息，又称属性</div>
+          <div class="glossary-item"><span class="glossary-term">标签 (Label/Target)</span>模型要预测的那一列数据</div>
         </div>
       </div>
       <div class="page-num">3 / 6</div>
@@ -890,6 +916,13 @@
         <div class="note-box">
           <div class="label">要点</div>
           w 和 b 不是人为设定的，而是机器从数据中<strong>自动学习</strong>得到的。这正是"机器学习"的含义。
+        </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Terms</div>
+          <div class="glossary-item"><span class="glossary-term">斜率 w (Weight)</span>控制直线倾斜程度的模型参数</div>
+          <div class="glossary-item"><span class="glossary-term">截距 b (Bias)</span>控制直线上下平移的模型参数</div>
+          <div class="glossary-item"><span class="glossary-term">模型参数 (Parameters)</span>由机器从数据中自动学习得到的值</div>
         </div>
       </div>
       <div class="page-num">4 / 6</div>
@@ -958,6 +991,12 @@
             <text x="218" y="60" fill="#b8943e" font-size="10" font-family="'Noto Serif SC',serif">预测</text>
           </svg>
         </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Terms</div>
+          <div class="glossary-item"><span class="glossary-term">训练 (Training)</span>让模型从数据中学习参数的过程</div>
+          <div class="glossary-item"><span class="glossary-term">预测 (Prediction)</span>用训练好的模型对新数据输出结果</div>
+        </div>
       </div>
       <div class="page-num">5 / 6</div>
     </div>
@@ -989,7 +1028,7 @@
 
         <div class="note-box" style="margin-top: 20px;">
           <div class="label">一句话概括</div>
-          机器学习就是让机器<strong>自动</strong>从数据中找到 <span class="blue">w</span> 和 <span class="green">b</span>，用数学模型描述世界的规律。
+          机器学习就是让机器<strong>自动</strong>从数据中找到 <span class="blue">w</span> 和 <span class="green">b</span>，用线性模型描述数据的规律。
         </div>
 
         <div class="insight-box" style="margin-top: 12px;">

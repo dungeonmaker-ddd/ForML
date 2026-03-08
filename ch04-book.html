@@ -587,6 +587,7 @@
   .pill.p2 { background: rgba(42,107,74,.1); color: var(--green-ink); }
   .pill.p3 { background: rgba(196,30,58,.08); color: var(--vermillion); }
   .pill.p4 { background: rgba(184,148,62,.12); color: var(--gold); }
+  .pill.p5 { background: rgba(107,74,138,.1); color: #6b4a8a; }
 
   /* ─── responsive ─── */
   @media (max-width: 600px) {
@@ -617,6 +618,12 @@
   .page[data-state="current"] .page-inner > *:nth-child(8) { animation-delay: .62s; }
   .page[data-state="current"] .page-inner > *:nth-child(9) { animation-delay: .68s; }
   .page[data-state="current"] .page-inner > *:nth-child(10) { animation-delay: .72s; }
+
+  /* ─── glossary ─── */
+  .glossary { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.08); }
+  .glossary-title { font-family: 'Crimson Pro', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .glossary-item { display: flex; gap: 8px; font-size: 12px; line-height: 1.7; padding: 2px 0; color: var(--ink-faint); }
+  .glossary-term { color: var(--ink-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
 </style>
 </head>
 <body>
@@ -675,13 +682,13 @@
             <div class="step-icon s3">3</div>
             <div class="step-text">
               <strong>特征工程</strong>
-              对特征进行提取、预处理、降维、组合，是最耗时耗精力的环节。
+              对特征进行提取、预处理、降维、选择、组合，是最耗时耗精力的环节。
             </div>
           </div>
           <div class="flow-step">
             <div class="step-icon s4">4</div>
             <div class="step-text">
-              <strong>机器学习（模型训练）</strong>
+              <strong>模型训练</strong>
               选择合适的算法，用处理好的数据训练模型。
             </div>
           </div>
@@ -697,6 +704,14 @@
         <div class="note-box">
           <div class="label">Feedback Loop</div>
           评估不佳则回退迭代 &mdash; 建模不是一次性流程，需要反复调整数据处理、特征工程或算法选择，直到模型达标。
+        </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">建模 (Modeling)</span>
+            <span>构建数学模型描述数据规律的过程</span>
+          </div>
         </div>
       </div>
       <div class="page-num">1 / 6</div>
@@ -739,6 +754,22 @@
             </div>
           </div>
         </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">缺失值 (Missing Value)</span>
+            <span>数据中某些位置为空</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">异常值 (Outlier)</span>
+            <span>明显偏离正常范围的数据点</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">离群点</span>
+            <span>同异常值</span>
+          </div>
+        </div>
       </div>
       <div class="page-num">2 / 6</div>
     </div>
@@ -754,13 +785,14 @@
         </p>
 
         <p class="body-text">
-          特征工程主要包含以下四个方向：
+          特征工程主要包含以下五个方向（并行概念）：
         </p>
 
         <div class="pill-row">
           <span class="pill p1">特征提取</span>
           <span class="pill p2">特征预处理</span>
           <span class="pill p3">特征降维</span>
+          <span class="pill p5">特征选择</span>
           <span class="pill p4">特征组合</span>
         </div>
 
@@ -768,6 +800,7 @@
           <span class="blue">特征提取</span> &mdash; 从原始数据中提炼出有意义的特征。<br>
           <span class="green">特征预处理</span> &mdash; 标准化、归一化等预处理操作。<br>
           <span class="highlight">特征降维</span> &mdash; 减少特征数量，去除冗余信息。<br>
+          <span style="color:#6b4a8a;font-weight:600;">特征选择</span> &mdash; 从已有特征中挑选最有用的子集。<br>
           <span class="gold">特征组合</span> &mdash; 将多个特征组合为新的有效特征。
         </p>
 
@@ -777,8 +810,12 @@
           再好的算法也无法从低质量的特征中学到好的规律。
         </div>
 
-        <div class="insight-box">
-          数据基本处理和特征工程占据了建模过程中的<strong>大部分时间和精力</strong>，是决定模型成败的关键环节。
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">特征工程 (Feature Engineering)</span>
+            <span>利用专业知识处理数据让算法更易学到规律</span>
+          </div>
         </div>
       </div>
       <div class="page-num">3 / 6</div>
@@ -839,6 +876,26 @@
         <div class="note-box" style="margin-top: 8px;">
           <div class="label">要点</div>
           算法的选择取决于<strong>任务类型</strong>（回归 vs 分类）和<strong>数据特点</strong>。没有万能算法，需根据实际情况选择。
+        </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">线性回归 (Linear Regression)</span>
+            <span>用直线拟合连续值的回归算法</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">逻辑回归 (Logistic Regression)</span>
+            <span>用于分类任务的概率模型</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">决策树 (Decision Tree)</span>
+            <span>基于树状结构的分类/回归算法</span>
+          </div>
+          <div class="glossary-item">
+            <span class="glossary-term">支持向量机 (SVM)</span>
+            <span>寻找最优分类超平面的算法</span>
+          </div>
         </div>
       </div>
       <div class="page-num">4 / 6</div>
@@ -919,6 +976,14 @@
           <strong>建模是迭代过程，不是一次性流程。</strong><br>
           优秀的模型往往经过多轮迭代优化才能达到满意的效果。
         </div>
+
+        <div class="glossary">
+          <div class="glossary-title">Glossary</div>
+          <div class="glossary-item">
+            <span class="glossary-term">迭代 (Iteration)</span>
+            <span>反复调整优化的循环过程</span>
+          </div>
+        </div>
       </div>
       <div class="page-num">5 / 6</div>
     </div>
@@ -937,7 +1002,7 @@
             <strong>数据基本处理</strong>：对缺失值进行删除或填写，对异常值（离群点）进行检测和处理，为特征工程准备干净数据。
           </li>
           <li>
-            <strong>特征工程</strong>：包含<span class="blue">特征提取</span>、<span class="green">特征预处理</span>、<span class="highlight">特征降维</span>、<span class="gold">特征组合</span>，是最耗时的环节。
+            <strong>特征工程</strong>：包含<span class="blue">特征提取</span>、<span class="green">特征预处理</span>、<span class="highlight">特征降维</span>、<span style="color:#6b4a8a;font-weight:600;">特征选择</span>、<span class="gold">特征组合</span>，是最耗时的环节。
           </li>
           <li>
             <strong>模型训练</strong>：根据任务选择算法（有监督/无监督/半监督/强化学习），常见算法有线性回归、逻辑回归、决策树、支持向量机等。
@@ -949,8 +1014,7 @@
 
         <div class="note-box" style="margin-top: 20px;">
           <div class="label">核心洞察</div>
-          <strong>数据和特征决定了机器学习的上限，模型和算法只是逼近这个上限。</strong><br>
-          在实际工作中，数据处理和特征工程占据了大部分时间和精力。
+          <strong>数据和特征决定了机器学习的上限，模型和算法只是逼近这个上限。</strong>
         </div>
 
         <div class="insight-box" style="margin-top: 12px;">
