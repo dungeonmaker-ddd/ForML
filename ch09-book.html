@@ -693,19 +693,17 @@
         <div class="compare-row">
           <div class="compare-card" style="background:rgba(196,30,58,.04);border:1px solid rgba(196,30,58,.15);">
             <div class="card-title" style="color:var(--vermillion)">K 过小 &rarr; 过拟合</div>
-            用极小邻域预测<br>
+            <strong>训练误差 = 0</strong>，测试可能仅 85%<br>
             &middot; 对<strong>异常点高度敏感</strong><br>
             &middot; 坐标微变，分类就翻转<br>
-            &middot; 决策边界极复杂<br>
-            <span style="font-size:12px;color:var(--ink-faint)">本质：记住了噪声，而非规律</span>
+            <code style="font-size:11px;color:var(--ink-faint)">bias&asymp;0, variance&uarr;&uarr;</code>
           </div>
           <div class="compare-card" style="background:rgba(42,74,107,.04);border:1px solid rgba(42,74,107,.15);">
             <div class="card-title" style="color:var(--blue-ink)">K 过大 &rarr; 欠拟合</div>
-            用极大邻域预测<br>
-            &middot; 极端 K=N：永远预测多数类<br>
+            极端 K=N：<strong>永远预测多数类</strong><br>
             &middot; 受<strong>类别不均衡</strong>支配<br>
-            &middot; 无论测试样本在哪，分类不变<br>
-            <span style="font-size:12px;color:var(--ink-faint)">本质：丢失了局部判别力</span>
+            &middot; 丢失局部判别力<br>
+            <code style="font-size:11px;color:var(--ink-faint)">bias&uarr;&uarr;, variance&asymp;0</code>
           </div>
         </div>
 
@@ -933,8 +931,8 @@
         </div>
 
         <div class="note-box">
-          <div class="label">面试必答</div>
-          <strong>归一化</strong>受极值支配，鲁棒性差，适合小数据。<strong>标准化</strong>受均值/标准差驱动，鲁棒性强，适合大数据。<span class="highlight">不确定时优先选标准化</span>。
+          <div class="label">Key</div>
+          <span class="highlight">归一化</span>：x' = (x&minus;min)/(max&minus;min)，受极值支配，鲁棒差，适合小数据。<span class="highlight">标准化</span>：x' = (x&minus;mean)/std，受均值/std 驱动，鲁棒强，适合大数据。<span class="highlight">不确定时优先选标准化</span>。
         </div>
 
         <div class="insight-box" style="border-color:var(--green-ink);background:rgba(42,107,74,.04);">
@@ -1068,11 +1066,6 @@
           这 5 步就是 <span class="highlight">ML 项目的通用模板</span>：获取 &rarr; 划分 &rarr; 预处理 &rarr; 训练 &rarr; 评估。无论换什么算法、什么数据集，骨架不变。后续手写数字识别也复用此流程。
         </div>
 
-        <div class="insight-box">
-          <strong>数据探索先于建模</strong><br>
-          用 seaborn 的 <code>lmplot</code> 可视化特征散点图（如花萼长度 vs 花瓣宽度），确认特征能否将不同类别分开。可视化帮你在建模前建立直觉。
-        </div>
-
         <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);margin-top:4px;">
           <div class="label" style="color:var(--blue-ink)">完整代码模板（面试手写级）</div>
           <code style="font-size:11.5px;display:block;line-height:1.65;color:var(--ink-light);">
@@ -1195,11 +1188,6 @@
           </div>
         </div>
 
-        <div class="note-box">
-          <div class="label">组合威力</div>
-          <strong>CV</strong> 解决数据划分 &rarr; 可靠评分。<strong>网格搜索</strong>解决超参组合 &rarr; 高效调参。两者组合 = <span class="highlight">模型调优完整方案</span>。高维超参空间下组合爆炸时，可用 RandomizedSearchCV 随机搜索替代。
-        </div>
-
         <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);margin-top:4px;">
           <div class="label" style="color:var(--blue-ink)">GridSearchCV 完整代码</div>
           <code style="font-size:11.5px;display:block;line-height:1.65;color:var(--ink-light);">
@@ -1215,13 +1203,6 @@
           <span style="color:var(--ink-faint)"># 导出全部结果</span><br>
           pd.DataFrame(gs.cv_results_).to_csv('grid.csv')
           </code>
-        </div>
-
-        <div class="insight-box">
-          <strong>两阶段流程</strong><br>
-          <span class="highlight">阶段 1</span>：对每个候选 K（如 3,5,7），分别做 cv 折交叉验证 &rarr; 选出得分最高的 K 值。<br>
-          <span class="highlight">阶段 2</span>：用全部训练集（训练 + 验证）对最优 K 重新训练 &rarr; 再用独立测试集做最终评估。<br>
-          <span style="font-size:12px;color:var(--ink-faint)">结果可导出：<code>pd.DataFrame(estimator.cv_results_).to_csv('gridsearchcv.csv')</code></span>
         </div>
 
         <div class="glossary">
@@ -1312,17 +1293,6 @@
           gs.fit(X_train, y_train)<br>
           print(gs.best_score_, gs.best_params_)
           </code>
-        </div>
-
-        <div class="compare-row">
-          <div class="compare-card" style="background:rgba(42,107,74,.04);border:1px solid rgba(42,107,74,.12);">
-            <div class="card-title" style="color:var(--green-ink)">鸢尾花</div>
-            150 样本 &middot; 4 维<br>小数据入门<br>KNN 轻松胜任
-          </div>
-          <div class="compare-card" style="background:rgba(42,74,107,.04);border:1px solid rgba(42,74,107,.12);">
-            <div class="card-title" style="color:var(--blue-ink)">MNIST</div>
-            7 万样本 &middot; 784 维<br>大数据实战<br>标准化和调优不可省
-          </div>
         </div>
 
         <div class="insight-box">
