@@ -619,18 +619,44 @@
           前 3 步完全相同，<span class="highlight">分歧在第 4 步</span>：分类用投票、回归用均值。KNN 是<strong>惰性学习</strong>算法 —— 不构建模型，存储全部训练数据，预测时才计算。代价：预测时间 O(n&times;d)，内存占用大，高维时距离区分度下降（<span class="highlight">维度灾难</span>）。
         </div>
 
+        <div class="compare-row">
+          <div class="compare-card" style="background:rgba(42,74,107,.05);border:1px solid rgba(42,74,107,.15);">
+            <div class="card-title" style="color:var(--blue-ink)">非参数模型 (KNN)</div>
+            模型复杂度<strong>随数据量增长</strong><br>
+            &middot; 数据即模型，不压缩为权重<br>
+            &middot; 1-NN 的决策边界是 <span class="blue">Voronoi 图</span><br>
+            &middot; K 增大 &rarr; 边界平滑化<br>
+            <span style="font-size:12px;color:var(--ink-faint)">哲学：记住每个案例</span>
+          </div>
+          <div class="compare-card" style="background:rgba(42,107,74,.05);border:1px solid rgba(42,107,74,.15);">
+            <div class="card-title" style="color:var(--green-ink)">参数模型 (线性回归)</div>
+            模型复杂度<strong>固定于参数量</strong><br>
+            &middot; 学习 w<sub>1</sub>, w<sub>2</sub>, b 等有限权重<br>
+            &middot; 数据压缩为公式 y = wx + b<br>
+            &middot; 训练完成后可丢弃训练数据<br>
+            <span style="font-size:12px;color:var(--ink-faint)">哲学：提炼出规律</span>
+          </div>
+        </div>
+
         <div class="insight-box">
           <strong>进阶：距离加权投票</strong><br>
           普通投票中每个邻居权重相等。改进方案：<span class="blue">w<sub>k</sub> = 1 / (distance(x, x<sub>k</sub>) + &epsilon;)</span>，距离越近权重越大。<br>
           <strong>优点</strong>：更合理，利用了距离信息。<strong>缺点</strong>：计算更复杂。<br>
-          <strong>场景</strong>：样本密度不均匀、数据分布不均时效果更好。
+          <strong>场景</strong>：样本密度不均匀、数据分布不均时效果更好。sklearn 中设置 <code>weights='distance'</code> 即可启用。
+        </div>
+
+        <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);">
+          <div class="label" style="color:var(--blue-ink)">加速：KD-Tree &amp; Ball Tree</div>
+          暴力搜索 O(n&times;d) 不可接受。<span class="blue">KD-Tree</span> 递归二分空间，预测时剪枝搜索，平均 <strong>O(d&times;log n)</strong>。Ball Tree 用超球体划分，适合高维。sklearn 默认 <code>algorithm='auto'</code>：样本少用 brute，特征少用 kd_tree，高维用 ball_tree。
         </div>
 
         <div class="glossary">
           <div class="glossary-title">Terms</div>
           <div class="glossary-item"><span class="glossary-term">KNN</span>K-Nearest Neighbors，K 近邻算法</div>
           <div class="glossary-item"><span class="glossary-term">Lazy Learning</span>惰性学习，不主动训练，预测时才计算距离</div>
-          <div class="glossary-item"><span class="glossary-term">Feature Space</span>特征空间，样本以特征为坐标轴构成的空间</div>
+          <div class="glossary-item"><span class="glossary-term">Non-parametric</span>非参数模型，模型复杂度随数据增长，无固定参数量</div>
+          <div class="glossary-item"><span class="glossary-term">Voronoi Diagram</span>沃罗诺伊图，1-NN 的决策边界，空间按最近训练样本划分</div>
+          <div class="glossary-item"><span class="glossary-term">KD-Tree</span>K维树，递归二分空间加速最近邻搜索，O(d&times;log n)</div>
           <div class="glossary-item"><span class="glossary-term">Curse of Dimensionality</span>维度灾难，高维空间中距离区分度急剧下降</div>
         </div>
       </div>
@@ -671,6 +697,13 @@
           取<strong>较小奇数</strong>避免投票平局：3、5、7、9。最终用<span class="highlight">交叉验证</span>遍历候选 K 值选最优。
         </div>
 
+        <div class="insight-box" style="border-color:var(--green-ink);background:rgba(42,107,74,.04);">
+          <strong>偏差-方差视角</strong> &mdash; K 是权衡的旋钮<br>
+          <span class="highlight">K = 1</span>：训练误差为 0（永远预测最近点的标签），但<strong>方差极高</strong> &mdash; 换一批数据，预测可能完全不同。<br>
+          <span class="highlight">K = N</span>：偏差极高（永远预测多数类），但<strong>方差为 0</strong> &mdash; 换任何数据结果都一样。<br>
+          最优 K 在中间：<span class="blue">bias&sup2; + variance</span> 最小的平衡点。这是 K 值选择的数学本质。
+        </div>
+
         <p class="body-text" style="margin-bottom:8px;margin-top:4px;">
           <strong>sklearn API</strong> &mdash; 分类与回归只差一个类名：
         </p>
@@ -696,9 +729,21 @@
           <span class="highlight">predict 输入必须二维</span>：<code>predict([[1]])</code> 正确，<code>predict([1])</code> 报错。sklearn 统一要求矩阵输入，即使只有一个样本也必须嵌套列表。评估方式：<code>estimator.score()</code> 或 <code>accuracy_score()</code>，两者结果一致。
         </div>
 
+        <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);margin-top:4px;">
+          <div class="label" style="color:var(--blue-ink)">最小可运行 KNN（4 行核心代码）</div>
+          <code style="font-size:12px;display:block;line-height:1.7;color:var(--ink-light);">
+          estimator = <span class="blue">KNeighborsClassifier</span>(n_neighbors=1)<br>
+          X = [[0], [1], [2], [3]] &nbsp; <span style="color:var(--ink-faint)"># 4 样本 1 特征，必须二维</span><br>
+          y = [0, 0, 1, 1] &nbsp; <span style="color:var(--ink-faint)"># 标签一维</span><br>
+          estimator.<strong>fit</strong>(X, y)<br>
+          estimator.<strong>predict</strong>([[4]]) &nbsp; <span style="color:var(--ink-faint)"># &rarr; [1]，必须二维输入</span>
+          </code>
+        </div>
+
         <div class="glossary">
           <div class="glossary-title">Terms</div>
           <div class="glossary-item"><span class="glossary-term">Hyperparameter</span>超参数，训练前人为设定的参数（如 K 值）</div>
+          <div class="glossary-item"><span class="glossary-term">Bias-Variance Tradeoff</span>偏差-方差权衡，K 越小方差越高，K 越大偏差越高</div>
           <div class="glossary-item"><span class="glossary-term">Overfitting</span>过拟合，模型学了噪声，训练好测试差</div>
           <div class="glossary-item"><span class="glossary-term">Underfitting</span>欠拟合，模型太简单，训练测试都差</div>
           <div class="glossary-item"><span class="glossary-term">n_neighbors</span>KNN API 中的 K 值参数，默认 5</div>
@@ -777,13 +822,21 @@
           <strong>手算示例</strong>：A(1,1)、B(2,2)、C(3,3)、D(4,4) 四点间欧氏距离：
         </p>
         <table class="data-table" style="font-size:12px;">
-          <thead><tr><th>点对</th><th>计算过程</th><th>欧氏</th><th>曼哈顿</th></tr></thead>
+          <thead><tr><th>点对</th><th>计算过程</th><th>欧氏</th><th>曼哈顿</th><th>切比雪夫</th></tr></thead>
           <tbody>
-            <tr><td>AB</td><td>&radic;((2&minus;1)&sup2;+(2&minus;1)&sup2;) = &radic;2</td><td><span class="blue">1.414</span></td><td>2</td></tr>
-            <tr><td>AC</td><td>&radic;((3&minus;1)&sup2;+(3&minus;1)&sup2;) = &radic;8</td><td><span class="blue">2.828</span></td><td>4</td></tr>
-            <tr><td>AD</td><td>&radic;((4&minus;1)&sup2;+(4&minus;1)&sup2;) = &radic;18</td><td><span class="blue">4.243</span></td><td>6</td></tr>
+            <tr><td>AB</td><td>&radic;((2&minus;1)&sup2;+(2&minus;1)&sup2;) = &radic;2</td><td><span class="blue">1.414</span></td><td>2</td><td>1</td></tr>
+            <tr><td>AC</td><td>&radic;((3&minus;1)&sup2;+(3&minus;1)&sup2;) = &radic;8</td><td><span class="blue">2.828</span></td><td>4</td><td>2</td></tr>
+            <tr><td>AD</td><td>&radic;((4&minus;1)&sup2;+(4&minus;1)&sup2;) = &radic;18</td><td><span class="blue">4.243</span></td><td>6</td><td>3</td></tr>
+            <tr><td>BC</td><td>&radic;((3&minus;2)&sup2;+(3&minus;2)&sup2;) = &radic;2</td><td><span class="blue">1.414</span></td><td>2</td><td>1</td></tr>
+            <tr><td>BD</td><td>&radic;((4&minus;2)&sup2;+(4&minus;2)&sup2;) = &radic;8</td><td><span class="blue">2.828</span></td><td>4</td><td>2</td></tr>
+            <tr><td>CD</td><td>&radic;((4&minus;3)&sup2;+(4&minus;3)&sup2;) = &radic;2</td><td><span class="blue">1.414</span></td><td>2</td><td>1</td></tr>
           </tbody>
         </table>
+
+        <div class="note-box" style="margin-top:4px;">
+          <div class="label">sklearn 参数</div>
+          <code style="font-size:12px;">KNeighborsClassifier(<span class="blue">metric</span>='minkowski', <span class="blue">p</span>=2)</code> &mdash; 默认欧氏。设 p=1 切换曼哈顿，p=3 试其他闵氏距离。<code>algorithm</code> 参数控制搜索方式：auto / kd_tree / ball_tree / brute。
+        </div>
 
         <div class="insight-box">
           <strong>p &rarr; &infin; 为什么等于切比雪夫？</strong><br>
@@ -801,6 +854,7 @@
           <div class="glossary-item"><span class="glossary-term">Manhattan</span>曼哈顿距离，p=1，城市街区距离</div>
           <div class="glossary-item"><span class="glossary-term">Chebyshev</span>切比雪夫距离，p&rarr;&infin;，棋盘距离</div>
           <div class="glossary-item"><span class="glossary-term">Minkowski</span>闵可夫斯基距离，统一以上三种距离的参数化框架</div>
+          <div class="glossary-item"><span class="glossary-term">metric / p</span>sklearn 参数，metric='minkowski' + p=2 默认欧氏</div>
         </div>
       </div>
       <div class="page-num">3 / 8</div>
@@ -844,6 +898,11 @@
           <strong>归一化</strong>受极值支配，鲁棒性差，适合小数据。<strong>标准化</strong>受均值/标准差驱动，鲁棒性强，适合大数据。<span class="highlight">不确定时优先选标准化</span>。
         </div>
 
+        <div class="insight-box" style="border-color:var(--green-ink);background:rgba(42,107,74,.04);">
+          <strong>数学本质：为什么标准化有效？</strong><br>
+          标准化后每个特征方差 = 1 &rarr; <span class="highlight">每个特征对距离公式的贡献相等</span>。未标准化时，方差大的特征（如年收入）主导距离公式中对应的 (x<sub>i</sub>&minus;y<sub>i</sub>)&sup2; 项。标准化的本质 = <strong>对齐距离公式中每一项的量级</strong>。
+        </div>
+
         <p class="body-text" style="font-size:13px;margin-bottom:6px;">
           <strong>实际数据对比</strong> &mdash; 原始数据 [[90,2,10,40], [60,4,15,45], [75,3,13,46]]：
         </p>
@@ -869,12 +928,21 @@
           <strong>为什么？</strong>测试集代表"未见数据"。如果对测试集 fit，模型间接"见过"测试集信息 &rarr; 评估虚高。这就是<span class="highlight">数据泄露 (Data Leakage)</span>，面试能说出这个词 = 加分。
         </div>
 
+        <div class="insight-box" style="margin-top:4px;">
+          <strong>进阶：sklearn Pipeline 防泄露</strong><br>
+          数据泄露不只是 fit_transform 问题 —— 在全数据集上做特征选择再划分也是泄露。<span class="blue">Pipeline</span> 从根本上解决：<br>
+          <code style="font-size:12px;color:var(--ink-light)">from sklearn.pipeline import Pipeline<br>
+          pipe = Pipeline([('scaler', StandardScaler()), ('knn', KNeighborsClassifier())])<br>
+          pipe.fit(X_train, y_train) &nbsp; <span style="color:var(--ink-faint)"># scaler 只 fit 训练集</span></code>
+        </div>
+
         <div class="glossary">
           <div class="glossary-title">Terms</div>
           <div class="glossary-item"><span class="glossary-term">MinMaxScaler</span>归一化，缩放到 [0, 1]，受极值敏感</div>
           <div class="glossary-item"><span class="glossary-term">StandardScaler</span>标准化，转换为 N(0,1)，鲁棒性强</div>
           <div class="glossary-item"><span class="glossary-term">Data Leakage</span>数据泄露，测试集信息渗入训练过程</div>
           <div class="glossary-item"><span class="glossary-term">fit_transform</span>学习参数并转换（只用于训练集）</div>
+          <div class="glossary-item"><span class="glossary-term">sklearn Pipeline</span>串联预处理+模型，从根本上防止数据泄露</div>
         </div>
       </div>
       <div class="page-num">4 / 8</div>
@@ -887,8 +955,19 @@
         <h2 class="section-title">鸢尾花案例 &mdash; ML 完整 Pipeline</h2>
 
         <p class="body-text" style="margin-bottom:8px;">
-          <span class="blue">Iris 鸢尾花</span>数据集：150 样本、4 特征（花萼/花瓣的长宽）、3 类别。用它走一遍 <span class="highlight">ML 通用 5 步流程</span> &mdash; 这个模板适用于所有 ML 项目：
+          <span class="blue">Iris 鸢尾花</span>数据集：150 样本、4 特征（花萼/花瓣的长宽）、3 类别（setosa / versicolor / virginica）。用它走一遍 <span class="highlight">ML 通用 5 步流程</span> &mdash; 这个模板适用于所有 ML 项目：
         </p>
+
+        <table class="data-table" style="font-size:12px;margin-bottom:8px;">
+          <thead><tr><th>属性</th><th>返回值</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>.data</code></td><td>150&times;4 矩阵</td><td>特征值（花萼长宽 + 花瓣长宽，单位 cm）</td></tr>
+            <tr><td><code>.target</code></td><td>150 个整数</td><td>标签 0/1/2 对应三个品种</td></tr>
+            <tr><td><code>.feature_names</code></td><td>4 个字符串</td><td>sepal length/width, petal length/width</td></tr>
+            <tr><td><code>.target_names</code></td><td>3 个字符串</td><td>setosa, versicolor, virginica</td></tr>
+            <tr><td><code>.DESCR</code></td><td>长文本</td><td>数据集完整描述（来源、统计信息等）</td></tr>
+          </tbody>
+        </table>
 
         <div class="flow-steps">
           <div class="flow-step">
@@ -940,12 +1019,50 @@
           用 seaborn 的 <code>lmplot</code> 可视化特征散点图（如花萼长度 vs 花瓣宽度），确认特征能否将不同类别分开。可视化帮你在建模前建立直觉。
         </div>
 
+        <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);margin-top:4px;">
+          <div class="label" style="color:var(--blue-ink)">完整代码模板（面试手写级）</div>
+          <code style="font-size:11.5px;display:block;line-height:1.65;color:var(--ink-light);">
+          <span style="color:var(--ink-faint)"># 1. 获取数据</span><br>
+          from sklearn.datasets import <span class="blue">load_iris</span><br>
+          iris = load_iris()<br>
+          <span style="color:var(--ink-faint)"># 2. 数据划分</span><br>
+          from sklearn.model_selection import <span class="blue">train_test_split</span><br>
+          X_train, X_test, y_train, y_test = train_test_split(<br>
+          &nbsp;&nbsp;iris.data, iris.target, test_size=0.2, random_state=22)<br>
+          <span style="color:var(--ink-faint)"># 3. 标准化（铁律：fit_transform vs transform）</span><br>
+          from sklearn.preprocessing import <span class="blue">StandardScaler</span><br>
+          scaler = StandardScaler()<br>
+          X_train = scaler.<strong>fit_transform</strong>(X_train)<br>
+          X_test = scaler.<strong>transform</strong>(X_test)<br>
+          <span style="color:var(--ink-faint)"># 4. 训练</span><br>
+          from sklearn.neighbors import <span class="blue">KNeighborsClassifier</span><br>
+          knn = KNeighborsClassifier(n_neighbors=3)<br>
+          knn.fit(X_train, y_train)<br>
+          <span style="color:var(--ink-faint)"># 5. 评估</span><br>
+          print(knn.<strong>score</strong>(X_test, y_test)) <span style="color:var(--ink-faint)"># &rarr; 准确率</span>
+          </code>
+        </div>
+
+        <div class="compare-row" style="margin-top:4px;">
+          <div class="compare-card" style="background:rgba(42,74,107,.04);border:1px solid rgba(42,74,107,.12);font-size:13px;">
+            <div class="card-title" style="color:var(--blue-ink);font-size:12px;">评估方式 1</div>
+            <code>estimator.score(X_test, y_test)</code><br>
+            直接返回准确率，最简洁
+          </div>
+          <div class="compare-card" style="background:rgba(42,107,74,.04);border:1px solid rgba(42,107,74,.12);font-size:13px;">
+            <div class="card-title" style="color:var(--green-ink);font-size:12px;">评估方式 2</div>
+            <code>accuracy_score(y_test, y_pred)</code><br>
+            需先 predict，灵活度更高
+          </div>
+        </div>
+
         <div class="glossary">
           <div class="glossary-title">Terms</div>
-          <div class="glossary-item"><span class="glossary-term">Iris Dataset</span>鸢尾花数据集，150 样本 &times; 4 特征 &times; 3 类别</div>
+          <div class="glossary-item"><span class="glossary-term">Iris Dataset</span>鸢尾花数据集，150 样本 &times; 4 特征 &times; 3 类别，ML 入门经典</div>
           <div class="glossary-item"><span class="glossary-term">train_test_split</span>数据集划分，按比例分为训练集和测试集</div>
           <div class="glossary-item"><span class="glossary-term">random_state</span>随机种子，保证划分结果可复现</div>
-          <div class="glossary-item"><span class="glossary-term">Pipeline</span>机器学习流水线，从数据到评估的标准流程</div>
+          <div class="glossary-item"><span class="glossary-term">accuracy_score</span>准确率函数，需先 predict 再对比 y_test</div>
+          <div class="glossary-item"><span class="glossary-term">seaborn.lmplot</span>散点图可视化工具，探索特征区分度</div>
         </div>
       </div>
       <div class="page-num">5 / 8</div>
@@ -1018,6 +1135,23 @@
           <strong>CV</strong> 解决数据划分 &rarr; 可靠评分。<strong>网格搜索</strong>解决超参组合 &rarr; 高效调参。两者组合 = <span class="highlight">模型调优完整方案</span>。高维超参空间下组合爆炸时，可用 RandomizedSearchCV 随机搜索替代。
         </div>
 
+        <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);margin-top:4px;">
+          <div class="label" style="color:var(--blue-ink)">GridSearchCV 完整代码</div>
+          <code style="font-size:11.5px;display:block;line-height:1.65;color:var(--ink-light);">
+          from sklearn.model_selection import <span class="blue">GridSearchCV</span><br>
+          <span style="color:var(--ink-faint)"># 构建网格</span><br>
+          param_grid = {'n_neighbors': [1, 3, 5, 7, 9]}<br>
+          gs = GridSearchCV(KNeighborsClassifier(), param_grid, <span class="blue">cv=5</span>)<br>
+          gs.fit(X_train, y_train)<br>
+          <span style="color:var(--ink-faint)"># 查看结果</span><br>
+          print(gs.<span class="green">best_params_</span>) &nbsp; <span style="color:var(--ink-faint)"># {'n_neighbors': 5}</span><br>
+          print(gs.<span class="green">best_score_</span>) &nbsp; <span style="color:var(--ink-faint)"># 0.9667</span><br>
+          print(gs.<span class="green">best_estimator_</span>) <span style="color:var(--ink-faint)"># 最优模型（已 refit）</span><br>
+          <span style="color:var(--ink-faint)"># 导出全部结果</span><br>
+          pd.DataFrame(gs.cv_results_).to_csv('grid.csv')
+          </code>
+        </div>
+
         <div class="insight-box">
           <strong>两阶段流程</strong><br>
           <span class="highlight">阶段 1</span>：对每个候选 K（如 3,5,7），分别做 cv 折交叉验证 &rarr; 选出得分最高的 K 值。<br>
@@ -1030,6 +1164,7 @@
           <div class="glossary-item"><span class="glossary-term">Cross-Validation</span>交叉验证，分 N 份轮流验证取平均</div>
           <div class="glossary-item"><span class="glossary-term">GridSearchCV</span>网格搜索，穷举超参组合 + 交叉验证</div>
           <div class="glossary-item"><span class="glossary-term">refit</span>自动用最优超参在全部训练集上重新训练</div>
+          <div class="glossary-item"><span class="glossary-term">cv_results_</span>所有参数组合的完整评估结果，可导出 CSV 分析</div>
           <div class="glossary-item"><span class="glossary-term">RandomizedSearchCV</span>随机搜索，高维超参空间的替代方案</div>
         </div>
       </div>
@@ -1088,6 +1223,23 @@
           同样的 5 步流程：加载 CSV &rarr; train_test_split &rarr; StandardScaler 标准化 784 维特征 &rarr; KNN + GridSearchCV 调优 K 值 &rarr; score 评估。<span class="highlight">证明了 Pipeline 的通用性</span>。
         </div>
 
+        <div class="note-box" style="border-color:var(--blue-ink);background:rgba(42,74,107,.04);margin-top:4px;">
+          <div class="label" style="color:var(--blue-ink)">MNIST Pipeline 代码骨架</div>
+          <code style="font-size:11.5px;display:block;line-height:1.65;color:var(--ink-light);">
+          import pandas as pd<br>
+          data = pd.read_csv('train.csv')<br>
+          X = data.iloc[:, 1:].values &nbsp; <span style="color:var(--ink-faint)"># 784 列像素</span><br>
+          y = data.iloc[:, 0].values &nbsp;&nbsp; <span style="color:var(--ink-faint)"># 第 1 列标签</span><br>
+          <span style="color:var(--ink-faint)"># 后续完全复用鸢尾花 5 步</span><br>
+          X_train, X_test, y_train, y_test = train_test_split(...)<br>
+          X_train = StandardScaler().fit_transform(X_train)<br>
+          gs = GridSearchCV(KNeighborsClassifier(),<br>
+          &nbsp;&nbsp;{'n_neighbors': [3, 5, 7]}, cv=3)<br>
+          gs.fit(X_train, y_train)<br>
+          print(gs.best_score_, gs.best_params_)
+          </code>
+        </div>
+
         <div class="compare-row">
           <div class="compare-card" style="background:rgba(42,107,74,.04);border:1px solid rgba(42,107,74,.12);">
             <div class="card-title" style="color:var(--green-ink)">鸢尾花</div>
@@ -1104,12 +1256,22 @@
           遍历 7 万样本计算 784 维距离，代价巨大。<span class="blue">维度灾难</span>在此最直观：784 维空间中距离区分度急剧下降。实际生产中手写数字识别常用 <span class="highlight">CNN（卷积神经网络）</span>，KNN 在此仅用于理解调优流程。
         </div>
 
+        <table class="data-table" style="font-size:12px;margin-top:4px;">
+          <thead><tr><th>算法</th><th>MNIST 准确率</th><th>预测速度</th><th>适用场景</th></tr></thead>
+          <tbody>
+            <tr><td><span class="blue">KNN</span></td><td>~96%</td><td>极慢（遍历全部）</td><td>学习 Pipeline，不适合生产</td></tr>
+            <tr><td><span class="green">SVM</span></td><td>~97%</td><td>中等</td><td>中小数据集分类</td></tr>
+            <tr><td><span class="highlight">CNN</span></td><td><strong>99%+</strong></td><td>快（前向传播）</td><td>图像识别主流方案</td></tr>
+          </tbody>
+        </table>
+
         <div class="glossary">
           <div class="glossary-title">Terms</div>
           <div class="glossary-item"><span class="glossary-term">MNIST</span>手写数字数据集，7 万张 28&times;28 灰度图，0-9 共 10 类</div>
           <div class="glossary-item"><span class="glossary-term">Flatten</span>展平，将 28&times;28 二维图像转为 784 维一维向量</div>
           <div class="glossary-item"><span class="glossary-term">Grayscale</span>灰度图，像素值 0（白）到 255（黑）</div>
-          <div class="glossary-item"><span class="glossary-term">CNN</span>卷积神经网络，图像识别的主流深度学习模型</div>
+          <div class="glossary-item"><span class="glossary-term">CNN</span>卷积神经网络，图像识别主流模型，MNIST 准确率 99%+</div>
+          <div class="glossary-item"><span class="glossary-term">SVM</span>支持向量机，中小数据集分类的强基线算法</div>
         </div>
       </div>
       <div class="page-num">7 / 8</div>
@@ -1123,25 +1285,25 @@
 
         <ul class="summary-list">
           <li>
-            <strong>KNN 思想</strong>：K 个最近邻投票/均值做决策。惰性学习，无显式训练。代价：O(n&times;d) 预测、内存占用大、维度灾难。
+            <strong>KNN 思想</strong>：K 个最近邻投票/均值做决策。<span class="blue">非参数模型</span> —— 数据即模型，不压缩为权重。1-NN 决策边界是 Voronoi 图。惰性学习代价：O(n&times;d)，可用 KD-Tree 加速至 O(d&times;log n)。
           </li>
           <li>
-            <strong>K 值选择</strong>：K 过小 &rarr; 过拟合（噪声敏感），K 过大 &rarr; 欠拟合（丢失局部判别力）。取较小奇数，用 CV 选最优。
+            <strong>K 值选择</strong>：K 过小 &rarr; 过拟合（高方差），K 过大 &rarr; 欠拟合（高偏差）。本质是 <span class="highlight">bias-variance tradeoff</span> 的旋钮。取较小奇数，用 CV 选最优。
           </li>
           <li>
-            <strong>距离度量</strong>：<span class="blue">闵可夫斯基距离</span>统一三种距离 &mdash; p=1 曼哈顿、p=2 欧氏、p&rarr;&infin; 切比雪夫。量纲差异会主导距离。
+            <strong>距离度量</strong>：<span class="blue">闵可夫斯基距离</span>统一三种距离 &mdash; p=1 曼哈顿、p=2 欧氏、p&rarr;&infin; 切比雪夫。sklearn 用 metric + p 参数控制。量纲差异会主导距离。
           </li>
           <li>
-            <strong>特征预处理</strong>：归一化受极值支配（小数据），<span class="green">标准化</span>受均值/std 驱动（大数据首选）。铁律：训练集 fit_transform，测试集只 transform &mdash; 防止<span class="highlight">数据泄露</span>。
+            <strong>特征预处理</strong>：归一化受极值支配（小数据），<span class="green">标准化</span>受均值/std 驱动（大数据首选）。数学本质：标准化使每个特征对距离贡献相等。铁律：训练集 fit_transform，测试集只 transform &mdash; 防止<span class="highlight">数据泄露</span>。Pipeline 从根本上解决。
           </li>
           <li>
-            <strong>ML Pipeline</strong>：获取 &rarr; 划分 &rarr; 预处理 &rarr; 训练 &rarr; 评估，5 步通用模板。鸢尾花和 MNIST 都复用同一骨架。
+            <strong>ML Pipeline</strong>：获取 &rarr; 划分 &rarr; 预处理 &rarr; 训练 &rarr; 评估，5 步通用模板。鸢尾花和 MNIST 都复用同一骨架。两种评估方式：score() 和 accuracy_score()。
           </li>
           <li>
-            <strong>模型调优</strong>：<span class="blue">交叉验证</span>消除划分随机性，<span class="highlight">网格搜索</span>穷举超参组合。组合使用 = 完整调优方案。refit=True 自动重训练。
+            <strong>模型调优</strong>：<span class="blue">交叉验证</span>消除划分随机性，<span class="highlight">网格搜索</span>穷举超参组合。两阶段：CV 选最优 K &rarr; 全训练集 refit。训练次数 = 超参组合 &times; cv 折数。
           </li>
           <li>
-            <strong>MNIST 案例</strong>：7 万张 28&times;28 灰度图。KNN 可做但效率低，维度灾难在 784 维最直观。生产常用 CNN。
+            <strong>MNIST 案例</strong>：7 万张 28&times;28 灰度图，784 维特征。KNN ~96% 但极慢，CNN 99%+。KNN 的价值：验证 Pipeline 通用性，体验维度灾难。
           </li>
         </ul>
 
