@@ -679,8 +679,12 @@
         </p>
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:8px;">
-          <strong style="color:var(--gold);">思路：K 值像放大镜倍率</strong><br>
-          <span class="highlight">K = 1</span> 是最高倍率 —— 看到每个细胞，但灰尘（噪声）也被看到了。<span class="highlight">K = N</span> 是卫星图 —— 只看到大陆轮廓，街道细节全丢了。调 K = 调焦距：找到既能看到街道纹理、又不被灰尘干扰的倍率。<strong>不是在找"正确的 K"，而是在找"恰到好处的模糊度"。</strong>
+          <strong style="color:var(--gold);">思路：K 值如何改变预测</strong><br>
+          训练集 y = [0, 0, <span class="highlight">1</span>, 1, 1]，其中第 3 个样本是<strong>噪声</strong>（标错了）。<br>
+          &middot; <span class="highlight">K = 1</span>：新样本最近邻恰好是这个噪声点 &rarr; 预测为 1（错误）。训练误差 = 0，但一换数据集结果就变 &rarr; <strong>高方差</strong>。<br>
+          &middot; <span class="highlight">K = 5</span>：5 个邻居投票，噪声点只占 1 票，被 4 票淹没 &rarr; 预测正确。<br>
+          &middot; <span class="highlight">K = N</span>：全体投票，类别 1 有 3 个，类别 0 有 2 个 &rarr; 永远预测 1，无论新样本在哪 &rarr; <strong>高偏差</strong>。<br>
+          <span style="font-size:12px;color:var(--ink-faint)">数学事实：K=1 时训练集误差恒为 0（每个样本的最近邻是自己），但这不代表泛化能力强。</span>
         </div>
 
         <div class="compare-row">
@@ -774,9 +778,11 @@
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:8px;">
           <strong style="color:var(--gold);">概念思路：为什么需要多种距离？</strong><br>
-          不同问题有不同的<strong>"像"的含义</strong>。<span class="blue">欧氏</span>：鸟飞直线 —— 适合连续均匀空间。<span class="green">曼哈顿</span>：城市走格子 —— 适合维度独立、有物理意义的场景。<span class="gold">切比雪夫</span>：最差维度决定 —— 适合瓶颈型问题。<br>
-          <strong>过程思路：闵氏统一的意义</strong><br>
-          它们不是三种距离，而是<span class="highlight">同一个公式的三种视角</span>。p 是你对"差异如何累积"的态度：p 越大，最大差异的分量越被放大，极端情况 p&rarr;&infin; 只看最大差异。
+          取 A(1, 3)、B(4, 1)，差值 |&Delta;x|=3, |&Delta;y|=2：<br>
+          &middot; <span class="green">p=1 曼哈顿</span>：3 + 2 = <strong>5</strong> &mdash; 维度贡献<strong>线性叠加</strong>，对异常维度不敏感<br>
+          &middot; <span class="blue">p=2 欧氏</span>：&radic;(9+4) = <strong>3.61</strong> &mdash; 大差异被<strong>平方放大</strong>，更重视差异大的维度<br>
+          &middot; <span class="gold">p&rarr;&infin; 切比雪夫</span>：max(3, 2) = <strong>3</strong> &mdash; <strong>只看最大差异</strong>，其他维度完全忽略<br>
+          <strong>过程思路</strong>：p 越大，最大差异的分量在求和中权重越高。p=1 平等对待所有维度，p=2 偏向大差异，p=&infin; 极端到只看最差维度。选 p 就是在选<strong>对维度差异的敏感策略</strong>。
         </div>
 
         <div class="formula-block">
@@ -889,9 +895,15 @@
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:8px;">
           <strong style="color:var(--gold);">概念思路：为什么要预处理？</strong><br>
-          想象用<strong>厘米量身高</strong>（175）和<strong>克量体重</strong>（70000）。体重数字大 400 倍 &rarr; 距离公式里体重差异淹没身高差异 &rarr; 模型只看体重不看身高。<span class="highlight">预处理 = 给每把尺子统一刻度</span>，让每个特征发出同等音量的声音。<br><br>
-          <strong style="color:var(--gold);">过程思路：铁律为什么不能违反？</strong><br>
-          你复习用的试卷不能是高考原题 —— 否则你分不清是真学会了还是背答案了。测试集就是高考，<strong>不能提前见到任何统计信息</strong>（均值、标准差）。fit = 看到试题，transform = 答题。训练集可以"看题+答题"，测试集只能"用训练集的经验答题"。
+          特征 A 范围 [0, 100000]（年收入），特征 B 范围 [20, 60]（年龄）。欧氏距离中 (100000&minus;50000)&sup2; = 2.5&times;10&sup9;，而 (60&minus;20)&sup2; = 1600。<span class="highlight">特征 A 的贡献是 B 的 156 万倍</span> &mdash; 年龄维度被完全淹没，KNN 实际上只按收入分类。标准化后两者方差 = 1，贡献均等。<br><br>
+          <strong style="color:var(--gold);">过程思路：铁律的数学证据</strong><br>
+          <code style="font-size:12px;color:var(--ink-light);">
+          <span style="color:var(--ink-faint)"># 错误做法：对测试集 fit_transform</span><br>
+          scaler.fit_transform(X_test) &rarr; X_test 的 <span class="highlight">mean = 0, std = 1</span>（已学到测试集统计量）<br>
+          <span style="color:var(--ink-faint)"># 正确做法：只用 transform</span><br>
+          scaler.transform(X_test) &rarr; X_test 的 <span class="green">mean &ne; 0, std &ne; 1</span>（用训练集的参数变换）
+          </code><br>
+          <span style="font-size:12px;">错误做法中 mean=0 本身就是泄露的证据 &mdash; 测试集不可能恰好均值为 0，除非 scaler 已经"见过"了它。</span>
         </div>
 
         <div class="param-cards">
@@ -983,12 +995,18 @@
         </p>
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:6px;">
-          <strong style="color:var(--gold);">过程思路：为什么必须这个顺序？</strong><br>
-          每一步都在<strong>为下一步铺路</strong>，这是因果链，不是任意排列：<br>
-          &middot; 先<strong>划分</strong>再标准化 &mdash; 反过来 = 数据泄露（测试集信息渗入训练）<br>
-          &middot; 先<strong>标准化</strong>再训练 &mdash; 反过来 = 距离失真（大量纲特征主导）<br>
-          &middot; 先<strong>训练</strong>再评估 &mdash; 没有模型怎么打分？<br>
-          乱序后果链：先标准化再划分 &rarr; 评估虚高 &rarr; 上线翻车。
+          <strong style="color:var(--gold);">过程思路：为什么必须这个顺序？（代码证明）</strong><br>
+          <code style="font-size:11.5px;display:block;line-height:1.6;color:var(--ink-light);">
+          <span style="color:var(--vermillion)"># 错误：先标准化，再划分</span><br>
+          X_all = scaler.fit_transform(X_all) &nbsp; <span style="color:var(--ink-faint)"># scaler 学了全部数据的 mean/std</span><br>
+          X_train, X_test = train_test_split(X_all)<br>
+          <span style="color:var(--ink-faint)"># 此时 X_test 已被全局 mean/std 污染 &rarr; 数据泄露</span><br><br>
+          <span style="color:var(--green-ink)"># 正确：先划分，再标准化</span><br>
+          X_train, X_test = train_test_split(X_raw)<br>
+          X_train = scaler.fit_transform(X_train) <span style="color:var(--ink-faint)"># 只学训练集</span><br>
+          X_test = scaler.transform(X_test) &nbsp;&nbsp;&nbsp;&nbsp; <span style="color:var(--ink-faint)"># 只变换</span>
+          </code>
+          <span style="font-size:12px;">错误做法中，scaler 的 mean_ 包含了测试集样本的信息。模型间接"见过"测试集 &rarr; 评估准确率偏高 &rarr; 上线后性能下降。</span>
         </div>
 
         <table class="data-table" style="font-size:12px;margin-bottom:8px;">
@@ -1113,9 +1131,13 @@
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:6px;">
           <strong style="color:var(--gold);">概念思路：为什么不直接最大化训练准确率？</strong><br>
-          做题全对不代表考试能过 —— 训练准确率高可能只是<strong>背答案</strong>（过拟合）。需要"模拟考"来检验，但一次模拟考也可能碰巧简单或碰巧难。所以考 N 次取平均 = CV，<span class="highlight">消除运气，得到真实水平</span>。CV 不是在调参，是在回答"这个模型到底行不行"。<br><br>
+          K=1 时训练集准确率 = <strong>100%</strong>（每个样本的最近邻是自己）。但测试集可能只有 85%。训练准确率高 &ne; 泛化好，这就是为什么需要<strong>独立评估</strong>。<br>
+          单次 split 的问题：同一模型，random_state=1 时得分 0.93，random_state=2 时得分 0.87 &mdash; <span class="highlight">波动 &plusmn;0.06</span>。5-fold CV 取平均后波动缩小到 &plusmn;0.02，评估更可信。<br><br>
           <strong style="color:var(--gold);">过程思路：网格搜索为什么要穷举？</strong><br>
-          超参数和模型性能之间<strong>没有公式</strong>，只有"试了才知道"。就像调收音机：不知道 FM 多少有好节目，只能一个频段一个频段扫。两个旋钮（K + p）时，在棋盘格上每个交叉点都试 —— 所以叫<span class="highlight">"网格"</span>。网格搜索回答"哪个参数最好"，CV 回答"这个评分可信吗"，<strong>缺一不可</strong>。
+          <span class="highlight">score(K) 不是 K 的单调函数</span> &mdash; 可能 K=3 得分 0.92，K=5 得分 0.96，K=7 又降到 0.91。没有公式能预测哪个 K 最优，只能遍历。<br>
+          <code style="font-size:12px;color:var(--ink-light);">param_grid = {'n_neighbors': [1,3,5,7], 'p': [1,2]}<br>
+          <span style="color:var(--ink-faint)"># 4 &times; 2 = 8 组超参 &times; 5 折 CV = <strong>40 次</strong>训练</span></code><br>
+          <span style="font-size:12px;">两个超参数形成 4&times;2 的网格，每个格点都要用 CV 评估一遍 &mdash; 这就是"网格"的含义。</span>
         </div>
 
         <!-- CV visual -->
@@ -1223,9 +1245,11 @@
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:6px;">
           <strong style="color:var(--gold);">概念思路：为什么把图片展平成 784 维？</strong><br>
-          KNN 需要距离，距离需要特征向量。<span class="highlight">像素就是特征</span>：每个像素位置携带形状信息 —— 数字"3"的第 10 行有墨水，数字"1"的第 10 行没有。展平不丢信息，只是把二维网格铺成一维序列。<br><br>
-          <strong style="color:var(--gold);">过程思路：为什么 KNN 在这里挣扎？</strong><br>
-          784 维太高。想象 784 维空间 —— 所有点到彼此的距离<strong>趋于相等</strong>，"近邻"失去意义。这就是<span class="highlight">维度灾难的直觉</span>：维度越高，"近"和"远"越难区分。所以图像识别需要能<strong>提取局部特征</strong>的 CNN，而不是暴力比较所有像素。
+          KNN 需要距离向量。每个像素是一个特征：<code>pixel[100]</code> 记录第 100 个位置的灰度值。数字"3"在特定像素有墨水（值 &gt; 200），数字"1"在同一位置没有（值 &asymp; 0）。展平 28&times;28 &rarr; 784 不丢信息，只改变数据形状。<br><br>
+          <strong style="color:var(--gold);">过程思路：维度灾难的数学事实</strong><br>
+          d 维空间中，随机点间的距离分布有一个性质：<br>
+          <span style="font-size:13px;"><span class="highlight">lim<sub>d&rarr;&infin;</sub> (d<sub>max</sub> &minus; d<sub>min</sub>) / d<sub>min</sub> &rarr; 0</span></span><br>
+          即维度越高，最远点和最近点的距离<strong>差异趋于 0</strong>。d=4 时 d<sub>max</sub>/d<sub>min</sub> &asymp; 2.5，d=784 时 &asymp; 1.05。所有点几乎等距 &rarr; "最近邻"失去区分意义 &rarr; KNN 退化。这就是为什么 784 维需要 CNN 提取局部特征，而不是暴力比距离。
         </div>
 
         <!-- MNIST pixel grid visual -->

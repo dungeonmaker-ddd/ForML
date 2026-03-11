@@ -1,55 +1,31 @@
 # use-this-graph-to-build: ch03 机器学习算法分类
+# confirm-sufficiency-before-start: 本图谱覆盖四大学习方式及对比、监督学习子任务、数学表示，含Q2作业，3内容页布局
 # scope: ML-intro-chapter-03
 # status: pending
 
-# ── core: 四大学习方式 ──
-supervised: [监督学习-supervised-learning, 输入:有标签, 输出:有反馈, 目的:预测结果, 案例:猫狗分类-房价预测, critical]
-supervised.regression: [回归-regression, 函数输出是连续值, 如房价预测, critical]
-supervised.classification: [分类-classification, 函数输出是有限个离散值, 如猫狗分类, critical]
+# ═══ Page 1: 监督学习 + 回归/分类 ═══
 
-unsupervised: [无监督学习-unsupervised-learning, 输入:无标签-但必须有特征, 输出:无反馈, 目的:发现潜在结构, 案例:物以类聚-人以群分, critical]
-unsupervised.clustering: [聚类-clustering, 按特征相似性对样本分组, 没有标准固定归类-结果与超参数有关, 发现事物内部结构及相互关系, critical]
+监督学习: [supervised-learning-监督学习, 输入:有标签的数据(X+Y), 训练有反馈:预测值与真实标签对比->计算loss->调整参数, 目标:学习映射函数f(X)->Y-预测新样本标签, critical]
+监督学习.数学形式: [输入X:特征矩阵-每行一个样本每列一个特征, 输出Y:标签向量, 学习目标:找到f使f(X)≈Y, 本质:有标准答案的学习-像做有答案的练习题, critical]
+监督学习.回归: [regression-回归, 输出连续值, 案例:房价预测-输出具体价格如358万, 数学:f(X)∈R-输出实数域, critical]
+监督学习.分类: [classification-分类, 输出有限个离散值, 案例:猫狗分类-输出类别标签, 二分类:0/1-多分类:0/1/2/.../N, critical]
+监督学习.回归vs分类: [核心区别在输出类型:连续vs离散, 判断方法:预测结果能否做加减法->能=回归-不能=分类, 面试追问:房价预测是回归还是分类->回归-因为输出是连续数值, critical]
 
-semi-supervised: [半监督学习-semi-supervised-learning, 输入:部分有标签-部分无标签, 输出:有反馈, 目的:降低数据标记难度, important]
+# ═══ Page 2: 无监督 + 半监督 + 强化学习 ═══
 
-reinforcement: [强化学习-reinforcement-learning, 输入:决策流程及激励系统, 输出:一系列行动, 目的:长期利益最大化, 案例:学下棋, important]
-reinforcement.elements: [四要素:Agent智能体-Environment环境-Action行动-Reward奖励, 通过不断试错获取最佳策略, important]
+无监督学习: [unsupervised-learning-无监督学习, 输入:只有特征X-没有标签Y, 训练无反馈:没有标准答案可对比, 目标:发现数据内部结构和分布规律, critical]
+无监督学习.数学形式: [输入X:特征矩阵-无Y, 学习目标:发现X的内部结构|分布|聚类, 本质:无标准答案的探索-像无答案的开放题, critical]
+无监督学习.聚类: [clustering-聚类, 按特征相似性自动分组, 没有标准固定分类-结果与超参数相关, 物以类聚-人以群分, 典型算法:K-Means|DBSCAN, critical]
 
-# ── core: 数学表示 ──
-supervised.math: [输入X含特征值+输出Y含目标值, 学习映射函数f:X->Y, critical]
-unsupervised.math: [输入X含特征值-无目标值Y, 学习X的内部结构和分布, critical]
+半监督学习: [semi-supervised-learning-半监督学习, 输入:部分有标签+大量无标签, 目的:降低数据标注成本-标注昂贵时尤其有用, 方法:用少量标签数据引导无标签数据的学习, important]
+强化学习: [reinforcement-learning-强化学习, 输入:环境状态+奖励信号, 四要素:Agent智能体-Environment环境-Action行动-Reward奖励, 目标:通过试错找到长期累计奖励最大化的策略, 案例:AlphaGo学下棋-机器人学走路, important]
 
-# ── edges: 类型归属 ──
-supervised -> supervised.regression: [回归是监督学习子任务, 输出连续值, critical]
-supervised -> supervised.classification: [分类是监督学习子任务, 输出离散值, critical]
-unsupervised -> unsupervised.clustering: [聚类是无监督学习典型方法, critical]
-reinforcement -> reinforcement.elements: [四要素构成强化学习框架, important]
-supervised -> supervised.math: [监督学习的数学形式化, important]
-unsupervised -> unsupervised.math: [无监督学习的数学形式化, important]
+# ═══ Page 3: 监督 vs 无监督核心对比（含Q2作业） ═══
 
-# ── edges: 学习方式间的对比关系 ──
-supervised -> unsupervised: [核心区别:有无标签, 数据形态是根本分界, critical]
-supervised -> semi-supervised: [半监督是监督与无监督的折中, 部分标签降低标注成本, important]
-semi-supervised -> unsupervised: [半监督同时包含有标签和无标签数据, 介于两者之间, important]
-
-# ── homework.Q2: 监督 vs 无监督的特点及区别 ──
-
-# 监督学习特点
-homework.supervised.trait-1: [数据同时包含特征X和标签Y, 有明确正确答案, critical]
-homework.supervised.trait-2: [学习映射函数f:X->Y, 目标是预测新样本的标签, critical]
-homework.supervised.trait-3: [训练有反馈:预测值与真实标签对比-计算loss-调整参数, critical]
-homework.supervised.trait-4: [两大子任务:回归输出连续值-分类输出离散值, critical]
-
-# 无监督学习特点
-homework.unsupervised.trait-1: [数据只有特征X-没有标签Y, 没有标准正确答案, critical]
-homework.unsupervised.trait-2: [学习数据内部结构和分布规律, 发现样本间相似性和隐藏模式, critical]
-homework.unsupervised.trait-3: [训练无反馈:无标签无法直接评判对错, critical]
-homework.unsupervised.trait-4: [典型任务:聚类按相似性自动分组, 结果与超参数有关-无唯一标准, critical]
-
-# 核心区别
-homework.contrast.data: [监督:有标签有反馈, 无监督:无标签无反馈, 数据形态是根本区别, critical]
-homework.contrast.goal: [监督:预测已知类别的结果, 无监督:发现未知的内部结构, 目标导向不同, critical]
-homework.contrast.evaluation: [监督:可用准确率-loss等指标直接评估, 无监督:评估困难-缺乏标准答案, important]
-homework.contrast.example: [监督:标注好的猫狗图片-学会区分, 无监督:未标注图片-按相似性自动分组, important]
+监督vs无监督.数据形态: [根本区别在数据:监督有标签有反馈-无监督无标签无反馈, 这是四大学习方式中最核心的分界线, 面试必答:一句话说出区别->有无标签, critical]
+监督vs无监督.目标差异: [监督:预测已知类别的结果(预测型), 无监督:发现未知的内部结构(探索型), 目标导向完全不同, critical]
+监督vs无监督.评估差异: [监督:有标签可直接计算准确率|loss|F1等指标, 无监督:缺乏标准答案-评估困难-需用轮廓系数等间接指标, 面试追问:无监督学习怎么评估效果, important]
+监督vs无监督.案例对比: [监督:标注好猫狗的图片->学会区分猫狗, 无监督:未标注图片->按视觉相似性自动分组->不知道组叫什么, 半监督:少量标注+大量未标注->用少量标签引导分组, critical]
+四种学习方式.选择策略: [有标签->监督, 无标签->无监督, 少量标签+大量无标签->半监督, 需要序列决策->强化, 面试追问:怎么选择学习方式->取决于数据形态和任务目标, important]
 
 # ~96%

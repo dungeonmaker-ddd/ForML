@@ -1,75 +1,36 @@
 # use-this-graph-to-build: ch06 模型拟合问题
+# confirm-sufficiency-before-start: 本图谱覆盖欠拟合/过拟合/正好拟合、loss曲线诊断、泛化与奥卡姆剃刀，含Q5作业，3内容页布局
 # scope: ML-intro-chapter-06
 # status: pending
 
-# ── core: 拟合的定义 ──
-fitting: [拟合-fitting, 用在机器学习领域, 用来表示模型对样本点的拟合情况, critical]
+# ═══ Page 1: 拟合定义 + 欠拟合 + 过拟合 ═══
 
-# ── core: 欠拟合 ──
-underfitting: [欠拟合-underfitting, 训练集表现很差-测试集表现也很差, 模型学到的特征过少-无法准确预测未知样本, critical]
-underfitting.cause: [原因:模型过于简单, 参数少-表达能力不足, 如y=kx+b拟合非线性数据, critical]
-underfitting.solution: [对策:增加模型复杂度-增加有效特征-换用更强模型, 本质:提升模型学习能力, critical]
-underfitting.loss-curve: [loss曲线特征:loss很大且下降很慢, train-loss和test-loss都高, 学不到特征, important]
+拟合: [fitting-拟合, 模型对样本分布点的模拟程度, 训练本质:让模型曲线贴合数据分布规律, 三种状态:欠拟合|过拟合|正好拟合, critical]
 
-# ── core: 过拟合 ──
-overfitting: [过拟合-overfitting, 训练集表现很好-测试集表现很差, 模型学到特征过多-包含脏特征-钻牛角尖, critical]
-overfitting.cause: [原因:模型太复杂-数据不纯含噪声-训练数据太少, 高次方模型参数多-在训练集表现异常好, critical]
-overfitting.solution: [对策:正则化约束参数-异常值检测-特征降维-数据增强-优化长尾数据, 本质:降低模型复杂度或提升数据质量, critical]
-overfitting.long-tail: [长尾数据优化:欠采样-过采样-focal-loss, important]
-overfitting.loss-curve: [loss曲线特征:后期验证集loss反而上升, train-loss远低于test-loss-出现明显gap, 需要早停-early-stopping, important]
+欠拟合: [underfitting-欠拟合, 现象:训练集差-测试集也差, 本质:模型连训练数据的规律都没学到-学到的特征过少, critical]
+欠拟合.原因: [模型过于简单-参数太少-表达能力不足, 典型:用y=kx+b拟合非线性数据-直线无法捕捉曲线分布, 面试追问:欠拟合的根本原因->模型复杂度不够, critical]
+欠拟合.对策: [增加模型复杂度:线性->多项式->神经网络, 增加有效特征:引入更多信息维度, 换用更强模型:如从线性回归换到随机森林, 本质:提升模型学习能力, critical]
 
-# ── core: 正好拟合 ──
-just-right: [正好拟合-just-right, train-loss和test-loss相近且都低, 如y=ax²+bx+c正好拟合二次分布, critical]
-just-right.loss-curve: [loss曲线特征:train和test曲线相似且收敛到低值, 表明泛化良好, important]
+过拟合: [overfitting-过拟合, 现象:训练集很好-测试集很差, 本质:模型学到了噪声和个例当规律-钻牛角尖-记住了训练集而非学会了规律, critical]
+过拟合.原因: [模型太复杂-参数过多, 数据不纯-含噪声和异常值, 训练数据太少-无法覆盖真实分布, 高次多项式模型在训练集表现异常好-实则过度拟合, critical]
+过拟合.对策: [正则化:L1/L2约束参数大小, 异常值检测:清洗脏数据, 特征降维:减少特征数量, 数据增强:增加训练样本, 早停:监控验证集loss-在上升前停止训练, 本质:降低模型复杂度或提升数据质量, critical]
+过拟合.长尾数据: [长尾数据优化:类别不均衡时少数类被忽略, 方法:欠采样(减少多数类)|过采样(增加少数类)|focal-loss(加大少数类权重), important]
 
-# ── core: Loss 的含义 ──
-loss: [损失函数-loss, 衡量模型预测值与真实值之间的差异, loss越小模型越好, 图表:横轴step-纵轴loss, critical]
+# ═══ Page 2: Loss曲线诊断 + 模型复杂度 ═══
 
-# ── core: 模型复杂度与拟合的关系 ──
-model-complexity.low: [低复杂度:y=kx+b, 参数少, 难以拟合规律, 训练集表现极差, important]
-model-complexity.moderate: [中复杂度:y=ax²+bx+c, 复杂度适中, 正好拟合分布, important]
-model-complexity.high: [高复杂度:高次多项式, 参数过多, 训练集异常好-测试集差, important]
+loss函数: [loss-损失函数, 衡量模型预测值与真实值的差异, loss越小->模型预测越准, 图表:横轴训练步数step-纵轴loss值, 通过loss曲线诊断拟合状态, critical]
+loss曲线.欠拟合特征: [train-loss和test-loss都高且下降缓慢, 两条曲线靠近但都在高位, 诊断:模型学习能力不足->需增加复杂度, critical]
+loss曲线.过拟合特征: [train-loss很低-test-loss后期反升, 两条曲线出现明显gap:train远低于test, 需要早停early-stopping:在test-loss开始上升时停止训练, critical]
+loss曲线.正好拟合特征: [train-loss和test-loss相近且都收敛到低值, 两条曲线几乎重合且稳定在低位, 表明模型泛化良好, critical]
 
-# ── core: 泛化与奥卡姆剃刀 ──
-generalization: [泛化-Generalization, 模型在新数据集(非训练数据)上表现好坏的能力, 具体的个别的扩大为一般的能力, critical]
-occam-razor: [奥卡姆剃刀原则, 给定两个相同泛化误差的模型-倾向选择较简单的模型, 简单模型更不易过拟合, critical]
+模型复杂度: [模型复杂度与拟合的因果关系, 低:y=kx+b-参数少-表达力弱->欠拟合, 中:y=ax²+bx+c-复杂度适中->正好拟合, 高:高次多项式-参数过多->过拟合, 面试追问:模型越复杂越好吗->不是-复杂到正好拟合数据规律即可, critical]
 
-# ── edges: 拟合类型 ──
-fitting -> underfitting: [拟合不足, critical]
-fitting -> overfitting: [拟合过度, critical]
-fitting -> just-right: [拟合恰好, critical]
+# ═══ Page 3: 泛化能力 + 奥卡姆剃刀（含Q5作业） ═══
 
-# ── edges: 原因→对策 ──
-underfitting.cause -> underfitting.solution: [识别原因后针对性解决, critical]
-overfitting.cause -> overfitting.solution: [识别原因后针对性解决, critical]
+泛化: [Generalization-泛化, 模型在未见过的新数据上的表现能力, 从具体的训练集扩展到一般性规律的能力, 是ML的终极目标:不是记住训练集-而是学会规律, critical]
+泛化.与拟合关系: [欠拟合->泛化差:训练都没学好-何谈新数据, 过拟合->泛化差:记住了训练集细节-新数据不适用, 正好拟合->泛化好:学到了真正规律-可推广到新数据, 面试:好模型的标准->泛化能力强, critical]
 
-# ── edges: 复杂度→拟合类型 ──
-model-complexity.low -> underfitting: [低复杂度导致欠拟合, 因果, critical]
-model-complexity.moderate -> just-right: [适中复杂度实现正好拟合, 因果, critical]
-model-complexity.high -> overfitting: [高复杂度导致过拟合, 因果, critical]
+奥卡姆剃刀: [Occam's-Razor-奥卡姆剃刀, 给定两个泛化误差相同的模型-倾向选择更简单的模型, 原因:简单模型不容易过拟合-泛化能力往往更强, 实践意义:不要盲目追求复杂模型-够用就好, critical]
+奥卡姆剃刀.实践: [选模型优先级:先试简单模型(线性回归)->效果不够再加复杂度(多项式|决策树)->最后考虑深度学习, 面试追问:为什么不直接用最复杂的模型->越复杂越容易过拟合-且训练成本高-解释性差, important]
 
-# ── edges: loss 与 loss 曲线 ──
-loss -> underfitting.loss-curve: [loss曲线诊断欠拟合, important]
-loss -> overfitting.loss-curve: [loss曲线诊断过拟合, important]
-loss -> just-right.loss-curve: [loss曲线确认正好拟合, important]
-
-# ── edges: 拟合→泛化 ──
-underfitting -> generalization: [欠拟合导致泛化差, critical]
-overfitting -> generalization: [过拟合导致泛化差, critical]
-just-right -> generalization: [正好拟合实现良好泛化, critical]
-generalization -> occam-razor: [奥卡姆剃刀指导模型选择-追求泛化, critical]
-
-# ── homework.Q5: 拟合问题及原因 ──
-
-homework.fitting.definition: [拟合是模型对样本分布点的模拟情况, 训练本质是让曲线贴合数据分布规律, critical]
-homework.underfitting.what: [欠拟合:训练集差-测试集也差, 模型连训练数据规律都没学到, critical]
-homework.underfitting.why: [原因:模型过于简单-参数太少-表达能力不足, 如y=kx+b拟合非线性分布, critical]
-homework.underfitting.how-to-fix: [对策:增加模型复杂度-增加有效特征-换更强模型, 本质:提升学习能力, critical]
-homework.overfitting.what: [过拟合:训练集好-测试集差, 模型记住了噪声和个例-非真正规律, critical]
-homework.overfitting.why: [原因:模型太复杂-数据不纯-训练数据太少, 脏特征和噪声被当成规律, critical]
-homework.overfitting.how-to-fix: [对策:正则化-异常值检测-特征降维-数据增强-优化长尾数据, 本质:降低复杂度或提升数据质量, critical]
-homework.fitting.generalization: [终极目标:泛化能力, 新数据上也表现良好, 不欠不过-恰好平衡, critical]
-homework.fitting.occam: [奥卡姆剃刀:同等泛化效果选更简单模型, 简单模型泛化能力往往更强, important]
-homework.fitting.loss-diagnosis: [loss曲线诊断:欠拟合-双高且慢降, 过拟合-train低test后期反升有gap, 正好-双低且收敛, critical]
-
-# ~98%
+# ~97%

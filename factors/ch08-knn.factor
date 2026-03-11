@@ -1,63 +1,35 @@
-# use-this-graph-to-build: ch08 KNN算法
+# use-this-graph-to-build: ch08 KNN算法概览
+# confirm-sufficiency-before-start: 本图谱覆盖KNN思想、分类/回归流程、K值选择、距离度量、预处理需求，3内容页布局
 # scope: ML-intro-chapter-08
 # status: pending
 
-# ── core: KNN 思想 ──
-knn: [K-Nearest-Neighbors-K近邻算法, 核心思想:根据离你最近的K个邻居的类别来判断你的类别, 物以类聚-近朱者赤, critical]
-knn.lazy: [惰性学习-lazy-learning, 没有显式训练过程, 预测时才计算距离做判断, critical]
-knn.k: [K值:选取最近邻居的数量, K太小容易受噪声影响-过拟合, K太大分类界限模糊-欠拟合, critical]
+# ═══ Page 1: KNN思想 + 分类/回归流程 ═══
 
-# ── core: 分类与回归 ──
-knn.classification: [KNN分类, 找到K个最近邻-投票法-少数服从多数, 输出:离散类别标签, critical]
-knn.regression: [KNN回归, 找到K个最近邻-取均值, 输出:连续数值, critical]
-knn.flow: [KNN处理流程, 1-计算待预测点与所有训练样本的距离, 2-按距离排序取前K个, 3-分类:投票-回归:均值, critical]
+KNN思想: [K-Nearest-Neighbors-K近邻算法, 核心:在特征空间中找K个最近邻-用它们的类别/值决定未知样本, 直觉:物以类聚-近朱者赤-你的邻居决定你的类别, critical]
+KNN思想.惰性学习: [lazy-learning-惰性学习, 无显式训练过程-不构建参数模型-存储全部训练数据, 预测时才遍历计算距离, 对比:线性模型学习权重w和b->KNN无参数可学, 面试追问:KNN有训练过程吗->没有-它是惰性学习, critical]
 
-# ── core: KNN算法API ──
-knn.api.classifier: [sklearn.neighbors.KNeighborsClassifier, 参数:n_neighbors=K值-algorithm=距离算法, critical]
-knn.api.regressor: [sklearn.neighbors.KNeighborsRegressor, 参数:n_neighbors=K值, important]
+KNN分类: [KNN分类流程5步, 1-计算未知样本到每个训练样本的距离, 2-按距离升序排列, 3-取前K个最近邻, 4-多数表决:统计K个邻居中各类别数量, 5-归属出现最多的类别, 输出:离散标签, critical]
+KNN回归: [KNN回归流程5步, 1-计算距离->2-升序排列->3-取前K个, 4-对K个样本的目标值求均值, 5-均值作为预测值, 输出:连续数值, critical]
+KNN分类vs回归: [前3步完全相同:计算距离-排序-取K, 分歧在第4步:分类用投票(多数表决)|回归用均值, 面试必答:一句话说出区别->第4步不同:投票vs均值, critical]
 
-# ── core: 距离度量 ──
-distance: [距离度量-distance-metric, KNN的核心计算, 不同距离公式衡量样本间相似度, critical]
-distance.euclidean: [欧氏距离-Euclidean, 最常用, 两点间直线距离, sqrt(sum((xi-yi)^2)), critical]
-distance.manhattan: [曼哈顿距离-Manhattan, 各维度差的绝对值之和, sum(|xi-yi|), 城市街区距离, important]
-distance.minkowski: [闵可夫斯基距离-Minkowski, 欧氏和曼哈顿的推广, p=1曼哈顿-p=2欧氏, important]
+# ═══ Page 2: K值选择 + API ═══
 
-# ── core: 特征预处理 ──
-preprocessing: [特征预处理, KNN基于距离计算-量纲差异会严重影响结果, 必须做预处理, critical]
-preprocessing.normalization: [归一化-MinMaxScaler, 将数据缩放到0-1范围, 公式:x'=(x-min)/(max-min), 适用:已知数据范围-无明显异常值, critical]
-preprocessing.standardization: [标准化-StandardScaler, 转换为均值0标准差1, 公式:x'=(x-mean)/std, 适用:数据有异常值-大多数ML任务, critical]
-preprocessing.why-knn: [KNN为何必须预处理:量纲大的特征主导距离计算, 量纲小的特征被忽略, 导致结果失真, critical]
-preprocessing.iris: [鸢尾花识别案例, 用KNN分类鸢尾花-体现预处理对分类效果的影响, important]
+K值: [KNN唯一核心超参数, 不从数据中学来-需人为设定, K值直接决定模型复杂度和预测效果, critical]
+K值.过小: [K过小(如K=1)->极小邻域-只看最近的一个邻居, 后果:对噪声和异常点极敏感-坐标微变即分类翻转-决策边界极复杂, 本质:记住噪声而非规律->过拟合, feeds-ch06-过拟合, critical]
+K值.过大: [K过大(极端K=N)->看全部训练样本, 后果:永远预测训练集中最多的类别-忽略局部特征-受类别不均衡支配, 本质:丢失局部判别力->欠拟合, feeds-ch06-欠拟合, critical]
+K值.实践: [取较小奇数避免平局:3|5|7|9, 用交叉验证遍历候选K值选最优, 工程经验:通常K=5是不错的默认值, feeds-ch09-交叉验证+网格搜索, important]
 
-# ── core: 超参数选择 ──
-hyperparameter: [超参数-hyperparameter, 模型训练前需要人为设定的参数, 如KNN的K值, 不是从数据学来的, critical]
-cross-validation: [交叉验证-cross-validation, 将训练集分成N份-轮流用1份做验证其余做训练, N次结果取平均, 更可靠地评估模型, critical]
-cross-validation.k-fold: [K折交叉验证, 数据分K份-每份轮流做验证集-共K次训练, 常用K=5或K=10, critical]
-grid-search: [网格搜索-GridSearchCV, 穷举所有超参数组合, 配合交叉验证找到最优超参数, critical]
-grid-search.api: [sklearn.model_selection.GridSearchCV, 参数:estimator-param_grid-cv, 输出:best_params_-best_score_, important]
-hyperparameter.mnist: [手写数字识别案例, 用KNN+网格搜索识别0-9手写数字, 体现超参数选择对模型效果的影响, important]
+KNN-API: [sklearn两个API:KNeighborsClassifier(分类)+KNeighborsRegressor(回归), 默认n_neighbors=5, 用法:fit(X,y)->predict(X)->score(X,y), important]
+KNN-API.陷阱: [predict输入必须二维:predict([[1]])正确|predict([1])报错, 原因:sklearn统一要求矩阵输入-即使单样本也要双层方括号, 面试代码题高频考点, important]
 
-# ── edges ──
-knn -> knn.classification: [KNN用于分类任务, critical]
-knn -> knn.regression: [KNN用于回归任务, critical]
-knn -> knn.flow: [KNN的具体处理步骤, critical]
-knn -> knn.lazy: [KNN是惰性学习算法, important]
+# ═══ Page 3: 距离度量 + 预处理需求 ═══
 
-knn.flow -> distance: [流程第一步需要计算距离, critical]
-distance -> distance.euclidean: [欧氏距离是最常用的度量, critical]
-distance -> distance.manhattan: [曼哈顿距离是备选度量, important]
-distance -> distance.minkowski: [闵氏距离是通用推广, important]
+距离度量: [distance-metric-距离度量, KNN核心计算基础, 不同距离公式衡量样本间相似度, critical]
+距离度量.欧氏: [Euclidean-Distance-欧氏距离, d=sqrt(sum((xi-yi)²)), 两点间直线距离-勾股定理推广到n维, KNN默认距离, critical]
+距离度量.曼哈顿: [Manhattan-Distance-曼哈顿距离, d=sum(|xi-yi|), 城市街区距离:只走横平竖直, important]
+距离度量.闵氏: [Minkowski-Distance-闵氏距离, 统一框架:d=(sum(|xi-yi|^p))^(1/p), p=1:曼哈顿|p=2:欧氏|p->∞:切比雪夫, 不是新距离-是统一公式, feeds-ch09-闵氏距离深入+p无穷推导, critical]
 
-distance -> preprocessing: [距离计算受量纲影响-必须做预处理, critical]
-preprocessing -> preprocessing.normalization: [归一化是预处理方法之一, critical]
-preprocessing -> preprocessing.standardization: [标准化是预处理方法之一, critical]
+预处理需求: [KNN基于距离->量纲不同的特征会主导距离计算, 例:年收入(万级)vs年龄(十级)->收入差异淹没年龄差异->结果失真, 预处理是KNN的前置刚需-不做则结果不可信, feeds-ch09-归一化vs标准化详解+fit_transform铁律, critical]
+预处理需求.方法预告: [归一化MinMaxScaler:映射到[0,1]-受极值影响, 标准化StandardScaler:转换为N(0,1)-受均值std驱动更鲁棒, 详见ch05概念介绍-ch09实战落地, important]
 
-knn.k -> hyperparameter: [K值是KNN最重要的超参数, critical]
-hyperparameter -> cross-validation: [交叉验证评估超参数效果, critical]
-hyperparameter -> grid-search: [网格搜索穷举最优超参数, critical]
-cross-validation -> grid-search: [网格搜索内部使用交叉验证, critical]
-
-knn.api.classifier -> knn.classification: [分类API对应分类任务, important]
-knn.api.regressor -> knn.regression: [回归API对应回归任务, important]
-
-# ~95%
+# ~96%
