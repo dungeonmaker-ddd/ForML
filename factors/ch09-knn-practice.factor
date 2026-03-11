@@ -6,6 +6,7 @@
 # ═══ Page 1: KNN算法思想 + 分类/回归流程 ═══
 
 knn思想: [K-Nearest-Neighbors-K近邻, 核心:特征空间中K个最近邻的多数类别决定未知样本类别, 惰性学习:无显式训练-预测时才计算, 解决:分类+回归两类问题, critical]
+knn思想.思路: [为什么近邻投票有效->物以类聚的数学化:相似样本在特征空间中自然聚集-同类样本形成簇-新样本落入哪个簇就属于哪类, 本质:用空间位置代替规则推导-不需要知道"为什么"-只需要知道"像谁", 类比:搬到新城市-看邻居是什么人就知道这是什么社区, critical]
 knn思想.特征空间相似性: [样本在特征空间中距离越近越相似, 距离=斜边:两轴差值=直角边-勾股定理求斜边, 默认度量:欧氏距离, critical]
 knn思想.电影分类示例: [特征:打斗次数+接吻次数, 标签:动作片|爱情片, 训练集:已知类型电影, 测试集:未知电影, 在2D特征空间中计算距离->判类别, critical]
 knn思想.惰性本质: [不构建参数模型-存储全部训练数据, 预测时遍历计算距离, 区别于线性模型:线性模型学习权重w1|w2|w3-KNN无参数, important]
@@ -21,6 +22,7 @@ knn分类vs回归: [前3步完全相同:距离-排序-取K, 分歧在第4步:分
 # ═══ Page 2: K值选择 + KNN API ═══
 
 k值选择: [KNN唯一核心超参数, 不从数据学来-需人为设定, K决定模型复杂度, critical]
+k值选择.思路: [K值像放大镜倍率:K=1是最高倍-看到每个细胞(噪声也看到)->过拟合, K=N是卫星图-只看到大陆轮廓(细节全丢)->欠拟合, 调K=调焦距:找到既看到街道纹理又不被灰尘干扰的倍率, 思考方式:不是在找"正确的K"-而是在找"恰到好处的模糊度", critical]
 k值选择.过小: [K过小->极小邻域预测, 后果:异常点敏感-坐标微变则分类翻转-决策边界极复杂, 本质:记住噪声非规律->过拟合, critical]
 k值选择.过大: [K过大->极大邻域预测, 极端K=N:永远预测训练集多数类-忽略局部特征, 后果:受类别不均衡支配-模型过于简单, 本质:丢失局部判别力->欠拟合, critical]
 k值选择.偏差方差: [K是偏差-方差权衡的旋钮:K=1零偏差但高方差(训练集误差为0)|K=N高偏差但零方差(永远预测均值), 最优K在中间:用CV找到bias²+variance最小的平衡点, 面试升华:K值选择本质是bias-variance-tradeoff, critical]
@@ -36,6 +38,7 @@ api.评估方式: [方式1:estimator.score(x_test,y_test)返回准确率, 方式
 # ═══ Page 3: 距离度量 ═══
 
 距离度量: [distance-measure-距离度量, KNN核心计算基础, 不同距离公式衡量样本相似度, 量纲不同->距离被大量纲特征主导->引出预处理需求, critical]
+距离度量.思路: [为什么需要多种距离->不同问题有不同的"像"的含义, 欧氏:鸟飞直线-适合连续均匀空间, 曼哈顿:城市走格子-适合维度独立有物理意义, 切比雪夫:最坏维度决定-适合瓶颈型问题, 闵氏统一的意义:它们不是三种距离-是同一个公式的三种视角-p是你对"差异如何累积"的态度, critical]
 距离度量.欧氏: [Euclidean-Distance-欧氏距离, 公式:d=sqrt(sum((xi-yi)^2)), 几何:两点直线距离-勾股定理推广到n维, 最常用-KNN默认距离, 示例:A(1,1)-B(2,2)->d=sqrt(1+1)=1.414, critical]
 距离度量.曼哈顿: [Manhattan-Distance-曼哈顿距离, 公式:d=sum(|xi-yi|), 城市街区距离:只走横平竖直-各维绝对值求和, 示例:A(1,1)-B(2,2)->d=|1|+|1|=2, important]
 距离度量.切比雪夫: [Chebyshev-Distance-切比雪夫距离, 公式:d=max(|xi-yi|), 棋盘距离:国际象棋国王走一步可到相邻8格-最少步数即切比雪夫距离, important]
@@ -47,6 +50,7 @@ api.评估方式: [方式1:estimator.score(x_test,y_test)返回准确率, 方式
 # ═══ Page 4: 特征预处理（归一化 vs 标准化）═══
 
 预处理: [feature-preprocessing-特征预处理, KNN基于距离->量纲差异导致大特征主导小特征被淹没, 预处理是KNN前置刚需-不做则结果失真, critical]
+预处理.思路: [想象用厘米尺量身高(175)和用克量体重(70000):体重数字大100倍->距离公式中体重的差异淹没身高的差异->模型只看体重不看身高, 预处理=给每把尺子统一刻度-让每个特征发出同等音量的声音, 铁律的思路:你复习用的试卷不能是高考原题-否则你分不清是真学会了还是背下了答案->测试集就是高考-不能提前见到任何统计信息, critical]
 预处理.归一化: [MinMaxScaler-归一化, 公式:x'=(x-min)/(max-min), 映射到[0,1]区间, API:MinMaxScaler(feature_range=(0,1)), fit_transform(X)执行变换, critical]
 预处理.归一化弊端: [致命缺陷:max/min若为异常值->全部数据被过度压缩, 鲁棒性差, 仅适合:传统精确小数据-数据范围已知-无异常值, critical]
 预处理.归一化代码: [from-sklearn.preprocessing-import-MinMaxScaler, data=[[90,2,10,40],[60,4,15,45],[75,3,13,46]], transformer=MinMaxScaler(), data=transformer.fit_transform(data), 结果:每列独立缩放到[0,1], important]
@@ -65,6 +69,7 @@ api.评估方式: [方式1:estimator.score(x_test,y_test)返回准确率, 方式
 鸢尾花案例: [iris-dataset经典入门, 150样本-4特征(花萼长宽+花瓣长宽)-3类别(setosa|versicolor|virginica), API:load_iris(), 属性:data|target|target_names|feature_names|DESCR, critical]
 鸢尾花案例.数据属性: [.data:150x4浮点矩阵, .target:150个整数标签(0|1|2), .target_names:['setosa','versicolor','virginica'], .feature_names:['sepal-length','sepal-width','petal-length','petal-width']-单位cm, .DESCR:数据集完整描述, important]
 鸢尾花案例.标准流程: [ML-pipeline模板:1-load_iris获取数据->2-train_test_split划分(test_size=0.2,random_state=22)->3-StandardScaler标准化->4-KNeighborsClassifier.fit训练->5-score评估准确率, 这个5步流程是所有ML项目通用模板, critical]
+鸢尾花案例.流程思路: [为什么必须这个顺序->每一步都在为下一步铺路:先划分再标准化(反过来=数据泄露)->先标准化再训练(反过来=距离失真)->先训练再评估(没模型怎么打分), 乱序后果链:先标准化再划分->测试集统计量渗入训练->评估虚高->上线翻车, 核心:这不是任意排列-是因果链, critical]
 鸢尾花案例.数据划分: [train_test_split(data,target,test_size,random_state), test_size:测试集占比-常用0.2, random_state:随机种子保证可复现, 返回:X_train-X_test-y_train-y_test四元组, critical]
 鸢尾花案例.标准化实践: [第3步体现铁律:x_train=transfer.fit_transform(x_train)->x_test=transfer.transform(x_test), 训练集学参数+变换|测试集只变换, 这是预处理铁律的实战落地, critical]
 鸢尾花案例.数据探索: [用seaborn.lmplot可视化特征散点图, 目的:确认特征能否分开不同类别, 特征选择:sepal-length-vs-petal-width, 探索先于建模, important]
@@ -74,12 +79,14 @@ api.评估方式: [方式1:estimator.score(x_test,y_test)返回准确率, 方式
 # ═══ Page 6: 交叉验证 + 网格搜索 ═══
 
 交叉验证: [cross-validation-CV, 目的:更准确可信地评估模型-避免单次划分的偶然性, 方法:训练集分N份-轮流1份验证其余训练-N次结果取平均, critical]
+交叉验证.思路: [为什么不直接最大化训练准确率->做题全对不代表考试能过:训练准确率高可能只是背答案(过拟合), 需要一个"模拟考"->但一次模拟考也可能碰巧简单或碰巧难, 所以考N次取平均=交叉验证:消除运气-得到真实水平, 本质:CV不是在调参-是在回答"这个模型到底行不行", critical]
 交叉验证.为何优于holdout: [简单holdout(一次train_test_split)的问题:划分不同->得分不同-运气成分大, CV用N次不同划分取平均->消除随机性, 类比:考一次试可能发挥失常-考N次取平均才是真实水平, 面试:为什么不直接split评估, critical]
 交叉验证.流程: [以cv=4为例:第1次-份1验证+份2,3,4训练->第2次-份2验证+份1,3,4训练->...->4次评估取平均=模型得分, 常用:cv=5或cv=10, critical]
 交叉验证.后续步骤: [选定最优超参后->用全部训练集(训练+验证)重新训练一遍->再用独立测试集做最终评估, 不能遗忘验证集数据-要完整利用, important]
 交叉验证.本质: [划分数据集的方法-不是调参方法, 目的:得到可信模型评分, 与网格搜索是互补关系:CV评估+网格搜索调参, critical]
 
 网格搜索: [GridSearchCV-网格搜索, 目的:自动穷举超参组合找最优, 本质:暴力搜索-每组超参都用CV评估, 是模型调参的有力工具, critical]
+网格搜索.思路: [为什么穷举而不是算->超参数和模型性能之间没有公式-只有"试了才知道", 就像调收音机频率:你不知道FM多少有好节目-只能一个一个频段扫, 两个旋钮(K值+p值)时=在棋盘格上每个交叉点都试一遍->所以叫"网格", 组合的思路:网格搜索回答"哪个参数最好"+CV回答"这个评分可信吗"=缺一不可, critical]
 网格搜索.api: [GridSearchCV(estimator,param_grid,cv), param_grid:字典如{'n_neighbors':[1,3,5,7]}, 结果属性:best_params_最优参数|best_score_最优得分|best_estimator_最优模型|cv_results_全部结果, critical]
 网格搜索.训练次数: [总次数=超参组合数*cv折数, 例:4个K值*5折CV=20次模型训练, 面试计算题, important]
 网格搜索.高维困境: [超参多+候选值多->组合爆炸, 网格搜索=暴力破解-高维超空间代价极大, 替代方案:RandomizedSearchCV随机搜索, important]
@@ -89,6 +96,7 @@ api.评估方式: [方式1:estimator.score(x_test,y_test)返回准确率, 方式
 # ═══ Page 7: 手写数字识别案例 ═══
 
 MNIST案例: [MNIST手写数字识别, 1999年发布-分类基准经典, 6万训练+1万测试=7万张28x28灰度图, critical]
+MNIST案例.思路: [为什么把图片展平成784维->KNN需要距离-距离需要特征向量-像素就是特征:每个像素位置携带形状信息(数字3的第10行有墨水-数字1的第10行没有), 展平不丢失信息:只是把二维网格铺成一维序列-所有784个值都还在, 为什么KNN在这里挣扎->784维太高:想象784维空间-所有点到彼此的距离趋于相等-"近邻"失去意义=维度灾难的直觉, critical]
 MNIST案例.数据结构: [每图28x28=784像素展平为一维向量, 像素值0-255:越大越深, train.csv:785列-第1列标签(0-9)-后784列pixel0到pixel783, critical]
 MNIST案例.实战流程: [复用鸢尾花5步pipeline:1-加载csv数据->2-划分训练测试集->3-标准化784维像素特征->4-KNN+GridSearchCV调优K值->5-score评估, 证明pipeline的通用性, critical]
 MNIST案例.完整代码: [import-pandas-as-pd, data=pd.read_csv('train.csv'), x=data.iloc[:,1:].values-y=data.iloc[:,0].values, train_test_split->StandardScaler->GridSearchCV(KNeighborsClassifier(),{'n_neighbors':[3,5,7]},cv=3), estimator.fit->estimator.score, critical]
