@@ -575,7 +575,10 @@
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);">
           <strong style="color:var(--gold);">思路：为什么"近邻投票"有效？</strong><br>
-          <span class="highlight">物以类聚的数学化</span> —— 相似样本在特征空间中自然聚集成簇。同类的电影打斗多、接吻少，在坐标系中靠在一起。新样本落入哪个簇，就属于哪类。KNN 的本质：<strong>不需要知道"为什么"，只需要知道"像谁"</strong>。类比：搬到新城市，看邻居是什么人，就知道这是什么社区。
+          <strong>数学事实</strong>：电影 A 打斗=100, 接吻=5；电影 B 打斗=95, 接吻=8。<br>
+          <code style="font-size:12px;color:var(--ink-light)">d(A, B) = &radic;((100&minus;95)&sup2; + (5&minus;8)&sup2;) = &radic;(25+9) = <strong>5.83</strong></code><br>
+          两者极近，因为<strong>特征值极相似</strong>。同类样本在特征空间中距离小 &rarr; 自然形成紧凑的簇。新样本到哪个簇的距离最小，就归属哪类。<br>
+          <span style="font-size:12px;color:var(--ink-faint)">本质：d(x, 同类中心) &lt; d(x, 异类中心) &rarr; 投票等价于按距离划分决策区域。</span>
         </div>
 
         <!-- KNN visual: 电影分类示例 -->
@@ -631,7 +634,7 @@
             &middot; 数据即模型，不压缩为权重<br>
             &middot; 1-NN 的决策边界是 <span class="blue">Voronoi 图</span><br>
             &middot; K 增大 &rarr; 边界平滑化<br>
-            <span style="font-size:12px;color:var(--ink-faint)">哲学：记住每个案例</span>
+            <code style="font-size:11px;color:var(--ink-faint)">predict(x) = majority(y[k] for k in topK)</code>
           </div>
           <div class="compare-card" style="background:rgba(42,107,74,.05);border:1px solid rgba(42,107,74,.15);">
             <div class="card-title" style="color:var(--green-ink)">参数模型 (线性回归)</div>
@@ -639,7 +642,7 @@
             &middot; 学习 w<sub>1</sub>, w<sub>2</sub>, b 等有限权重<br>
             &middot; 数据压缩为公式 y = wx + b<br>
             &middot; 训练完成后可丢弃训练数据<br>
-            <span style="font-size:12px;color:var(--ink-faint)">哲学：提炼出规律</span>
+            <code style="font-size:11px;color:var(--ink-faint)">predict(x) = w&middot;x + b &nbsp;(固定公式)</code>
           </div>
         </div>
 
@@ -801,19 +804,19 @@
               <td><strong>p = 1</strong></td>
               <td><span class="green">曼哈顿距离</span></td>
               <td>&sum;|x<sub>i</sub> &minus; y<sub>i</sub>|</td>
-              <td>城市街区，只走横竖</td>
+              <td>各维绝对值之和（L1 范数）</td>
             </tr>
             <tr>
               <td><strong>p = 2</strong></td>
               <td><span class="blue">欧氏距离</span></td>
               <td>&radic;<span style="text-decoration:overline">&sum;(x<sub>i</sub>&minus;y<sub>i</sub>)&sup2;</span></td>
-              <td>两点直线，最常用</td>
+              <td>直线距离（L2 范数），默认</td>
             </tr>
             <tr>
               <td><strong>p &rarr; &infin;</strong></td>
               <td><span class="gold">切比雪夫距离</span></td>
               <td>max|x<sub>i</sub> &minus; y<sub>i</sub>|</td>
-              <td>棋盘距离，国王走一步</td>
+              <td>只取最大分量（L&infin; 范数）</td>
             </tr>
           </tbody>
         </table>
@@ -868,14 +871,14 @@
 
         <div class="note-box">
           <div class="label">Key</div>
-          <span class="highlight">量纲不同，距离就被大特征主导</span>。例如年收入（万元级）vs 年龄（十位数级），收入差异会淹没年龄差异。所以 KNN <strong>必须做特征预处理</strong> &rarr; 下一页。
+          <span class="highlight">量纲不同，距离就被大特征主导</span>。年收入差 (10万)&sup2; = 10<sup>10</sup>，年龄差 (3岁)&sup2; = 9 &mdash; 收入贡献是年龄的 <strong>11 亿倍</strong>。所以 KNN <strong>必须做特征预处理</strong> &rarr; 下一页。
         </div>
 
         <div class="glossary">
           <div class="glossary-title">Terms</div>
-          <div class="glossary-item"><span class="glossary-term">Euclidean</span>欧氏距离，p=2，两点直线距离</div>
-          <div class="glossary-item"><span class="glossary-term">Manhattan</span>曼哈顿距离，p=1，城市街区距离</div>
-          <div class="glossary-item"><span class="glossary-term">Chebyshev</span>切比雪夫距离，p&rarr;&infin;，棋盘距离</div>
+          <div class="glossary-item"><span class="glossary-term">Euclidean</span>欧氏距离，p=2，L2 范数，d=&radic;&sum;(x<sub>i</sub>&minus;y<sub>i</sub>)&sup2;</div>
+          <div class="glossary-item"><span class="glossary-term">Manhattan</span>曼哈顿距离，p=1，L1 范数，d=&sum;|x<sub>i</sub>&minus;y<sub>i</sub>|</div>
+          <div class="glossary-item"><span class="glossary-term">Chebyshev</span>切比雪夫距离，p&rarr;&infin;，L&infin; 范数，d=max|x<sub>i</sub>&minus;y<sub>i</sub>|</div>
           <div class="glossary-item"><span class="glossary-term">Minkowski</span>闵可夫斯基距离，统一以上三种距离的参数化框架</div>
           <div class="glossary-item"><span class="glossary-term">metric / p</span>sklearn 参数，metric='minkowski' + p=2 默认欧氏</div>
         </div>
@@ -1126,7 +1129,7 @@
         <h2 class="section-title">交叉验证与网格搜索</h2>
 
         <p class="body-text" style="margin-bottom:6px;">
-          为什么不直接用一次 train_test_split 评估？因为<span class="highlight">单次划分有运气成分</span> —— 划分不同，得分不同。类比：考一次试可能发挥失常，<span class="blue">考 N 次取平均</span>才是真实水平。
+          为什么不直接用一次 train_test_split 评估？因为<span class="highlight">单次划分有运气成分</span> —— 同一模型 random_state=1 得分 0.93、random_state=2 得分 0.87，波动 &plusmn;0.06。<span class="blue">N 次不同划分取平均</span>后波动缩小到 &plusmn;0.02，评估更可信。
         </p>
 
         <div class="insight-box" style="border-color:var(--gold);background:rgba(184,148,62,.06);margin-bottom:6px;">
