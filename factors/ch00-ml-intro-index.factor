@@ -1,194 +1,138 @@
 # use-this-graph-to-build: Day01 ML入门基础 — 从零到第一个算法
-# confirm-sufficiency-before-start: 本图谱聚合ch01-ch08全部知识点，20内容页布局，覆盖概念→术语→分类→流程→特征→拟合→作业→KNN
+# confirm-sufficiency-before-start: 本图谱聚合ch01-ch08，每页锚定数学公式或代码API，15内容页布局
 # scope: ML-intro-day01-aggregated
-# status: pending
+# status: built
 
-# ═══ Page 1: AI/ML/DL 三层嵌套 + ML本质（ch01） ═══
+# ═══ Page 1: ML本质 — y=wx+b 是一切的起点（ch01） ═══
 
-三层嵌套: [AI>ML>DL严格包含关系, AI:最大范畴-包含专家系统|模糊逻辑|进化计算|多智能体|知识表示|推荐系统|机器人感知, ML:AI核心子集-从数据自动学习规律, DL:ML子集-基于神经网络的学习方法, 面试必答:三者关系是包含不是并列, critical]
-三层嵌套.AI范畴: [Artificial-Intelligence-人工智能, 不等于ML-ML只是AI实现方式之一, 其他方式:专家系统(人工编写规则)|模糊逻辑|进化计算, 面试追问:AI除了ML还有什么, important]
-三层嵌套.DL特点: [Deep-Learning-深度学习, 基于多层神经网络, 属于ML的方法子集-不是全部ML, 面试追问:DL和ML什么关系->DL是ML的子集-不是替代, important]
+ML本质: [Machine-Learning-机器学习, 核心:从数据中自动学习规律->产生模型->用模型预测, 与传统编程本质区别:传统输入规则+数据->输出结果-ML输入数据+结果->输出规则, 面试追问:ML和传统编程有什么区别, critical]
+ML本质.三层嵌套: [AI⊃ML⊃DL严格包含, AI:最大范畴-含专家系统|模糊逻辑|进化计算, ML:AI子集-数据驱动学习, DL:ML子集-多层神经网络, 面试必答:三者是包含不是并列, critical]
+ML本质.线性模型: [y=wx+b-最简模型-理解ML的起点, w:斜率-衡量特征对标签的影响力, b:截距-表示基础偏移, w和b是模型参数:从数据中学来-算法自动调整, 对比超参数:人为设定-如KNN的K值, critical]
+ML本质.训练过程: [step1:数据点画入坐标系(x=面积,y=售价), step2:选模型y=wx+b, step3:算法迭代调整w和b使Σ(y_true-y_pred)²最小, step4:模型固定->输入新x->输出预测ŷ, 公式:ŷ=wx+b, critical]
+ML本质.局限预告: [y=wx+b只能拟合线性关系, y=ax²+bx+c能拟合二次曲线, 更复杂:神经网络能拟合任意函数, 模型复杂度选择->feeds-拟合问题, important]
 
-ML本质: [Machine-Learning-机器学习, 核心:从数据中自动学习规律->产生模型->用模型预测, 利用线性/非线性表达式-自动从数据获取规律, 这就是"机器"在"学习", critical]
-ML本质.vs规则系统: [ML vs 基于规则系统的本质区别, 规则系统:人工编写if-else-数据仅用于查询-规则写死, ML:数据驱动-自动提取规律-规则从数据中学来, 面试追问:ML和传统编程有什么区别->传统编程输入规则+数据输出结果-ML输入数据+结果输出规则, critical]
-ML本质.算法族: [ML包含多种算法:回归|分类|聚类|决策树|贝叶斯|SVM|AdaBoost|EM, 这些算法将在后续章节逐一展开, important]
+# ═══ Page 2: 数据结构 — X矩阵·y向量·划分铁律（ch02） ═══
 
-# ═══ Page 2: 房价预测示例 + 线性模型（ch01） ═══
+数据矩阵: [数据集=二维表格=矩阵, X∈R^(m×n):m个样本×n个特征, y∈R^m:m个标签值, 一行=一个样本(sample/instance), 一列=一个特征(feature/attribute), 末列=标签(label/target), critical]
+数据矩阵.术语映射: [sample=行=观测单元, feature=列=属性=维度(dimension), label=target=因变量=模型要预测的值, dataset=X+y的集合, n个特征=n维空间, critical]
+数据矩阵.划分铁律: [数据集必须划分:训练集(80%)+测试集(20%), 铁律:先split->再train->最后evaluate, 违反后果:数据泄露(data-leakage)->评估虚高->上线崩塌, 类比:高考卷≠模拟卷, critical]
+数据矩阵.划分API: [train_test_split(X,y,test_size=0.2,random_state=22), 返回:X_train-X_test-y_train-y_test四元组, test_size:测试集占比, random_state:随机种子-保证可复现, from-sklearn.model_selection-import-train_test_split, critical]
 
-房价预测示例: [经典入门案例, 输入:面积(特征/feature), 输出:售价(标签/label), 一行数据=一个样本, 目标:从历史数据学到面积->售价的映射规律, critical]
-房价预测示例.线性模型: [y=wx+b-最简线性模型, w:斜率-控制直线倾斜度-衡量面积对价格的影响力, b:截距-控制直线上下平移-表示基础价格, w和b是需要从数据中学习的模型参数-不是人为设定的, critical]
-房价预测示例.训练四步: [step1:样本画入坐标系-n个数据点-观察分布趋势, step2:选择模型(如线性模型y=wx+b)描述规律, step3:训练-用算法学习最优w和b使预测值接近真实值, step4:模型训练好后-输入新面积->输出预测售价, critical]
-房价预测示例.参数vs超参数: [w和b:模型参数-从数据学来-算法自动调整, 对比:K值(KNN中):超参数-需要人为设定-不从数据学来, 面试追问:参数和超参数有什么区别, important]
-房价预测示例.局限: [y=wx+b只能拟合线性关系, 现实数据往往非线性->需要更复杂模型如多项式|神经网络, 但线性模型是理解ML的最佳起点:简单-直观-核心概念齐全, important]
+# ═══ Page 3: 监督学习 — f(X)→Y·loss·回归vs分类（ch03） ═══
 
-# ═══ Page 3: 四大基础术语 + 数据集结构（ch02） ═══
+监督学习: [supervised-learning, 数学定义:已知X(特征矩阵)和Y(标签向量)-学习映射f使f(X)≈Y, 训练过程:预测ŷ=f(X)->计算loss=L(y,ŷ)->调整f的参数->重复直到loss收敛, critical]
+监督学习.loss概念: [loss=L(y_true,ŷ):衡量预测值与真实值的差距, 回归常用:MSE=1/m·Σ(yi-ŷi)², 分类常用:交叉熵=-Σ(yi·log(ŷi)), loss越小->模型越准->参数越优, critical]
+监督学习.回归: [regression-回归:f(X)∈R-输出连续值, 案例:房价预测ŷ=358万, 评估:MSE|MAE|R², 判断方法:预测结果能做加减法->回归, critical]
+监督学习.分类: [classification-分类:f(X)∈{0,1,...,K}-输出离散类别, 案例:猫狗分类ŷ∈{猫,狗}, 评估:准确率|精确率|召回率|F1, 二分类:0/1-多分类:0/1/.../K, critical]
+监督学习.回归vs分类: [核心区别:输出连续vs离散, 面试追问:房价预测是回归还是分类->回归-输出连续数值, 垃圾邮件检测->分类-输出0或1, critical]
 
-样本: [sample-样本, 一行数据就是一个样本, 又称一条记录/实例(instance), 数据集中的最小观测单元, critical]
-特征: [feature-特征, 一列数据就是一个特征, 又称属性(attribute)/维度(dimension), 是描述样本的关键信息, 特征数量=数据维度, critical]
-标签: [label/target-标签, 模型要预测的那一列, 如就业薪资|房屋售价|疾病类型, 监督学习必须有标签-无监督学习没有标签, critical]
-数据集: [dataset-数据集, 由多个样本组成的二维表格, 行=样本-列=特征-末列通常是标签, 理解:Excel表格-每行一个人-每列一个属性-最后一列是要预测的值, critical]
-数据集.结构关系: [样本横向包含多个特征-特征是输入-标签是输出, 模型学习:特征->标签的映射函数f(X)=Y, 面试追问:特征和标签的关系->特征是自变量-标签是因变量-模型学习映射关系, critical]
+# ═══ Page 4: 无监督·半监督·强化 + 四种学习方式对比（ch03+Q2） ═══
 
-# ═══ Page 4: 训练集与测试集划分（ch02） ═══
+无监督学习: [unsupervised-learning, 数学定义:只有X无Y-学习X的内部结构P(X), 聚类:将m个样本分成K组-组内相似度高|组间相似度低, 典型算法:K-Means(最小化组内距离之和)|DBSCAN, critical]
+半监督学习: [semi-supervised-learning, 少量标签数据(X_l,Y_l)+大量无标签数据(X_u), 利用X_u的分布信息辅助学习f, 价值:标注成本高时(医学影像|语音标注)-用少量标签撬动大量数据, important]
+强化学习: [reinforcement-learning, 四要素:Agent-Environment-Action-Reward, 目标:max-Σ(γ^t·R_t)-γ折扣因子-R_t即时奖励, 通过试错找最优策略π(s)->a, 案例:AlphaGo|机器人控制, important]
+四种对比: [监督:有X有Y->学f(X)≈Y->预测, 无监督:有X无Y->学P(X)->发现结构, 半监督:少量Y+大量X->降低标注成本, 强化:状态+奖励->最优策略, 选择依据:数据形态决定学习方式, critical]
+四种对比.面试要点: [Q2答题:一句话->有无标签是根本区别, 展开:数据形态|训练反馈|目标导向|评估方式四个维度对比, 加分:无监督评估困难-需轮廓系数等间接指标, critical]
 
-数据划分: [数据集必须划分为训练集和测试集, 这是ML铁律-不划分则无法评估模型真实能力, critical]
-数据划分.训练集: [training-set-训练集, 用途:训练模型-学习参数w和b, 占比:通常80%或70%, 类比:平时做的练习题, critical]
-数据划分.测试集: [testing-set-测试集, 用途:测试模型-评估泛化能力, 占比:通常20%或30%, 类比:高考真题-必须和练习题不同, critical]
-数据划分.为什么必须分离: [核心原因:测试集代表未见数据-模型不能提前看到答案, 类比:高考卷和模拟卷不能相同-否则成绩虚高不代表真实水平, 违反后果:数据泄露(data-leakage)->模型评估失真->上线后表现骤降, 面试追问:为什么不能用训练数据做测试, critical]
-数据划分.比例选择: [常见:8:2或7:3, 数据量大(>10万):可用9:1, 数据量小(<1000):建议用交叉验证替代简单划分, important]
-数据划分.流程: [先划分后训练:split->train->evaluate, 绝对禁止:训练后才划分-或训练集测试集有重叠, 这个顺序是所有ML项目的铁律, critical]
+# ═══ Page 5: 五步Pipeline — sklearn建模模板（ch04+Q3） ═══
 
-# ═══ Page 5: 监督学习 + 回归/分类（ch03） ═══
+建模Pipeline: [ML五步通用模板:1-获取数据->2-数据处理->3-特征工程->4-模型训练->5-模型评估, 非线性流水线-是带反馈的迭代循环:评估差->回退步骤2或3, critical]
+建模Pipeline.代码模板: [sklearn标准流程:load_data()->train_test_split()->StandardScaler().fit_transform()->model.fit()->model.score(), 这5行代码对应5步流程-从鸢尾花到MNIST通用, critical]
+建模Pipeline.时间分布: [数据处理+特征工程占60%-80%时间, 模型训练+评估占20%-40%, 核心洞察:数据和特征决定ML上限-模型算法只是逼近, 新手误区:花大量时间调参-忽视数据质量, critical]
+建模Pipeline.迭代回退: [过拟合->回步骤3:特征降维|正则化, 欠拟合->回步骤3:增加特征|步骤4:换更强模型, 数据泄露->回步骤2:检查划分方式, 面试追问:模型效果不好怎么办->按诊断结果回退, important]
 
-监督学习: [supervised-learning-监督学习, 输入:有标签的数据(X+Y), 训练有反馈:预测值与真实标签对比->计算loss->调整参数, 目标:学习映射函数f(X)->Y-预测新样本标签, critical]
-监督学习.数学形式: [输入X:特征矩阵-每行一个样本每列一个特征, 输出Y:标签向量, 学习目标:找到f使f(X)≈Y, 本质:有标准答案的学习-像做有答案的练习题, critical]
-监督学习.回归: [regression-回归, 输出连续值, 案例:房价预测-输出具体价格如358万, 数学:f(X)∈R-输出实数域, critical]
-监督学习.分类: [classification-分类, 输出有限个离散值, 案例:猫狗分类-输出类别标签, 二分类:0/1-多分类:0/1/2/.../N, critical]
-监督学习.回归vs分类: [核心区别在输出类型:连续vs离散, 判断方法:预测结果能否做加减法->能=回归-不能=分类, 面试追问:房价预测是回归还是分类->回归-因为输出是连续数值, critical]
+# ═══ Page 6: 特征工程 — 五大子领域 + BMI示例（ch05+Q4） ═══
 
-# ═══ Page 6: 无监督 + 半监督 + 强化学习（ch03） ═══
+特征工程: [feature-engineering, 利用专业知识处理数据让模型更易学到规律, 五大子领域:提取-预处理-降维-选择-组合, 鸢尾花启示:颜色对分类区分力不够->不选-特征不是越多越好, critical]
+特征工程.提取: [feature-extraction, 非结构化数据->数值矩阵, 图像:像素矩阵flatten为向量(28×28->784维), 文本:词频/TF-IDF向量化, 本质:让模型能"看懂"原始数据, critical]
+特征工程.选择: [feature-selection, 从n个特征中选k个(k<n)最相关子集, 过滤法:方差阈值|卡方检验|互信息, 包裹法:递归特征消除RFE, 嵌入法:L1正则化自动置零, 目的:减噪-降计算量-防过拟合, critical]
+特征工程.组合: [feature-crosses, 用数学运算创造新特征, BMI=weight(kg)/height(m)²:有医学定义-高可解释性, 面积=长×宽:领域知识驱动, 对比PCA:PCA降维压缩-组合创造新维度-方向相反, critical]
 
-无监督学习: [unsupervised-learning-无监督学习, 输入:只有特征X-没有标签Y, 训练无反馈:没有标准答案可对比, 目标:发现数据内部结构和分布规律, critical]
-无监督学习.数学形式: [输入X:特征矩阵-无Y, 学习目标:发现X的内部结构|分布|聚类, 本质:无标准答案的探索-像无答案的开放题, critical]
-无监督学习.聚类: [clustering-聚类, 按特征相似性自动分组, 没有标准固定分类-结果与超参数相关, 物以类聚-人以群分, 典型算法:K-Means|DBSCAN, critical]
+# ═══ Page 7: 归一化 — MinMaxScaler公式与API（ch05） ═══
 
-半监督学习: [semi-supervised-learning-半监督学习, 输入:部分有标签+大量无标签, 目的:降低数据标注成本-标注昂贵时尤其有用, 方法:用少量标签数据引导无标签数据的学习, important]
-强化学习: [reinforcement-learning-强化学习, 输入:环境状态+奖励信号, 四要素:Agent智能体-Environment环境-Action行动-Reward奖励, 目标:通过试错找到长期累计奖励最大化的策略, 案例:AlphaGo学下棋-机器人学走路, important]
+归一化: [MinMaxScaler-归一化, 公式:x'=(x-x_min)/(x_max-x_min), 将特征映射到[0,1]区间, 几何意义:把所有特征压缩到同一尺度的单位超立方体内, critical]
+归一化.API: [from-sklearn.preprocessing-import-MinMaxScaler, scaler=MinMaxScaler(feature_range=(0,1)), X_scaled=scaler.fit_transform(X_train), X_test_scaled=scaler.transform(X_test), 属性:data_min_-data_max_-data_range_, critical]
+归一化.致命缺陷: [max/min若为异常值->全部数据被过度压缩, 例:正常数据[10,20,30]-异常值[10,20,30,1000]->归一化后正常数据全挤在[0,0.03]区间-区分度丧失, 鲁棒性差-仅适合:已知范围|无异常值|图像像素0-255, critical]
+归一化.计算示例: [数据[10,20,30,40,50], min=10-max=50, x'(30)=(30-10)/(50-10)=0.5, x'(10)=0-x'(50)=1, 所有值映射到[0,1], important]
 
-# ═══ Page 7: 监督 vs 无监督核心对比（ch03 + Q2作业） ═══
+# ═══ Page 8: 标准化 — StandardScaler·正态分布·归一vs标准（ch05） ═══
 
-监督vs无监督.数据形态: [根本区别在数据:监督有标签有反馈-无监督无标签无反馈, 这是四大学习方式中最核心的分界线, 面试必答:一句话说出区别->有无标签, critical]
-监督vs无监督.目标差异: [监督:预测已知类别的结果(预测型), 无监督:发现未知的内部结构(探索型), 目标导向完全不同, critical]
-监督vs无监督.评估差异: [监督:有标签可直接计算准确率|loss|F1等指标, 无监督:缺乏标准答案-评估困难-需用轮廓系数等间接指标, 面试追问:无监督学习怎么评估效果, important]
-监督vs无监督.案例对比: [监督:标注好猫狗的图片->学会区分猫狗, 无监督:未标注图片->按视觉相似性自动分组->不知道组叫什么, 半监督:少量标注+大量未标注->用少量标签引导分组, critical]
-四种学习方式.选择策略: [有标签->监督, 无标签->无监督, 少量标签+大量无标签->半监督, 需要序列决策->强化, 面试追问:怎么选择学习方式->取决于数据形态和任务目标, important]
+标准化: [StandardScaler-标准化, 公式:x'=(x-μ)/σ, μ=均值-σ=标准差, 转换后:均值=0-标准差=1-即标准正态分布N(0,1), critical]
+标准化.API: [from-sklearn.preprocessing-import-StandardScaler, scaler=StandardScaler(), X_scaled=scaler.fit_transform(X_train), X_test_scaled=scaler.transform(X_test), 属性:mean_均值-var_方差-scale_标准差, critical]
+标准化.正态分布: [N(μ,σ²):μ决定中心位置-σ决定分散幅度, 标准化后N(0,1):1σ覆盖68%-2σ覆盖95%-3σ覆盖99.7%, 方差σ²衡量数据离散程度, critical]
+标准化.优势: [少量异常值对μ和σ影响小->鲁棒性强, 适合:现代嘈杂大数据|有异常值场景, 实践结论:不确定时优先选标准化, critical]
+归一vs标准: [归一化:受极值max/min支配-鲁棒差-适合小数据已知范围, 标准化:受μ和σ驱动-鲁棒强-适合大数据有噪声, 面试必答:本质区别->归一化用极值-标准化用统计量-鲁棒性不同, critical]
 
-# ═══ Page 8: 五步建模流程（ch04） ═══
+# ═══ Page 9: PCA降维 — 线性组合·方差最大化（ch05） ═══
 
-建模流程: [ML建模五步:获取数据->数据处理->特征工程->模型训练->模型评估, 非一次性流程-评估不佳需回退迭代, 这个五步是所有ML项目的通用模板-从鸢尾花到MNIST都适用, critical]
-步骤1.获取数据: [搜集与任务相关的数据集, 数据类型:经验数据|图像数据|文本数据|传感器数据, 关键:数据必须匹配实际需求-中国房价数据不能用于预测美国房价, 面试追问:数据从哪来->公开数据集|爬虫|传感器|用户行为日志, critical]
-步骤2.数据处理: [为特征工程准备干净数据, 缺失值处理:删除含缺失值的样本或用均值/中位数填充, 异常值处理:离群点检测-箱线图|Z-score, 重复值处理:去重, 面试追问:缺失值该删除还是填充->取决于缺失比例和业务含义, critical]
-步骤3.特征工程: [五大子领域:提取-预处理-降维-选择-组合, 耗时耗精力最多的环节-占整个项目60%-80%时间, 好的特征工程直接决定模型上限, critical]
-步骤4.模型训练: [根据任务选择合适算法, 监督:线性回归|逻辑回归|决策树|SVM|KNN, 无监督:K-Means|DBSCAN, 选择依据:数据规模|特征类型|任务目标|可解释性需求, critical]
-步骤5.模型评估: [用测试集评估模型泛化能力, 回归指标:MSE|MAE|R², 分类指标:准确率|精确率|召回率|F1, 效果好:部署上线, 效果不好:回退到步骤2或3重新迭代, critical]
+PCA: [Principal-Component-Analysis-主成分分析, 目标:将n维数据投影到k维(k<n)-保留最大方差方向, 方法:找方差最大的正交方向作为新坐标轴, 新特征=原始特征的线性组合, critical]
+PCA.数学: [PC1=w11·x1+w12·x2+...+w1n·xn:第一主成分-方差最大方向, PC2⊥PC1:第二大方差方向-与PC1正交, 约束:||w||=1-各PC正交, 本质:旋转坐标系使方差集中在前几个轴, critical]
+PCA.示例: [身高x1+体重x2两特征, PC1=0.7·x1'+0.7·x2'(标准化后), 含义:大致代表"体型大小"-无明确单位, 效果:2维->1维-保留主要方差信息-信息损失可控, important]
+PCA.vs特征组合: [PCA:纯数学优化-无语义-不可解释-仅线性组合-自动化, 特征组合:领域知识驱动-有语义(BMI)-可解释-任意函数-人工设计, 面试追问:两者区别->方向相反:PCA压缩-组合创造, critical]
+PCA.API: [from-sklearn.decomposition-import-PCA, pca=PCA(n_components=k), X_reduced=pca.fit_transform(X), 属性:explained_variance_ratio_各主成分方差解释比, 选k:累计方差解释比≥95%, important]
 
-# ═══ Page 9: 迭代本质 + 数据天花板洞察（ch04 + Q3作业） ═══
+# ═══ Page 10: 拟合问题 — 多项式复杂度·欠拟合·过拟合（ch06） ═══
 
-迭代反馈: [建模是迭代过程:评估->发现不足->调整数据/特征/模型->重新训练->再评估, 回退路径:评估差->可能是数据脏(回步骤2)|特征差(回步骤3)|模型选错(回步骤4), 不是线性流水线-是带反馈的循环, critical]
-迭代反馈.常见回退场景: [过拟合->回步骤3做特征降维或正则化, 欠拟合->回步骤3增加特征或步骤4换更强模型, 数据泄露->回步骤2检查划分方式, 面试追问:模型效果不好怎么办->按诊断结果回退到对应步骤, important]
+拟合与复杂度: [模型复杂度决定拟合状态, y=kx+b(2参数)->欠拟合:表达力不足, y=ax²+bx+c(3参数)->正好拟合:匹配数据规律, y=Σ(ai·x^i)(n参数)->过拟合:记住噪声, critical]
+欠拟合: [underfitting, 现象:train-loss高+test-loss高, 原因:模型太简单-参数少-线性模型拟合非线性数据, 对策:增加复杂度(线性->多项式->神经网络)|增加有效特征|换更强模型, critical]
+过拟合: [overfitting, 现象:train-loss低+test-loss高, 原因:模型太复杂|数据含噪声|训练数据太少, 本质:记住了训练集噪声-非真正规律, critical]
+过拟合.对策: [正则化:L1(|w|)稀疏化-L2(w²)平滑化-约束参数大小, 早停:监控val-loss-上升时停止, 数据增强:增加样本量, 特征降维:减少维度, Dropout(神经网络):随机丢弃神经元, critical]
+过拟合.正则化数学: [L1:Loss+λΣ|wi|->部分wi变0->特征选择, L2:Loss+λΣwi²->所有wi趋近0但不为0->平滑, λ:正则化强度-λ越大约束越强, 面试追问:L1和L2区别->L1产生稀疏解-L2产生平滑解, critical]
 
-关键洞察.数据天花板: [数据和特征决定ML上限-模型和算法只是逼近这个上限, 含义:再好的算法也救不了烂数据, 因此数据处理和特征工程占大部分时间是合理的, 面试:这句话怎么理解->数据质量是天花板-模型只能逼近不能突破, critical]
-关键洞察.实践分布: [时间分配:数据处理+特征工程占60%-80%, 模型训练+评估占20%-40%, 新手误区:花大量时间调模型参数-忽视数据和特征质量, 面试追问:ML工程师日常工作主要做什么->处理数据和做特征工程, important]
+# ═══ Page 11: Loss曲线诊断 — 泛化·奥卡姆剃刀（ch06+Q5） ═══
 
-# ═══ Page 10: 特征工程定义 + 特征提取 + 特征选择（ch05） ═══
+loss曲线诊断: [横轴:训练轮次epoch, 纵轴:loss值, 两条线:train-loss(蓝)和val/test-loss(红), 通过两条线的走势诊断拟合状态, critical]
+loss曲线.三种模式: [欠拟合:两线都高且下降慢-靠近但都在高位, 过拟合:train低+test后期反升-gap明显扩大, 正好拟合:两线相近且收敛到低值-几乎重合, critical]
+loss曲线.早停策略: [early-stopping:记录val-loss最小值, 连续patience轮不下降->停止训练, 恢复到val-loss最小时的模型参数, sklearn:无内置-需手动或用Keras的EarlyStopping回调, important]
 
-特征工程: [feature-engineering-特征工程, 利用专业背景知识和技巧处理数据-让ML算法更容易学到规律, 五大子领域:提取-预处理-降维-选择-组合, 数据和特征决定ML上限-模型算法只是逼近, critical]
-特征工程.鸢尾花启示: [为何不用颜色作特征:专业人员判断颜色对三种鸢尾花区分力不够, 启示:特征选择依赖领域知识-不是特征越多越好-无关特征是噪声, 面试追问:特征越多越好吗->不是-无关特征增加噪声-可能导致维度灾难和过拟合, critical]
+泛化: [Generalization-泛化, 模型在未见数据上的表现, 终极目标:学会规律-不是记住训练集, 欠拟合和过拟合都导致泛化差-只有正好拟合才泛化好, critical]
+奥卡姆剃刀: [Occam's-Razor, 泛化误差相同->选更简单的模型, 原因:简单模型不易过拟合, 实践:先试线性回归->不够再多项式->最后深度学习, 面试追问:为什么不直接用最复杂模型->过拟合风险高+训练成本高+解释性差, critical]
 
-特征提取: [feature-extraction-特征提取, 从原始数据中提取与任务相关的特征-转成数值特征向量, 原始数据可能是:图像(像素矩阵)->文本(词频/TF-IDF)->音频(频谱), 本质:把非结构化数据变成模型能处理的数字矩阵, critical]
-特征选择: [feature-selection-特征选择, 从已有特征中挑选与任务最相关的子集, 不改变原始特征值-只做取舍, 方法:过滤法(统计指标)|包裹法(模型评估)|嵌入法(L1正则化), 目的:减少噪声-降低计算量-防止过拟合, critical]
+# ═══ Page 12: KNN算法 — 5步流程·分类vs回归（ch08） ═══
 
-# ═══ Page 11: 特征预处理 — 归一化 vs 标准化（ch05） ═══
+KNN算法: [K-Nearest-Neighbors, 核心公式:d(x_q,x_i)=distance(query,train_i)->排序->取前K个, 惰性学习:不构建参数模型-存储全部训练集-预测时O(m·n)遍历计算, 面试追问:KNN有训练过程吗->没有-惰性学习, critical]
+KNN分类: [5步:1-计算d(x_q,x_i)对所有i, 2-按d升序排列, 3-取前K个最近邻{x_nn1,...,x_nnK}, 4-多数表决:ŷ=mode(y_nn1,...,y_nnK), 5-输出离散标签, critical]
+KNN回归: [5步:前3步同分类, 4-求均值:ŷ=1/K·Σ(y_nni), 5-输出连续值, 分歧仅在第4步:分类mode(投票)|回归mean(均值), 面试必答:一句话区别->第4步不同, critical]
+KNN算法.电影分类示例: [特征:x1=打斗次数-x2=接吻次数, 训练集:动作片(多打斗少接吻)-爱情片(少打斗多接吻), 未知电影:计算到所有训练样本的欧氏距离->取K=5最近邻->3个动作片2个爱情片->预测:动作片, critical]
 
-特征预处理: [feature-preprocessing-特征预处理, 解决量纲问题:不同特征量级差异导致模型偏向大量纲特征, 预处理是KNN等距离敏感算法的前置刚需, critical]
-特征预处理.量纲问题: [量纲差异举例:年收入(万元级) vs 年龄(十位级), 后果:模型优先学习量纲大的特征-忽略量纲小但可能更重要的特征, 本质:不是特征不重要-而是量纲掩盖了重要性, critical]
-特征预处理.归一化: [MinMaxScaler-归一化, 公式:x'=(x-min)/(max-min), 映射到[0,1], API:MinMaxScaler(feature_range=(0,1)), 适用:已知范围|无异常值|图像像素(0-255), critical]
-特征预处理.标准化: [StandardScaler-标准化, 公式:x'=(x-mean)/std, 转换为N(0,1)标准正态分布, API:StandardScaler(), 适用:大多数ML任务|数据有异常值, critical]
-特征预处理.归一vs标准: [归一化:受极值max/min支配-异常值敏感-鲁棒差, 标准化:受均值和std驱动-少量异常值影响可忽略-鲁棒强, 实践结论:不确定时优先选标准化, 面试必答:说出本质区别和适用场景, critical]
+# ═══ Page 13: 距离度量 — 欧氏·曼哈顿·闵氏统一框架（ch08） ═══
 
-# ═══ Page 12: 特征降维 + 特征组合（ch05 + Q4作业） ═══
+欧氏距离: [Euclidean-Distance, d=√(Σ(xi-yi)²), 两点间直线距离-勾股定理推广到n维, KNN默认距离, 示例:A(1,1)-B(2,2)->d=√(1²+1²)=√2≈1.414, critical]
+曼哈顿距离: [Manhattan-Distance, d=Σ|xi-yi|, 城市街区距离:只走横平竖直-各维绝对值之和, 示例:A(1,1)-B(2,2)->d=|1|+|1|=2, important]
+切比雪夫距离: [Chebyshev-Distance, d=max(|xi-yi|), 棋盘距离:国际象棋国王一步可达相邻8格, 示例:A(1,1)-B(4,2)->d=max(3,1)=3, important]
+闵氏距离: [Minkowski-Distance-统一框架, d=(Σ|xi-yi|^p)^(1/p), p=1:曼哈顿|p=2:欧氏|p→∞:切比雪夫, 不是新距离-是参数化统一公式, sklearn参数:metric='minkowski'-p=2, critical]
+闵氏距离.p无穷推导: [当p→∞:最大分量|xi-yi|^p远超其他分量之和, 开p次根后其他项贡献→0, 极限:lim(p→∞)(Σ|xi-yi|^p)^(1/p)=max(|xi-yi|)=切比雪夫, 面试追问:为什么p无穷等价切比雪夫, important]
+距离度量.量纲警示: [特征量纲不同->大量纲特征主导距离, 例:年收入(万级)vs年龄(十级)->距离几乎只由收入决定, 这就是为什么KNN必须做特征预处理, critical]
 
-特征降维: [feature-decomposition-特征降维, 将高维数据压缩到低维-保留主要信息-丢弃次要信息, 目的:降低计算量-去除冗余特征-缓解维度灾难, critical]
-特征降维.PCA: [PCA-Principal-Component-Analysis-主成分分析, 纯数学优化-无语义目标, 方法:找方差最大的方向作为新坐标轴, 新特征是原始特征的线性组合-通常不可解释, critical]
-特征降维.PCA示例: [身高+体重两特征, PC1=0.7×标准化身高+0.7×标准化体重, 新特征含义:大致代表"体型大小"-但无明确定义-无单位, 效果:2维压缩为1维-保留主要方差信息, important]
+# ═══ Page 14: K值选择 + KNN API（ch08） ═══
 
-特征组合: [feature-crosses-特征组合, 用乘法|除法|加法合并多个特征为新特征, 引入领域知识-构造有明确语义的新特征, critical]
-特征组合.BMI示例: [BMI=体重(kg)/身高(m)², 新特征:肥胖程度, 有医学标准定义-高可解释性, 这就是领域知识驱动的特征工程, important]
-特征组合.vs降维PCA: [组合:引入领域知识-有语义-高可解释-任意函数形式, PCA:纯数学优化-无语义-通常不可解释-仅限线性组合, 面试追问:PCA和特征组合有什么区别->方向相反:PCA降维压缩-组合创造新特征, critical]
+K值选择: [K:KNN唯一核心超参数-不从数据学来-需人为设定, K过小(K=1)->极小邻域->噪声敏感->过拟合, K过大(K=N)->看全部样本->永远预测多数类->欠拟合, 实践:取较小奇数3|5|7|9-用交叉验证选最优, critical]
+K值选择.复杂度因果: [K=1:决策边界极复杂-每个训练点独占领地-记住噪声, K=5:边界适中-局部投票-兼顾局部和全局, K=N:边界最简单-全局多数类-丧失局部判别力, K值反向控制模型复杂度:K越小越复杂-K越大越简单, critical]
 
-# ═══ Page 13: 拟合定义 + 欠拟合 + 过拟合（ch06） ═══
+KNN.分类器API: [from-sklearn.neighbors-import-KNeighborsClassifier, clf=KNeighborsClassifier(n_neighbors=5), clf.fit(X_train,y_train), y_pred=clf.predict(X_test), acc=clf.score(X_test,y_test), critical]
+KNN.回归器API: [from-sklearn.neighbors-import-KNeighborsRegressor, reg=KNeighborsRegressor(n_neighbors=5), 用法同分类器-输出连续值均值, important]
+KNN.predict陷阱: [predict输入必须二维:predict([[1]])正确|predict([1])报错, 原因:sklearn统一要求(m,n)矩阵-单样本也要[[value]], 评估:score(X_test,y_test)或accuracy_score(y_true,y_pred), critical]
 
-拟合: [fitting-拟合, 模型对样本分布点的模拟程度, 训练本质:让模型曲线贴合数据分布规律, 三种状态:欠拟合|过拟合|正好拟合, critical]
+# ═══ Page 15: Day01总结 + Day02预告 ═══
 
-欠拟合: [underfitting-欠拟合, 现象:训练集差-测试集也差, 本质:模型连训练数据的规律都没学到-学到的特征过少, critical]
-欠拟合.原因: [模型过于简单-参数太少-表达能力不足, 典型:用y=kx+b拟合非线性数据-直线无法捕捉曲线分布, 面试追问:欠拟合的根本原因->模型复杂度不够, critical]
-欠拟合.对策: [增加模型复杂度:线性->多项式->神经网络, 增加有效特征:引入更多信息维度, 换用更强模型:如从线性回归换到随机森林, 本质:提升模型学习能力, critical]
+day01.公式速查: [y=wx+b线性模型, x'=(x-min)/(max-min)归一化, x'=(x-μ)/σ标准化, d=√(Σ(xi-yi)²)欧氏距离, d=(Σ|xi-yi|^p)^(1/p)闵氏距离, MSE=1/m·Σ(yi-ŷi)²均方误差, L1:Loss+λΣ|wi|, L2:Loss+λΣwi², critical]
+day01.API速查: [train_test_split(X,y,test_size,random_state), MinMaxScaler().fit_transform(), StandardScaler().fit_transform(), PCA(n_components).fit_transform(), KNeighborsClassifier(n_neighbors).fit().predict().score(), critical]
+day01.三大洞察: [洞察1:数据和特征决定ML上限-模型只是逼近, 洞察2:训练集测试集必须分离-防数据泄露, 洞察3:模型复杂度需平衡-追求正好拟合和泛化, critical]
+day01.能力检验: [能写出:y=wx+b并解释w和b含义, 能区分:回归(连续)vs分类(离散), 能计算:归一化和标准化的结果, 能描述:KNN五步流程, 能诊断:看loss曲线判断拟合状态, critical]
 
-过拟合: [overfitting-过拟合, 现象:训练集很好-测试集很差, 本质:模型学到了噪声和个例当规律-钻牛角尖-记住了训练集而非学会了规律, critical]
-过拟合.原因: [模型太复杂-参数过多, 数据不纯-含噪声和异常值, 训练数据太少-无法覆盖真实分布, 高次多项式模型在训练集表现异常好-实则过度拟合, critical]
-过拟合.对策: [正则化:L1/L2约束参数大小, 异常值检测:清洗脏数据, 特征降维:减少特征数量, 数据增强:增加训练样本, 早停:监控验证集loss-在上升前停止训练, 本质:降低模型复杂度或提升数据质量, critical]
-过拟合.长尾数据: [长尾数据优化:类别不均衡时少数类被忽略, 方法:欠采样(减少多数类)|过采样(增加少数类)|focal-loss(加大少数类权重), important]
+day02预告: [KNN实战深化:fit_transform铁律与数据泄露->鸢尾花完整Pipeline->交叉验证K折->GridSearchCV网格搜索->MNIST手写数字识别, @factors/ch09-knn-practice.factor, critical]
 
-# ═══ Page 14: Loss曲线诊断 + 模型复杂度（ch06） ═══
-
-loss函数: [loss-损失函数, 衡量模型预测值与真实值的差异, loss越小->模型预测越准, 图表:横轴训练步数step-纵轴loss值, 通过loss曲线诊断拟合状态, critical]
-loss曲线.欠拟合特征: [train-loss和test-loss都高且下降缓慢, 两条曲线靠近但都在高位, 诊断:模型学习能力不足->需增加复杂度, critical]
-loss曲线.过拟合特征: [train-loss很低-test-loss后期反升, 两条曲线出现明显gap:train远低于test, 需要早停early-stopping:在test-loss开始上升时停止训练, critical]
-loss曲线.正好拟合特征: [train-loss和test-loss相近且都收敛到低值, 两条曲线几乎重合且稳定在低位, 表明模型泛化良好, critical]
-
-模型复杂度: [模型复杂度与拟合的因果关系, 低:y=kx+b-参数少-表达力弱->欠拟合, 中:y=ax²+bx+c-复杂度适中->正好拟合, 高:高次多项式-参数过多->过拟合, 面试追问:模型越复杂越好吗->不是-复杂到正好拟合数据规律即可, critical]
-
-# ═══ Page 15: 泛化能力 + 奥卡姆剃刀（ch06 + Q5作业） ═══
-
-泛化: [Generalization-泛化, 模型在未见过的新数据上的表现能力, 从具体的训练集扩展到一般性规律的能力, 是ML的终极目标:不是记住训练集-而是学会规律, critical]
-泛化.与拟合关系: [欠拟合->泛化差:训练都没学好-何谈新数据, 过拟合->泛化差:记住了训练集细节-新数据不适用, 正好拟合->泛化好:学到了真正规律-可推广到新数据, 面试:好模型的标准->泛化能力强, critical]
-
-奥卡姆剃刀: [Occam's-Razor-奥卡姆剃刀, 给定两个泛化误差相同的模型-倾向选择更简单的模型, 原因:简单模型不容易过拟合-泛化能力往往更强, 实践意义:不要盲目追求复杂模型-够用就好, critical]
-奥卡姆剃刀.实践: [选模型优先级:先试简单模型(线性回归)->效果不够再加复杂度(多项式|决策树)->最后考虑深度学习, 面试追问:为什么不直接用最复杂的模型->越复杂越容易过拟合-且训练成本高-解释性差, important]
-
-# ═══ Page 16: 课后作业 — 跨章综合串联（ch07） ═══
-
-Q2.跨章串联: [监督vs无监督, 一句话答:有无标签是根本区别, ch01提供ML本质->ch02标签定义分界线->ch03四种学习方式体系, 串联:标签(ch02)决定学习方式(ch03)决定算法选择(ch04步骤4), critical]
-Q3.跨章串联: [建模流程, 五步迭代循环, 步骤3特征工程->ch05五大子领域, 步骤4模型训练->ch03学习方式决定算法, 步骤5评估->ch06拟合诊断, 串联:流程(ch04)是骨架-其他章节填充血肉, critical]
-Q4.跨章串联: [特征工程, 定义:利用专业知识处理数据让模型更易学规律, ch01房价例中面积是特征, ch04中特征工程最耗时, ch06中特征质量影响拟合, 串联:特征工程(ch05)是ML天花板的决定因素, critical]
-Q5.跨章串联: [拟合问题, 按现象->原因->对策作答, ch01的y=wx+b可能欠拟合, ch04步骤5发现拟合问题->回退, ch05特征质量影响拟合, 串联:拟合(ch06)是模型评估的核心判断标准, critical]
-全章知识图谱: [ch01概念->ch02术语->ch03分类->ch04流程->ch05特征->ch06拟合, 每章不是孤立的-是ML完整认知链条的一环, Q2-Q5用作业驱动跨章整合, critical]
-
-# ═══ Page 17: KNN思想 + 分类/回归流程（ch08） ═══
-
-KNN思想: [K-Nearest-Neighbors-K近邻算法, 核心:在特征空间中找K个最近邻-用它们的类别/值决定未知样本, 直觉:物以类聚-近朱者赤-你的邻居决定你的类别, critical]
-KNN思想.惰性学习: [lazy-learning-惰性学习, 无显式训练过程-不构建参数模型-存储全部训练数据, 预测时才遍历计算距离, 对比:线性模型学习权重w和b->KNN无参数可学, 面试追问:KNN有训练过程吗->没有-它是惰性学习, critical]
-
-KNN分类: [KNN分类流程5步, 1-计算未知样本到每个训练样本的距离, 2-按距离升序排列, 3-取前K个最近邻, 4-多数表决:统计K个邻居中各类别数量, 5-归属出现最多的类别, 输出:离散标签, critical]
-KNN回归: [KNN回归流程5步, 1-计算距离->2-升序排列->3-取前K个, 4-对K个样本的目标值求均值, 5-均值作为预测值, 输出:连续数值, critical]
-KNN分类vs回归: [前3步完全相同:计算距离-排序-取K, 分歧在第4步:分类用投票(多数表决)|回归用均值, 面试必答:一句话说出区别->第4步不同:投票vs均值, critical]
-
-# ═══ Page 18: K值选择 + API（ch08） ═══
-
-K值: [KNN唯一核心超参数, 不从数据中学来-需人为设定, K值直接决定模型复杂度和预测效果, critical]
-K值.过小: [K过小(如K=1)->极小邻域-只看最近的一个邻居, 后果:对噪声和异常点极敏感-坐标微变即分类翻转-决策边界极复杂, 本质:记住噪声而非规律->过拟合, critical]
-K值.过大: [K过大(极端K=N)->看全部训练样本, 后果:永远预测训练集中最多的类别-忽略局部特征-受类别不均衡支配, 本质:丢失局部判别力->欠拟合, critical]
-K值.实践: [取较小奇数避免平局:3|5|7|9, 用交叉验证遍历候选K值选最优, 工程经验:通常K=5是不错的默认值, important]
-
-KNN-API: [sklearn两个API:KNeighborsClassifier(分类)+KNeighborsRegressor(回归), 默认n_neighbors=5, 用法:fit(X,y)->predict(X)->score(X,y), important]
-KNN-API.陷阱: [predict输入必须二维:predict([[1]])正确|predict([1])报错, 原因:sklearn统一要求矩阵输入-即使单样本也要双层方括号, 面试代码题高频考点, important]
-
-# ═══ Page 19: 距离度量（ch08） ═══
-
-距离度量: [distance-metric-距离度量, KNN核心计算基础, 不同距离公式衡量样本间相似度, critical]
-距离度量.欧氏: [Euclidean-Distance-欧氏距离, d=sqrt(sum((xi-yi)²)), 两点间直线距离-勾股定理推广到n维, KNN默认距离, critical]
-距离度量.曼哈顿: [Manhattan-Distance-曼哈顿距离, d=sum(|xi-yi|), 城市街区距离:只走横平竖直, important]
-距离度量.闵氏: [Minkowski-Distance-闵氏距离, 统一框架:d=(sum(|xi-yi|^p))^(1/p), p=1:曼哈顿|p=2:欧氏|p->∞:切比雪夫, 不是新距离-是统一公式, critical]
-
-预处理需求: [KNN基于距离->量纲不同的特征会主导距离计算, 例:年收入(万级)vs年龄(十级)->收入差异淹没年龄差异->结果失真, 预处理是KNN的前置刚需-不做则结果不可信, critical]
-预处理需求.方法预告: [归一化MinMaxScaler:映射到[0,1]-受极值影响, 标准化StandardScaler:转换为N(0,1)-受均值std驱动更鲁棒, 详见ch05概念介绍-ch09实战落地, important]
-
-# ═══ Page 20: Day01 总结 + Day02 预告 ═══
-
-day01总结.认知链: [ch01概念->ch02术语->ch03分类->ch04流程->ch05特征->ch06拟合->ch07综合->ch08算法, 从"什么是ML"到"第一个算法KNN"-完成ML入门认知闭环, critical]
-day01总结.三大洞察: [洞察1:数据和特征决定ML上限-模型算法只是逼近, 洞察2:训练集和测试集必须分离-防止数据泄露, 洞察3:模型不能太简单也不能太复杂-追求恰好拟合和泛化, critical]
-day01总结.能力检验: [学完day01你应该能:1-解释AI/ML/DL关系, 2-说出ML核心术语, 3-区分四种学习方式, 4-描述五步建模流程, 5-理解特征工程五大子领域, 6-诊断拟合问题, 7-描述KNN算法流程, critical]
-
-day02预告: [KNN实战深化:从算法概念到生产级pipeline, 内容:闵氏距离深入->归一化vs标准化实战->fit_transform铁律与数据泄露->鸢尾花完整pipeline->交叉验证->网格搜索->MNIST手写数字识别, @factors/ch09-knn-practice.factor, critical]
+day03预告: [线性回归全流程:定义与KNN对比->数据预处理(标准化vs归一化)->损失函数(MSE碗形保证)->正规方程与梯度下降->评估(MAE/MSE/RMSE)->多项式特征->正则化(L1/L2), @linear-regression/linear-regression.factor, critical]
 
 # source — 章节因子图谱引用
-source.ch01: [@factors/ch01-ai-ml-dl-concepts.factor, pages:1-2, critical]
-source.ch02: [@factors/ch02-ml-terminology.factor, pages:3-4, critical]
-source.ch03: [@factors/ch03-ml-algorithm-classification.factor, pages:5-7, critical]
-source.ch04: [@factors/ch04-ml-modeling-pipeline.factor, pages:8-9, critical]
-source.ch05: [@factors/ch05-feature-engineering.factor, pages:10-12, critical]
-source.ch06: [@factors/ch06-model-fitting.factor, pages:13-15, critical]
-source.ch07: [@factors/ch07-homework.factor, page:16, critical]
-source.ch08: [@factors/ch08-knn.factor, pages:17-19, critical]
+source.ch01: [@factors/ch01-ai-ml-dl-concepts.factor, pages:1, critical]
+source.ch02: [@factors/ch02-ml-terminology.factor, pages:2, critical]
+source.ch03: [@factors/ch03-ml-algorithm-classification.factor, pages:3-4, critical]
+source.ch04: [@factors/ch04-ml-modeling-pipeline.factor, pages:5, critical]
+source.ch05: [@factors/ch05-feature-engineering.factor, pages:6-9, critical]
+source.ch06: [@factors/ch06-model-fitting.factor, pages:10-11, critical]
+source.ch07: [@factors/ch07-homework.factor, absorbed-into:pages-4+5+6+11, critical]
+source.ch08: [@factors/ch08-knn.factor, pages:12-14, critical]
+source.linear-regression: [@linear-regression/linear-regression.factor, day03:线性回归全流程, critical]
 
 # ~97%
