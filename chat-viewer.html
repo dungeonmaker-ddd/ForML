@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 对话查看器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, "Segoe UI", sans-serif;
+  background: #1a1a2e; color: #e0e0e0;
+  line-height: 1.6; display: flex;
+}
+
+/* ── Left sidebar: file list ── */
+.sidebar-files {
+  width: 260px; min-width: 0;
+  background: #12122a; border-right: 1px solid #2a2a4a;
+  display: flex; flex-direction: column; height: 100vh;
+  transition: width 0.2s; overflow: hidden;
+}
+.sidebar-files.collapsed { width: 42px; min-width: 42px; }
+.sidebar-files.collapsed .sb-header > *:not(.sb-toggle) { display: none; }
+.sidebar-files.collapsed .file-items { display: none; }
+.sidebar-files .sb-header {
+  padding: 16px; border-bottom: 1px solid #2a2a4a;
+}
+.sb-toggle {
+  background: none; border: none; color: #888; cursor: pointer;
+  font-size: 1.1em; padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
+}
+.sb-toggle:hover { color: #c9a0ff; }
+.sidebar-files .sb-header h2 {
+  color: #c9a0ff; font-size: 0.95em; margin-bottom: 8px;
+}
+.sidebar-files .sb-status {
+  color: #666; font-size: 0.75em; margin-top: 6px;
+}
+.sidebar-files .sb-actions {
+  display: flex; gap: 6px; margin-top: 8px;
+}
+.sb-btn {
+  flex: 1; padding: 5px 8px; border-radius: 6px; border: 1px solid #333;
+  background: #1a1a3a; color: #888; cursor: pointer;
+  font-size: 0.72em; transition: all 0.2s; text-align: center;
+}
+.sb-btn:hover { border-color: #4fc3f7; color: #4fc3f7; }
+
+.file-search {
+  width: 100%; padding: 6px 10px; border-radius: 6px;
+  border: 1px solid #2a2a4a; background: #0e0e22; color: #ccc;
+  font-size: 0.8em; outline: none;
+}
+.file-search:focus { border-color: #4fc3f7; }
+.file-items {
+  flex: 1; overflow-y: auto; padding: 6px;
+}
+.file-items::-webkit-scrollbar { width: 4px; }
+.file-items::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+.file-item {
+  padding: 7px 10px; margin: 2px 0; border-radius: 6px;
+  cursor: pointer; font-size: 0.8em; transition: background 0.15s;
+  border-left: 2px solid transparent;
+}
+.file-item:hover { background: #1a1a3e; }
+.file-item.active { background: #1e1e3e; border-left-color: #4fc3f7; }
+.file-item .fname {
+  color: #ddd; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: break-all;
+}
+.file-item.expanded .fname { -webkit-line-clamp: unset; }
+.file-item .fpath { color: #555; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Left sub-sidebar: questions ── */
+.sidebar-questions {
+  width: 240px; min-width: 0;
+  background: #141430; border-right: 1px solid #2a2a4a;
+  display: flex; flex-direction: column; height: 100vh;
+  transition: width 0.2s; overflow: hidden;
+}
+.sidebar-questions.collapsed { width: 42px; min-width: 42px; }
+.sidebar-questions.collapsed .sb-header > *:not(.sb-toggle) { display: none; }
+.sidebar-questions.collapsed .q-items,
+.sidebar-questions.collapsed .q-export-btn { display: none; }
+.sidebar-questions .sb-header {
+  padding: 14px; border-bottom: 1px solid #2a2a4a;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-questions .sb-header h3 { color: #4fc3f7; font-size: 0.88em; }
+.q-count { color: #666; font-size: 0.75em; }
+.q-items { flex: 1; overflow-y: auto; padding: 6px; }
+.q-items::-webkit-scrollbar { width: 4px; }
+.q-items::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+.q-item {
+  padding: 8px 10px; margin: 2px 0; border-radius: 6px;
+  cursor: pointer; font-size: 0.78em; color: #aaa;
+  transition: background 0.15s; border-left: 2px solid transparent;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: break-all;
+}
+.q-item.expanded { -webkit-line-clamp: unset; }
+.q-item:hover { background: #1a1a3e; color: #ddd; }
+.q-item.active { border-left-color: #c9a0ff; color: #e0e0e0; background: #1e1e3e; }
+.q-item .q-num { color: #4fc3f7; font-size: 0.9em; margin-right: 4px; }
+.q-export-btn {
+  margin: 8px; padding: 6px; border-radius: 6px; border: 1px solid #c9a0ff;
+  background: #2a1a4a; color: #c9a0ff; cursor: pointer;
+  font-size: 0.75em; text-align: center; transition: all 0.2s;
+}
+.q-export-btn:hover { background: #3a2a5a; }
+.q-empty { color: #444; font-size: 0.8em; text-align: center; padding: 30px 10px; }
+
+/* ── Main content ── */
+.main {
+  flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+}
+.main-header {
+  padding: 12px 24px; border-bottom: 1px solid #2a2a4a;
+  display: flex; align-items: center; gap: 16px; min-height: 50px;
+}
+.main-header h1 { color: #c9a0ff; font-size: 1.15em; flex: 1; }
+.main-header .meta { color: #666; font-size: 0.78em; }
+.main-body {
+  flex: 1; overflow-y: auto; padding: 20px 30px;
+}
+.main-body::-webkit-scrollbar { width: 6px; }
+.main-body::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+.main-empty {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; color: #444; font-size: 0.95em;
+}
+.msg { margin: 10px 0; padding: 14px 18px; border-radius: 10px; }
+.label {
+  font-size: 0.72em; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 6px; opacity: 0.7;
+}
+.user { background: #16213e; border-left: 3px solid #4fc3f7; }
+.user .label { color: #4fc3f7; }
+
+/* ── Fixed current-question bar ── */
+.current-q-bar {
+  display: none; position: sticky; top: 0; z-index: 10;
+  background: #16213e; border-bottom: 1px solid #2a3a5a;
+  border-left: 3px solid #4fc3f7;
+  padding: 10px 18px; margin: 0 -30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  max-height: 3.6em; overflow: hidden;
+  word-break: break-all; font-size: 0.92em;
+  cursor: pointer; transition: max-height 0.2s;
+}
+.current-q-bar.show { display: block; }
+.current-q-bar.expanded { max-height: none; overflow-y: auto; overscroll-behavior: contain; }
+.current-q-bar.expanded::-webkit-scrollbar { width: 3px; }
+.current-q-bar.expanded::-webkit-scrollbar-thumb { background: #4fc3f7; border-radius: 2px; }
+.current-q-bar .q-tag {
+  color: #4fc3f7; font-size: 0.72em; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin-right: 8px;
+}
+.ai { background: #1e1e3a; border-left: 3px solid #c9a0ff; }
+.ai .label { color: #c9a0ff; }
+.ai p { margin: 5px 0; }
+.tool { background: #1a2a1a; border-left: 3px solid #66bb6a; font-size: 0.85em; }
+.tool summary { cursor: pointer; color: #66bb6a; font-size: 0.85em; }
+.tool-out {
+  background: #1a2a1a; border-left: 3px solid #66bb6a;
+  font-size: 0.8em; opacity: 0.6; margin-top: -6px; padding: 6px 18px;
+}
+.thinking {
+  text-align: center; color: #888;
+  font-size: 0.8em; font-style: italic; padding: 6px; opacity: 0.5;
+}
+pre {
+  background: #0d1117; color: #c9d1d9; padding: 12px; border-radius: 8px;
+  overflow-x: auto; font-size: 0.83em; margin: 6px 0; line-height: 1.45;
+  font-family: "Cascadia Code","Fira Code",monospace;
+}
+code {
+  background: #2d2d4e; padding: 1px 5px; border-radius: 4px; font-size: 0.88em;
+  font-family: "Cascadia Code","Fira Code",monospace;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+strong { color: #ffd54f; }
+.drop-overlay {
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(26,26,46,0.92); align-items: center; justify-content: center;
+}
+.drop-overlay.show { display: flex; }
+.drop-overlay .drop-box {
+  padding: 60px 80px; border: 2px dashed #c9a0ff; border-radius: 16px;
+  color: #c9a0ff; font-size: 1.2em;
+}
+</style>
+</head>
+<body>
+
+<!-- File sidebar -->
+<div class="sidebar-files collapsed" id="sidebarFiles">
+  <div class="sb-header">
+    <button class="sb-toggle" id="toggleFiles" title="展开/收起">☰</button>
+    <h2>对话记录</h2>
+    <input class="file-search" id="fileSearch" placeholder="搜索文件…">
+    <div class="sb-actions">
+      <button class="sb-btn" id="scanBtn">选择目录</button>
+      <button class="sb-btn" id="dropBtn">拖入文件</button>
+    </div>
+    <div class="sb-status" id="sbStatus">正在扫描…</div>
+  </div>
+  <div class="file-items" id="fileItems"></div>
+  <input type="file" id="fileInput" accept=".txt" style="display:none">
+</div>
+
+<!-- Questions sidebar -->
+<div class="sidebar-questions collapsed" id="sidebarQuestions">
+  <div class="sb-header">
+    <button class="sb-toggle" id="toggleQuestions" title="展开/收起">☰</button>
+    <h3>提问列表</h3>
+    <span class="q-count" id="qCount"></span>
+  </div>
+  <div class="q-items" id="qItems">
+    <div class="q-empty">选择一个对话文件</div>
+  </div>
+  <div class="q-export-btn" id="qExport">导出所有提问</div>
+</div>
+
+<!-- Main content -->
+<div class="main">
+  <div class="main-header" id="mainHeader">
+    <h1 id="title">Claude Code 对话查看器</h1>
+    <span class="meta" id="meta"></span>
+  </div>
+  <div class="main-body" id="mainBody">
+    <div class="current-q-bar" id="currentQBar"></div>
+    <div class="main-empty">选择左侧文件开始浏览</div>
+  </div>
+</div>
+
+<!-- Drop overlay -->
+<div class="drop-overlay" id="dropOverlay">
+  <div class="drop-box">拖放 .txt 文件到此处</div>
+</div>
+
+<script>
+const fileItems = document.getElementById('fileItems');
+const fileSearch = document.getElementById('fileSearch');
+const sbStatus = document.getElementById('sbStatus');
+const scanBtn = document.getElementById('scanBtn');
+const dropBtn = document.getElementById('dropBtn');
+const fileInput = document.getElementById('fileInput');
+const qItems = document.getElementById('qItems');
+const qCount = document.getElementById('qCount');
+const qExport = document.getElementById('qExport');
+const mainBody = document.getElementById('mainBody');
+const titleEl = document.getElementById('title');
+const metaEl = document.getElementById('meta');
+const dropOverlay = document.getElementById('dropOverlay');
+const sidebarFiles = document.getElementById('sidebarFiles');
+const sidebarQuestions = document.getElementById('sidebarQuestions');
+const toggleFiles = document.getElementById('toggleFiles');
+const toggleQuestions = document.getElementById('toggleQuestions');
+let scannedFiles = [], currentMessages = [], activeFileEl = null;
+
+// ── Sidebar toggles ──
+toggleFiles.addEventListener('click', () => sidebarFiles.classList.toggle('collapsed'));
+toggleQuestions.addEventListener('click', () => sidebarQuestions.classList.toggle('collapsed'));
+
+// ── Persist directory handle via IndexedDB ──
+const DB_NAME = 'chat-viewer', STORE = 'handles', KEY = 'lastDir';
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function saveDirHandle(handle) {
+  try { const db = await openDB(); const tx = db.transaction(STORE,'readwrite'); tx.objectStore(STORE).put(handle, KEY); } catch(e) {}
+}
+async function loadDirHandle() {
+  try { const db = await openDB(); return new Promise(r => { const tx = db.transaction(STORE); const req = tx.objectStore(STORE).get(KEY); req.onsuccess = () => r(req.result || null); req.onerror = () => r(null); }); } catch(e) { return null; }
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function fmtInline(t) {
+  t = esc(t);
+  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  return t.replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+
+// ── Auto-scan: 3-tier strategy ──
+async function autoScan() {
+  sbStatus.textContent = '正在扫描…';
+
+  // 1) GitHub Pages: use GitHub API to list all .txt files
+  const ghMatch = location.hostname.match(/^(.+)\.github\.io$/);
+  if (ghMatch) {
+    const owner = ghMatch[1];
+    // detect repo from pathname: /RepoName/... or root (user.github.io)
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const repo = pathParts.length > 1 ? pathParts[0] : owner + '.github.io';
+    const found = await scanGitHub(owner, repo);
+    if (found.length) {
+      scannedFiles = found;
+      renderFileItems();
+      sbStatus.textContent = found.length + ' 个文件 (GitHub)';
+      return;
+    }
+  }
+
+  // 2) HTTP server: crawl directory index
+  if (location.protocol.startsWith('http')) {
+    try {
+      const base = new URL('.', location.href).href;
+      const found = await crawlIndex(base, '');
+      if (found.length) {
+        scannedFiles = found;
+        renderFileItems();
+        sbStatus.textContent = found.length + ' 个文件';
+        return;
+      }
+    } catch (e) {}
+  }
+
+  // 3) file:// or fallback: try saved handle, then prompt
+  if (window.showDirectoryPicker) {
+    // Try restoring persisted directory handle
+    const saved = await loadDirHandle();
+    if (saved) {
+      try {
+        const perm = await saved.requestPermission({ mode: 'read' });
+        if (perm === 'granted') {
+          sbStatus.textContent = '扫描中…';
+          scannedFiles = await fsWalk(saved, '');
+          renderFileItems();
+          sbStatus.textContent = scannedFiles.length + ' 个文件 (已记住)';
+          return;
+        }
+      } catch (e) {}
+    }
+    // No saved handle or permission denied — prompt picker
+    if (location.protocol === 'file:') {
+      sbStatus.textContent = '本地模式，请选择项目目录';
+      try {
+        const dh = await window.showDirectoryPicker({ mode: 'read' });
+        sbStatus.textContent = '扫描中…';
+        scannedFiles = await fsWalk(dh, '');
+        await saveDirHandle(dh);
+        renderFileItems();
+        sbStatus.textContent = scannedFiles.length + ' 个文件';
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          sbStatus.textContent = '已取消，可点击「选择目录」重试';
+          return;
+        }
+      }
+    }
+  }
+
+  sbStatus.textContent = '请手动选择目录或拖入文件';
+}
+
+// ── GitHub API: get full tree in one request ──
+async function scanGitHub(owner, repo) {
+  const results = [];
+  try {
+    const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/git/trees/main?recursive=1';
+    const r = await fetch(apiUrl);
+    if (!r.ok) return results;
+    const data = await r.json();
+    const siteBase = location.origin + '/' + (repo === owner + '.github.io' ? '' : repo + '/');
+    for (const item of data.tree || []) {
+      if (item.type === 'blob' && item.path.endsWith('.txt')) {
+        const name = item.path.split('/').pop();
+        results.push({ name, path: item.path, url: siteBase + item.path, source: 'http' });
+      }
+    }
+  } catch (e) {}
+  return results;
+}
+
+async function crawlIndex(baseUrl, prefix) {
+  const results = [];
+  try {
+    const url = baseUrl + (prefix ? prefix + '/' : '');
+    const r = await fetch(url);
+    if (!r.ok) return results;
+    const ct = r.headers.get('content-type') || '';
+    // Only parse if it looks like a directory listing (not an HTML page)
+    if (!ct.includes('text/html')) return results;
+    const html = await r.text();
+    // Heuristic: directory listings have <pre> or "Index of" in title
+    if (!html.includes('Index of') && !html.includes('<pre>')) return results;
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const links = [...doc.querySelectorAll('a')]
+      .map(a => decodeURIComponent(a.getAttribute('href') || ''));
+    for (const href of links) {
+      if (href === '../' || href.startsWith('?') || href.startsWith('/')) continue;
+      const clean = href.replace(/\/$/, '');
+      const rel = prefix ? prefix + '/' + clean : clean;
+      if (href.endsWith('/')) {
+        results.push(...await crawlIndex(baseUrl, rel));
+      } else if (clean.endsWith('.txt')) {
+        results.push({ name: clean, path: rel, url: baseUrl + rel, source: 'http' });
+      }
+    }
+  } catch (e) {}
+  return results;
+}
+
+// ── Manual directory scan ──
+async function manualScan() {
+  if (!window.showDirectoryPicker) { alert('请使用 Chrome / Edge'); return; }
+  try {
+    const dh = await window.showDirectoryPicker();
+    sbStatus.textContent = '扫描中…';
+    scannedFiles = await fsWalk(dh, '');
+    await saveDirHandle(dh);
+    renderFileItems();
+    sbStatus.textContent = scannedFiles.length + ' 个文件';
+  } catch (e) { if (e.name !== 'AbortError') sbStatus.textContent = '扫描失败'; }
+}
+async function fsWalk(dh, prefix) {
+  const r = [];
+  for await (const [name, handle] of dh) {
+    const rel = prefix ? prefix + '/' + name : name;
+    if (handle.kind === 'file' && name.endsWith('.txt'))
+      r.push({ name, path: rel, handle, source: 'fs' });
+    else if (handle.kind === 'directory')
+      r.push(...await fsWalk(handle, rel));
+  }
+  return r;
+}
+
+// ── File list rendering ──
+function renderFileItems(filter) {
+  fileItems.innerHTML = '';
+  const kw = (filter || '').toLowerCase();
+  const list = kw ? scannedFiles.filter(f => f.path.toLowerCase().includes(kw)) : scannedFiles;
+  list.sort((a, b) => a.path.localeCompare(b.path));
+  for (const f of list) {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = '<div class="fname">' + esc(f.name.replace(/\.txt$/, ''))
+      + '</div><div class="fpath">' + esc(f.path) + '</div>';
+    div.addEventListener('click', () => selectFile(f, div));
+    div.addEventListener('dblclick', e => { e.stopPropagation(); div.classList.toggle('expanded'); });
+    fileItems.appendChild(div);
+  }
+  // Auto-expand file sidebar when files found
+  if (list.length) sidebarFiles.classList.remove('collapsed');
+}
+
+async function selectFile(f, el) {
+  if (activeFileEl) activeFileEl.classList.remove('active');
+  el.classList.add('active'); activeFileEl = el;
+  let text;
+  if (f.source === 'http') text = await (await fetch(f.url)).text();
+  else { text = await (await f.handle.getFile()).text(); }
+  const msgs = parseConversation(text);
+  renderMessages(msgs, f.name.replace(/\.txt$/, ''));
+  renderQuestions(msgs);
+  sidebarQuestions.classList.remove('collapsed');
+}
+
+// ── Questions sidebar ──
+function renderQuestions(msgs) {
+  qItems.innerHTML = '';
+  const um = msgs.filter(m => m.role === 'user');
+  qCount.textContent = um.length ? um.length + ' 条' : '';
+  if (!um.length) { qItems.innerHTML = '<div class="q-empty">无提问</div>'; return; }
+  um.forEach((m, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-item';
+    div.innerHTML = '<span class="q-num">' + (i+1) + '.</span> '
+      + esc(m.lines.join(' ').trim());
+    div.addEventListener('click', () => {
+      const targets = mainBody.querySelectorAll('.msg.user');
+      if (targets[i]) {
+        isClickScrolling = true;
+        targets[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        targets[i].style.outline = '2px solid #4fc3f7';
+        setTimeout(() => { targets[i].style.outline = ''; isClickScrolling = false; }, 800);
+      }
+      qItems.querySelectorAll('.q-item').forEach(q => q.classList.remove('active'));
+      div.classList.add('active');
+    });
+    div.addEventListener('dblclick', e => { e.stopPropagation(); div.classList.toggle('expanded'); });
+    qItems.appendChild(div);
+  });
+}
+
+qExport.addEventListener('click', () => {
+  const q = currentMessages.filter(m => m.role === 'user')
+    .map((m, i) => (i+1) + '. ' + m.lines.join('\n').trim()).join('\n\n');
+  if (!q) { alert('没有提问'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([q], {type:'text/plain;charset=utf-8'}));
+  a.download = (titleEl.textContent || 'q') + '-提问导出.txt';
+  a.click(); URL.revokeObjectURL(a.href);
+});
+
+// ── Events ──
+scanBtn.addEventListener('click', manualScan);
+dropBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+fileSearch.addEventListener('input', e => renderFileItems(e.target.value));
+document.addEventListener('dragover', e => { e.preventDefault(); dropOverlay.classList.add('show'); });
+dropOverlay.addEventListener('dragleave', () => dropOverlay.classList.remove('show'));
+dropOverlay.addEventListener('drop', e => {
+  e.preventDefault(); dropOverlay.classList.remove('show');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const msgs = parseConversation(e.target.result);
+    renderMessages(msgs, file.name.replace(/\.txt$/, ''));
+    renderQuestions(msgs);
+    sidebarQuestions.classList.remove('collapsed');
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// ── Parser ──
+function parseConversation(text) {
+  const lines = text.split('\n'), msgs = [];
+  let cur = null, started = false;
+  for (const line of lines) {
+    const s = line.trimStart();
+    if (!started) {
+      if (s.startsWith('> ') || s.startsWith('\u25cf ')) started = true; else continue;
+    }
+    if (s.startsWith('> ')) {
+      if (cur) msgs.push(cur); cur = {role:'user', lines:[s.slice(2)]};
+    } else if (s.startsWith('\u25cf ')) {
+      const c = s.slice(2);
+      if (/^(Write|Bash|Read|Glob|Grep|Searched|Edit|Agent|Task)[\s(]/.test(c)) {
+        if (cur) msgs.push(cur); cur = {role:'tool', lines:[c]};
+      } else if (cur && cur.role==='assistant') cur.lines.push(c);
+      else { if (cur) msgs.push(cur); cur = {role:'assistant', lines:[c]}; }
+    } else if (s.startsWith('\u273b ')) {
+      if (cur) msgs.push(cur); cur = {role:'thinking', lines:[s.slice(2)]};
+    } else if (s.startsWith('\u23bf') || s.startsWith('\u2e1f')) {
+      const c = s.slice(1).trimStart();
+      if (cur && cur.role==='tool') cur.lines.push(c);
+      else { if (cur) msgs.push(cur); cur = {role:'tool_output', lines:[c]}; }
+    } else if (s && cur) cur.lines.push(s);
+    else if (!s && cur) cur.lines.push('');
+  }
+  if (cur) msgs.push(cur);
+  return msgs;
+}
+
+function isCodeLine(line) {
+  if (!line || !line.trim()) return false;
+  const s = line.trim();
+  return /^[┌├│└┬┤┐┘┼─\s]+$/.test(s) || /^[│┌├└].*[│┐┤┘]$/.test(s)
+    || /^[#.oOX@%*+=\-:|_ ]{6,}$/.test(s) || /^[\-=]{4,}/.test(s)
+    || /^\d+\s*[|]/.test(s) || /^[|+\-]{3,}/.test(s)
+    || /^(def |class |import |from |print|for |if |>>>|\.\.\.)/.test(s)
+    || /^(#\d|→|←|↓|↑)/.test(s) || /^\w+\s*[:=].*[|→←]/.test(s);
+}
+
+function renderAssistant(text) {
+  const lines = text.split('\n');
+  let html = '', buf = [], inC = false, ec = 0;
+  function flush() {
+    if (buf.length) {
+      while (buf.length && !buf[buf.length-1].trim()) buf.pop();
+      html += '<pre><code>' + esc(buf.join('\n')) + '</code></pre>'; buf = [];
+    }
+    inC = false; ec = 0;
+  }
+  for (const l of lines) {
+    const t = l.trim();
+    if (isCodeLine(t)) { if (!inC) inC = true; if (ec) { for(let i=0;i<ec;i++) buf.push(''); ec=0; } buf.push(t); }
+    else if (inC && !t) { ec++; if (ec > 1) flush(); }
+    else { flush(); html += t ? '<p>'+fmtInline(t)+'</p>' : '<br>'; }
+  }
+  flush(); return html;
+}
+
+function renderMessages(msgs, filename) {
+  let uc = 0, ac = 0, qi = 0;
+  msgs.forEach(m => { if (m.role==='user') uc++; if (m.role==='assistant') ac++; });
+  titleEl.textContent = filename;
+  metaEl.textContent = msgs.length + ' 条消息 | ' + uc + ' 轮对话';
+  let out = '';
+  for (const msg of msgs) {
+    const text = msg.lines.join('\n').trim(); if (!text) continue;
+    if (msg.role==='user') {
+      out += '<div class="msg user" data-q-index="'+qi+'">'
+        + '<div class="label">Q' + (qi+1) + '</div>'
+        + fmtInline(text).replace(/\n/g,'<br>') + '</div>';
+      qi++;
+    }
+    else if (msg.role==='assistant') out += '<div class="msg ai"><div class="label">Claude</div>'+renderAssistant(text)+'</div>';
+    else if (msg.role==='tool') out += '<div class="msg tool"><details><summary>'+esc(text.split('\n')[0])+'</summary><pre>'+esc(text)+'</pre></details></div>';
+    else if (msg.role==='tool_output') out += '<div class="msg tool-out"><pre>'+esc(text)+'</pre></div>';
+    else if (msg.role==='thinking') out += '<div class="msg thinking">'+esc(text)+'</div>';
+  }
+  // Keep the bar, replace everything after it
+  const bar = document.getElementById('currentQBar');
+  bar.className = 'current-q-bar'; bar.innerHTML = '';
+  // Remove all children except the bar
+  while (mainBody.children.length > 1) mainBody.removeChild(mainBody.lastChild);
+  mainBody.insertAdjacentHTML('beforeend', out);
+  currentMessages = msgs;
+  mainBody.scrollTop = 0;
+  setupScrollSync();
+}
+
+// ── Scroll sync: right side scroll → left sidebar highlight ──
+let scrollObserver = null;
+let isClickScrolling = false;
+let lastStuckIndex = -1;
+
+function setupScrollSync() {
+  if (scrollObserver) scrollObserver.disconnect();
+  lastStuckIndex = -1;
+  mainBody.removeEventListener('scroll', onMainScroll);
+  mainBody.addEventListener('scroll', onMainScroll);
+  onMainScroll();
+}
+
+function onMainScroll() {
+  if (isClickScrolling) return;
+  const bar = document.getElementById('currentQBar');
+  const userEls = mainBody.querySelectorAll('.msg.user');
+  if (!userEls.length) return;
+  const containerTop = mainBody.getBoundingClientRect().top + bar.offsetHeight;
+  let current = -1;
+  for (let i = userEls.length - 1; i >= 0; i--) {
+    if (userEls[i].getBoundingClientRect().top < containerTop + 2) {
+      current = i; break;
+    }
+  }
+  if (current === lastStuckIndex) return;
+  lastStuckIndex = current;
+  if (current >= 0) {
+    const el = userEls[current];
+    const qi = parseInt(el.dataset.qIndex);
+    bar.innerHTML = '<span class="q-tag">Q' + (qi+1) + '</span>' + el.innerHTML.replace(/<div class="label">.*?<\/div>/, '');
+    bar.classList.add('show');
+    bar.classList.remove('expanded');
+    syncQSidebar(qi);
+  } else {
+    bar.classList.remove('show');
+    bar.innerHTML = '';
+  }
+}
+
+function syncQSidebar(index) {
+  const items = qItems.querySelectorAll('.q-item');
+  if (!items.length) return;
+  items.forEach(q => q.classList.remove('active'));
+  if (items[index]) {
+    items[index].classList.add('active');
+    // Scroll the sidebar item into view if needed
+    const container = qItems;
+    const item = items[index];
+    const cRect = container.getBoundingClientRect();
+    const iRect = item.getBoundingClientRect();
+    if (iRect.top < cRect.top || iRect.bottom > cRect.bottom) {
+      item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+}
+
+// Click to expand/collapse current-q-bar
+document.getElementById('currentQBar').addEventListener('click', function() {
+  this.classList.toggle('expanded');
+});
+
+autoScan();
+</script>
+</body>
+</html>
