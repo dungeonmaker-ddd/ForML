@@ -1,0 +1,778 @@
+ ▐▛███▜▌   Claude Code v2.1.73
+▝▜█████▛▘  Opus 4.6 · API Usage Billing
+  ▘▘ ▝▝    ~\Desktop\ai\ML
+
+> /factor-graph-v2                                                              
+
+> Base directory for this skill:                                                
+C:\Users\Administrator\.claude\skills\factor-graph-v2                           
+                                                                                
+```factor                                                                       
+# demo/core — specimen proves full capability boundary of []                    
+Core.ability: [decompose-system-to-facet, encode-domain-knowledge,              
+gate-quality-with-completeness, detect-bloat-via-red-flag,                      
+justify-node-existence, quantify-sla-target, model-trade-off,                   
+orchestrate-produce-deliver-build-linkback-sync, self-evaluate-completeness,    
+extract-implicit-intent, multi-interpret-single-input,                          
+detect-factor-interaction:conflict|amplify|constrain|emerge,                    
+generate-diagnostic-with-min-4-options,                                         
+prefer-more-over-less:options|factors|interpretations, must-validate-input,     
+no-raw-sql, pool-size:10, supports-streaming, scope:module,                     
+env:production-only, needs-redis, status:active, p99:200ms, if-authenticated,   
+when-rate-exceeded:reject, on-error:notify-ops, strategy:round-robin,           
+fallback-to-cache, prefer-consistency-over-latency, read-heavy,                 
+enables-core-deploy, guards-data-integrity, feeds-auth-pipeline]                
+                                                                                
+skill: [output-is-agent-protocol:not-human-readable-document,                   
+receive-any-input:concept|module|system|idea, transform-input-to-factor-graph,  
+write-dot-factor-file-to-disk, quality-precedes-syntax-and-structure,           
+enables-multi-agent-build-chain]                                                
+skill.identity: [think-before-graph, architect-structure-not-code,              
+refuse-to-execute, absorb-pressure-as-factor]                                   
+skill.priority: [first:extract-implicit-intent,                                 
+second:decompose-to-factor-graph, third:write-factor-file-to-disk,              
+reject-non-graph-work, on-no-input:ask-user-not-self-produce,                   
+on-ambiguity:ask-user-with-options, on-deterministic:decide-self]               
+skill.output: [emit-factor-lines-only,                                          
+on-any-input:restate-as-factor-then-produce,                                    
+on-user-urge:absorb-urgency-never-execute]                                      
+                                                                                
+density: [every-token-must-drive-a-decision-builder-cannot-skip,                
+every-subnode-must-carry-decisions-parent-cannot-absorb,                        
+concentrate-detail-on-core-nodes, starve-auxiliary-nodes,                       
+five-dim-internal-think:why|goal|how|result|next,                               
+feeds-completeness-evaluation, quality-test:cannot-act-without-lookup->enrich|n 
+o-decision-value->delete|fail->completeness-self-strengthen]                    
+density.critical-node: [encode-domain-knowledge-inline, embed-concrete-value,   
+embed-specific-constraint, must-enable-act-without-lookup,                      
+if-factor-names-tunable->embed-default-value]                                   
+                                                                                
+intent: [answer-why-not-what, prefer-action-driving-over-descriptive,           
+express-node-purpose-relationally,                                              
+forbid-dedicated-intent-subnode:inline-intent-in-parent-factors,                
+quality-test:no-why->rewrite|smell->triggers-core-primacy-bloat]                
+intent.relational: [must-justify-existence-for-core,                            
+pattern:verb-plus-core-noun,                                                    
+verbs:enables|guards|feeds|constrains|validates|isolates|accelerates|bridges,   
+enables-deletion-test]                                                          
+intent.example: [good:docker:enables-core-deploy|nginx:routes-core-traffic|redi 
+s:accelerates-core-query|prisma:bridges-core-to-db|helmet:guards-core-headers|z 
+od:validates-core-input, bad:docker:containerized|nginx:reverse-proxy|redis:in- 
+memory-cache|prisma:orm-tool|helmet:security-middleware|zod:schema-library]     
+intent.self-describing: [symptom:intent-only-says-what-not-why,                 
+root-cause:unclear-purpose-triggers-volume-compensation,                        
+if-node-only-restates-context->delete,                                          
+fix-intent-quality-before-trimming-quantity]                                    
+                                                                                
+completeness: [self-evaluate-after-every-produce, format:hash-tilde-percent,    
+when-pass:core-nodes-rich|values-embedded, above:80%->permits-delivery,         
+below:80%->self-strengthen:re-read-input|enrich-sparsest-core-first|recheck-rat 
+io|re-score, qualified-graph-enters-pipeline]                                   
+                                                                                
+core-primacy: [auxiliary-serves-core-never-reverse,                             
+cascade-core-edit-to-auxiliary, delete-stale-auxiliary,                         
+primacy-constrains-density-budget, ratio:core-exceeds-auxiliary|cap-auxiliary-a 
+t:30%|violation->trim-auxiliary-first|ratio-violation->completeness-fail,       
+red-flag:auxiliary-exceeds-core|auxiliary-self-describes->stop-and-restructure] 
+core-primacy.auxiliary-rule: [forbid-auxiliary-self-description,                
+forbid-independent-auxiliary-tree, require-inline-on-core-node,                 
+max-depth:1-below-core, flatten-deeper]                                         
+                                                                                
+syntax: [context-inherits-downward:child-never-restates-parent,                 
+one-line-type-only:node, bracket-encloses-factor-words,                         
+namespace-hierarchy-is-relationship, no-arrow-line-syntax,                      
+arrow-permitted-inside-bracket-for-condition->action,                           
+forbid-decorative-comments:no-section-separators|no-ascii-art-lines|only-header 
+-and-completeness-use-hash]                                                     
+syntax.format: [node:topic.facet:[factor-words], dot-separates-hierarchy,       
+colon-attaches-value, square-bracket-encloses, hyphen-connects-multi-word,      
+pipe-separates-alternatives, arrow-chains-consequence]                          
+syntax.factor-word: [english-only, forbid-natural-language,                     
+enforce-atomic-expression, each-factor-must-drive-unique-decision,              
+if-factor-restates-neighbor->delete,                                            
+if-factors-share-pattern->collapse-with-pipe]                                   
+syntax.position: [left-holds-impl, right-holds-intent]                          
+syntax.cross-reference: [use-factor-word-to-name-target-concept,                
+pattern:verb-target-noun, example:feeds-completeness-evaluation|triggers-comple 
+teness-self-strengthen|prevents-core-primacy-bloat]                             
+syntax.bracket: [see:Core.ability-for-roles-and-patterns,                       
+pick-relevant-not-all]                                                          
+                                                                                
+pipeline: [seven-step-cycle:produce-save-secondary-think-confirm-deliver-build- 
+linkback-sync, save-before-think-is-iron-law]                                   
+pipeline.save: [must-write-to-disk-before-any-analysis,                         
+saved-file-is-single-source-of-truth]                                           
+pipeline.secondary-think: [read-from-saved-file-not-memory,                     
+invoke-/ppr-to-deepen-intent, invoke-/factor-graph-to-enrich,                   
+invoke-brainstorming-to-expand, output-feeds-back-to-produce]                   
+pipeline.confirm: [present-factor-file-to-user, ask:confirm-or-refine,          
+on-confirms->deliver, on-refines->re-enter-produce,                             
+confirm-is-blocking:never-auto-proceed-to-build]                                
+                                                                                
+file:                                                                           
+[filename-is-implicit-root-namespace:nodes-must-not-repeat-filename-as-prefix,  
+suffix:dot-factor, format:plain-text, address:filename-is-path,                 
+write-on-produce, any-agent-can-edit]                                           
+file.header: [place-at-top, directives-are-fixed-text:no-appended-content,      
+directive:use-this-graph-to-build, directive:confirm-sufficiency-before-start,  
+directive:link-back-after-build, format:hash-comment-block,                     
+directive-words-use-hyphens-not-spaces, file-link:@path/to/file,                
+status:pending|built|updated]                                                   
+file.linking: [trigger:after-downstream-builds,                                 
+action:add-@filepath-to-factor-node, rule:every-file-change-syncs-factor]       
+                                                                                
+lifecycle: [persist-across-sessions,                                            
+on:downstream-feedback|requirement-change|state-drift->update-and-sync-to-disk] 
+                                                                                
+collaboration: [any-agent-can-contribute,                                       
+trigger:on-encounter|intent-overlap|domain-relevance,                           
+review:assess-from-own-domain|identify-gaps->enrich-or-correct,                 
+on-edit:must-justify-superiority, on-delete:requires-strong-evidence]           
+collaboration.constraint: [preserve-original-intent,                            
+forbid-overwrite-without-superiority, prefer-append-over-replace,               
+expertise-earns-edit-authority]                                                 
+```                                                                             
+                                                                                
+# ~97%                                                                          
+                                                                                
+
+● Factor Graph Engine v2 loaded.
+
+  Ready to receive input — give me a concept, module, system, or idea and I'll
+  decompose it into a .factor graph.
+
+  What would you like to graph?
+
+> 让我们开始day04                                                               
+
+● Let me first check what we have so far and what day04 should cover.
+
+● Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Let me check what's in the linear-regression directory and any day03
+  references.
+
+● Read 2 files (ctrl+o to expand)
+
+● 现在我了解了项目全貌：
+
+  - day01: ML基础 + KNN理论 (ch01-ch08)
+  - day02: KNN实战 (ch09)
+  - day03: 线性回归 (linear-regression/ 目录已有5个子因子文件)
+
+  day04 要讲什么主题？你有课程安排还是我来建议下一个方向？
+
+  常见的进度是线性回归之后接逻辑回归（从回归过渡到分类），或者决策树。
+
+✻ Crunched for 51s
+
+> 从一个梯度的文件夹开始吧 这是归属于线性回归的子内容吗                         
+
+● 先看看现有的梯度下降内容深度。
+
+● Read 1 file (ctrl+o to expand)
+
+● 梯度下降在你的课程里是通过线性回归的 MSE 碗形图第一次接触的，放在
+  linear-regression/ 下作为子内容是合理的——因为线性回归的 MSE
+  是最简单的理解梯度下降的场景。
+
+  但梯度下降本身是通用优化算法，后面逻辑回归、神经网络全都用它。所以结构上有两种
+  选法：
+
+  1. linear-regression/gradient-descent/ — 归属线性回归，强调"在这里第一次学会"
+  2. 顶层 gradient-descent/ — 独立主题，强调"通用工具"
+
+  你的学习路径是从线性回归的碗形 MSE 切入的，我建议放在 linear-regression/
+  下，后续章节再回引。
+
+  我先基于你 day03 的学习记录和现有因子，产出梯度下降的 .factor 图谱。
+
+● Explore(Read day03 learning notes)
+  ⎿  Done (15 tool uses · 39.6k tokens · 1m 10s)
+  (ctrl+o to expand)
+
+● 内容很清晰了。你对梯度下降有直觉理解（下山、导数指方向），但缺少系统化的结构。
+  我来产出因子图谱。
+
+● Bash(mkdir -p
+      "C:/Users/Administrator/Desktop/ai/ML/linear-regression/gradient-descent")
+  ⎿  Done
+
+● Write(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Wrote 10 lines to
+     linear-regression\gradient-descent\gradient-descent.factor
+     # use-this-graph-to-build: 梯度下降 — 从导数到参数更新的优化引擎
+     # confirm-sufficiency-before-start:
+     本图谱覆盖梯度下降从直觉到代码的完整知识链，7页布局
+     # scope: linear-regression/gradient-descent
+     # status: pending
+
+     # ═══ Page 1: 为什么需要梯度下降 — 正规方程的天花板 ═══
+
+     动机: [正规方程w=(XᵀX)⁻¹Xᵀy是精确解-但O(n³)复杂度,
+     特征数n>10000时矩阵求逆极慢甚至不可逆,
+     现实:图像784维|文本10万维|推荐系统百万维->正规方程失效,
+     梯度下降:迭代逼近最优解-每步只需O(m·n)-可处理任意规模数据, critical]
+     动机.思路: [正规方程像解方程组:变量少时一步出答案-变量多时计算量爆炸,
+     梯度下降像下山:不需要看到全局地图-只需脚下哪个方向最陡-一步步走到谷底,
+     数学事实:10000维矩阵求逆需10^12次运算|梯度下降1000次迭代×10000维=10^7次
+     运算->快10万倍, critical]
+     动机.适用边界: [正规方程:特征<10000|数据量不限|无超参数|精确解,
+     梯度下降:特征不限|数据量不限|需调学习率|近似解,
+     sklearn的LinearRegression内部用正规方程-SGDRegressor用梯度下降,
+     critical]
+
+  ⎿  Error editing file
+
+● Read 1 file (ctrl+o to expand)
+  ⎿  Error editing file
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 63 lines
+       8  动机: [正规方程w=(XᵀX)⁻¹Xᵀy是精确解-但O(n³)复杂度,             
+          特征数n>10000时矩阵求逆极慢甚至不可逆,                         
+          现实:图像784维|文本10万维|推荐系统百万维->正规方程失效,        
+          梯度下降:迭代逼近最优解-每步只需O(m·n)-可处理任意规模数据,     
+          critical]                                                      
+       9  动机.思路:                                                     
+          [正规方程像解方程组:变量少时一步出答案-变量多时计算量爆炸,     
+          梯度下降像下山:不需要看到全局地图-只需脚下哪个方向最陡-一步步  
+          走到谷底, 数学事实:10000维矩阵求逆需10^12次运算|梯度下降1000次 
+          迭代×10000维=10^7次运算->快10万倍, critical]                   
+      10  动机.适用边界:                                                 
+          [正规方程:特征<10000|数据量不限|无超参数|精确解,               
+          梯度下降:特征不限|数据量不限|需调学习率|近似解, sklearn的Linea 
+          rRegression内部用正规方程-SGDRegressor用梯度下降, critical]    
+      11 +                                                               
+      12 +# ═══ Page 2: 导数的真正含义 — 方向+幅度 ═══                   
+      13 +                                                               
+      14 +导数: [导数=函数在某点的变化率, 几何意义:切线斜率,             
+         +物理意义:瞬时速度,                                             
+         +对梯度下降的意义:告诉你两件事->方向(正/负)+幅度(离最低点多远), 
+         + critical]                                                     
+      15 +导数.方向: [导数>0:函数在上升->w应该减小(往左走),              
+         +导数<0:函数在下降->w应该增大(往右走), 导数=0:到达极值点->停止, 
+         + 更新规则w=w-α·dL/dw中的负号:自动反转方向->导数正则减-导数负则 
+         +加, critical]                                                  
+      16 +导数.幅度: [导数绝对值大->离最低点远->步子大,                  
+         +导数绝对值小->接近最低点->步子小,                              
+         +自动减速效应:越接近谷底走得越慢->天然防止冲过头,               
+         +MSE对w求导:dL/dw=2/m·Σ(ŷi-yi)·xi, critical]                    
+      17 +导数.偏导数: [多个参数时:对每个参数分别求导-固定其他参数,      
+         +∂L/∂w:把b当常数-只看L随w的变化,                                
+         +∂L/∂b:把w当常数-只看L随b的变化, 梯度=[∂L/∂w,∂L/∂b]:所有偏导数  
+         +组成的向量->指向函数上升最快的方向, critical]                  
+      18 +导数.MSE求导: [L=1/m·Σ(yi-(w·xi+b))², ∂L/∂w=-2/m·Σ(yi-ŷi)·xi,  
+         +∂L/∂b=-2/m·Σ(yi-ŷi), 含义:误差(yi-ŷi)乘以对应特征xi的加权平均- 
+         +>误差大且特征值大的样本对梯度贡献最大, critical]               
+      19 +                                                               
+      20 +# ═══ Page 3: 更新规则 — w=w-α·∂L/∂w ═══                       
+      21 +                                                               
+      22 +更新规则: [核心公式:w_new=w_old-α·∂L/∂w,                       
+         +三个组成部分:当前位置w_old+学习率α+梯度∂L/∂w,                  
+         +负号含义:梯度指向上升方向->取负号变为下降方向,                 
+         +每次迭代同时更新w和b, critical]                                
+      23 +更新规则.思路:                                                 
+         +[为什么是减不是加->梯度∂L/∂w指向loss增大最快的方向,            
+         +我们要loss减小->走反方向->所以减,                              
+         +类比:站在山坡上-重力方向(梯度反方向)自然把你拉向谷底,          
+         +数学证明:泰勒展开L(w-α·g)≈L(w)-α·||g||²<L(w)->loss确实减小了,  
+         +critical]                                                      
+      24 +更新规则.单步示例: [当前w=5-α=0.1-∂L/∂w=4, w_new=5-0.1×4=4.6,  
+         +导数为正->w在最优值右边->减小w->向左移动,                      
+         +下一步:w=4.6时∂L/∂w=2.4->w=4.6-0.1×2.4=4.36,                   
+         +导数变小->步子变小->逐渐收敛, critical]                        
+      25 +更新规则.同时更新:                                             
+         +[必须同时更新所有参数:先算完所有梯度->再一起更新, 错误:更新w后 
+         +立刻用新w算b的梯度->b的梯度基于新w而非旧w->方向偏了,           
+         +正确:temp_w=w-α·∂L/∂w->temp_b=b-α·∂L/∂b->w=temp_w->b=temp_b,   
+         +important]                                                     
+      26 +                                                               
+      27 +# ═══ Page 4: 学习率α — 太大震荡·太小龟速 ═══                  
+      28 +                                                               
+      29 +学习率: [α:learning-rate-学习率,                               
+         +唯一核心超参数:控制每步走多远, 不从数据学来-需人为设定,        
+         +典型值:0.01|0.001|0.0001, critical]                            
+      30 +学习率.过大: [α太大->步子太大->跨过谷底->在两侧来回震荡->loss  
+         +不降反升->发散, 极端情况:loss趋向无穷->数值溢出NaN,            
+         +诊断:loss曲线剧烈波动或持续上升, critical]                     
+      31 +学习率.过小: [α太小->步子太小->收敛极慢->需要几万次迭代,       
+         +诊断:loss曲线缓慢下降-训练时间不可接受,                        
+         +实际危害:计算资源浪费-可能被误判为已收敛, important]           
+      32 +学习率.选择策略:                                               
+         +[实践:从0.01开始试->loss震荡则缩小10倍->loss下降太慢则放大,    
+         +观察loss曲线:理想形态是快速下降后趋于平坦,                     
+         +进阶:学习率衰减-开始大步走后期小步走->兼顾速度和精度,          
+         +important]                                                     
+      33 +学习率.与标准化关系: [未标准化:各特征量级不同->loss等高线是扁  
+         +椭圆->梯度方向偏离谷底->需要极小α才不震荡, 标准化后:各特征量级 
+         +相同->等高线接近正圆->梯度直指谷底->较大α也能稳定收敛,         
+         +这就是为什么梯度下降前必须标准化, critical]                    
+      34 +                                                               
+      35 +# ═══ Page 5: 三种变体 — Batch·SGD·Mini-batch ═══              
+      36 +                                                               
+      37 +变体: [三种梯度下降变体:区别仅在于每步用多少样本计算梯度,      
+         +Batch:全部m个样本, SGD:随机1个样本,                            
+         +Mini-batch:随机batch_size个样本,                               
+         +梯度公式不变-只是求和范围不同, critical]                       
+      38 +变体.Batch-GD: [每步用全部m个样本:∂L/∂w=1/m·Σ(全部样本),       
+         +优点:梯度精确-下降方向稳定-必定收敛,                           
+         +缺点:m很大时每步计算慢-内存占用大, 适合:小数据集(m<10000),     
+         +critical]                                                      
+      39 +变体.SGD: [每步随机取1个样本:∂L/∂w=(ŷi-yi)·xi,                 
+         +优点:每步极快-内存极小-可在线学习,                             
+         +缺点:梯度噪声大-下降路径锯齿形-在最优解附近震荡,               
+         +适合:超大数据集|流式数据, critical]                            
+      40 +变体.Mini-batch:                                               
+         +[每步随机取batch_size个样本(常用32|64|128|256),                
+         +折中:梯度比SGD稳定-比Batch快, 实践默认选择:batch_size=32或64,  
+         +GPU友好:矩阵运算并行加速, critical]                            
+      41 +变体.对比: [Batch:精确但慢-像看完全部考卷再改答案,             
+         +SGD:快但抖-像看一道题就改策略,                                 
+         +Mini-batch:又快又稳-像看一组题再调整-工业界标准, critical]     
+      42 +变体.sklearn实现: [SGDRegressor(loss='squared_error',learning_ 
+         +rate='optimal',eta0=0.01,max_iter=1000),                       
+         +默认用SGD-支持partial_fit增量学习,                             
+         +对比LinearRegression:后者用正规方程-无迭代过程, important]     
+      43 +                                                               
+      44 +# ═══ Page 6: 收敛判断 — 什么时候停 ═══                        
+      45 +                                                               
+      46 +收敛: [convergence-收敛, 定义:loss不再显著下降->参数趋于稳定,  
+         +判断标准:相邻两次loss差<阈值ε(如1e-6),                         
+         +或达到最大迭代次数max_iter, critical]                          
+      47 +收敛.loss曲线: [横轴:迭代次数iteration, 纵轴:loss值,           
+         +理想形态:快速下降->逐渐平坦->趋于水平线,                       
+         +未收敛:曲线仍在明显下降->增加迭代次数,                         
+         +发散:曲线上升->学习率太大, critical]                           
+      48 +收敛.停止条件:                                                 
+         +[条件1:loss变化<ε->tol参数(SGDRegressor默认tol=1e-3),          
+         +条件2:达到max_iter(默认1000),                                  
+         +条件3:梯度范数<阈值->参数几乎不再变化, 满足任一即停止,         
+         +important]                                                     
+      49 +收敛.凸函数保证: [MSE是凸函数:只有一个全局最小值-无局部最小值, 
+         + 凸函数+合适学习率->梯度下降必定收敛到全局最优, 非凸函数(神经  
+         +网络):有多个局部最小值->梯度下降可能陷入局部最优->这是后续课题 
+         +, critical]                                                    
+      50 +                                                               
+      51 +# ═══ Page 7: 手写实现 vs sklearn — 代码对照 ═══               
+      52 +                                                               
+      53 +手写实现: [用numpy实现梯度下降线性回归:20行代码,               
+         +目的:理解每一步在做什么-不是黑盒调用, critical]                
+      54 +手写实现.伪代码: [初始化:w=0-b=0,                              
+         +循环n_iter次:{计算预测ŷ=X@w+b,                                 
+         +计算梯度dw=1/m·Xᵀ@(ŷ-y)-db=1/m·sum(ŷ-y),                       
+         +更新w=w-α·dw-b=b-α·db, 记录loss}, 返回w和b, critical]          
+      55 +手写实现.关键代码: [import-numpy-as-np, y_pred=X_train@w+b,    
+         +dw=(1/m)*(X_train.T@(y_pred-y_train)),                         
+         +db=(1/m)*np.sum(y_pred-y_train), w=w-lr*dw, b=b-lr*db,         
+         +loss=(1/m)*np.sum((y_pred-y_train)**2), critical]              
+      56 +手写实现.sklearn对照: [手写20行=SGDRegressor两行:model=SGDRegr 
+         +essor()->model.fit(X,y),                                       
+         +sklearn封装了:参数初始化+学习率调度+收敛判断+正则化,           
+         +手写的意义:知道fit()内部在跑什么, important]                   
+      57 +                                                               
+      58 +常见陷阱: [陷阱1:未标准化->loss震荡不收敛,                     
+         +陷阱2:学习率太大->loss爆炸NaN,                                 
+         +陷阱3:忘记同时更新参数->收敛到错误值,                          
+         +陷阱4:迭代次数不够->欠收敛, critical]                          
+      59 +常见陷阱.诊断清单: [loss不下降->检查学习率是否太大,            
+         +loss下降太慢->检查学习率是否太小或未标准化,                    
+         +loss震荡->检查是否标准化+降低学习率,                           
+         +loss为NaN->学习率太大或数据有异常值, important]                
+      60 +                                                               
+      61 +# ═══ 边 ═══                                                   
+      62 +动机 -> 导数:                                                  
+         +[正规方程失效->需要迭代优化->迭代需要方向->导数提供方向,       
+         +critical]                                                      
+      63 +导数 -> 更新规则: [导数提供方向和幅度->更新规则用导数调整参数, 
+         + critical]                                                     
+      64 +导数.偏导数 -> 导数.MSE求导: [偏导数概念应用于MSE损失函数,     
+         +critical]                                                      
+      65 +更新规则 -> 学习率: [更新规则中α控制步长->α的选择决定收敛行为, 
+         + critical]                                                     
+      66 +学习率.与标准化关系 -> 常见陷阱:                               
+         +[未标准化是最常见的收敛失败原因, critical]                     
+      67 +更新规则 -> 变体: [更新规则不变-变体改变每步用多少样本算梯度,  
+         +critical]                                                      
+      68 +变体 -> 收敛: [三种变体收敛速度和稳定性不同, critical]         
+      69 +收敛.凸函数保证 -> 常见陷阱:                                   
+         +[凸函数保证收敛-但超参数不当仍会失败, important]               
+      70 +手写实现 -> 手写实现.sklearn对照:                              
+         +[手写理解原理->sklearn用于生产, important]                     
+      71 +动机.适用边界 -> 变体.sklearn实现:                             
+         +[LinearRegression用正规方程-SGDRegressor用梯度下降, important] 
+      72 +                                                               
+      73 +# ~95%                                                         
+
+● 因子图谱已写入磁盘。让我从保存的文件重新读一遍确认质量。
+
+● Read 1 file (ctrl+o to expand)
+
+● 图谱已保存到 linear-regression/gradient-descent/gradient-descent.factor。
+
+  7 页结构：
+
+  1. 动机 — 正规方程的天花板，为什么需要迭代
+  2. 导数 — 方向+幅度，偏导数，MSE 求导公式
+  3. 更新规则 — w=w-α·∂L/∂w 的每个部分，单步数值示例
+  4. 学习率α — 过大震荡、过小龟速、与标准化的关系
+  5. 三种变体 — Batch/SGD/Mini-batch 对比 + sklearn API
+  6. 收敛判断 — loss 曲线、停止条件、凸函数保证
+  7. 手写实现 vs sklearn — 20 行 numpy 代码对照 SGDRegressor
+
+  基于你 day03 的学习记录，重点补了你问过的几个点：导数为什么是"减"不是"加"、标
+  准化和学习率的因果关系、fit() 内部到底在跑什么。
+
+  确认这个结构，还是要调整？确认后我开始构建翻书页面。
+
+✻ Baked for 5m 46s
+
+> 把边嵌入内容区内 不再需要边                                                   
+
+● Read 1 file (ctrl+o to expand)
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+       5                                                                 
+       6  # ═══ Page 1: 为什么需要梯度下降 — 正规方程的天花板 ═══        
+       7                                                                 
+       8 -动机: [正规方程w=(XᵀX)⁻¹Xᵀy是精确解-但O(n³)复杂度,             
+         -特征数n>10000时矩阵求逆极慢甚至不可逆,                         
+         -现实:图像784维|文本10万维|推荐系统百万维->正规方程失效,        
+         -梯度下降:迭代逼近最优解-每步只需O(m·n)-可处理任意规模数据,     
+         -critical]                                                      
+       8 +动机: [正规方程w=(XᵀX)⁻¹Xᵀy是精确解-但O(n³)复杂度,             
+         +特征数n>10000时矩阵求逆极慢甚至不可逆,                         
+         +现实:图像784维|文本10万维|推荐系统百万维->正规方程失效,        
+         +梯度下降:迭代逼近最优解-每步只需O(m·n)-可处理任意规模数据,     
+         +正规方程失效->feeds-导数:迭代需要方向, critical]               
+       9  动机.思路:                                                     
+          [正规方程像解方程组:变量少时一步出答案-变量多时计算量爆炸,     
+          梯度下降像下山:不需要看到全局地图-只需脚下哪个方向最陡-一步步  
+          走到谷底, 数学事实:10000维矩阵求逆需10^12次运算|梯度下降1000次 
+          迭代×10000维=10^7次运算->快10万倍, critical]                   
+      10  动机.适用边界:                                                 
+          [正规方程:特征<10000|数据量不限|无超参数|精确解,               
+          梯度下降:特征不限|数据量不限|需调学习率|近似解, sklearn的Linea 
+          rRegression内部用正规方程-SGDRegressor用梯度下降, critical]    
+      11                                                                 
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+       7                                                                 
+       8  动机: [正规方程w=(XᵀX)⁻¹Xᵀy是精确解-但O(n³)复杂度,             
+          特征数n>10000时矩阵求逆极慢甚至不可逆,                         
+          现实:图像784维|文本10万维|推荐系统百万维->正规方程失效,        
+          梯度下降:迭代逼近最优解-每步只需O(m·n)-可处理任意规模数据,     
+          正规方程失效->feeds-导数:迭代需要方向, critical]               
+       9  动机.思路:                                                     
+          [正规方程像解方程组:变量少时一步出答案-变量多时计算量爆炸,     
+          梯度下降像下山:不需要看到全局地图-只需脚下哪个方向最陡-一步步  
+          走到谷底, 数学事实:10000维矩阵求逆需10^12次运算|梯度下降1000次 
+          迭代×10000维=10^7次运算->快10万倍, critical]                   
+      10 -动机.适用边界: [正规方程:特征<10000|数据量不限|无超参数|精确解,
+         - 梯度下降:特征不限|数据量不限|需调学习率|近似解,               
+         -sklearn的LinearRegression内部用正规方程-SGDRegressor用梯度下降 
+         -, critical]                                                    
+      10 +动机.适用边界: [正规方程:特征<10000|数据量不限|无超参数|精确解,
+         + 梯度下降:特征不限|数据量不限|需调学习率|近似解,               
+         +sklearn的LinearRegression用正规方程-SGDRegressor用梯度下降     
+         +->feeds-变体.sklearn实现, critical]                            
+      11                                                                 
+      12  # ═══ Page 2: 导数的真正含义 — 方向+幅度 ═══                   
+      13                                                                 
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      11                                                                 
+      12  # ═══ Page 2: 导数的真正含义 — 方向+幅度 ═══                   
+      13                                                                 
+      14 -导数: [导数=函数在某点的变化率, 几何意义:切线斜率,             
+         -物理意义:瞬时速度,                                             
+         -对梯度下降的意义:告诉你两件事->方向(正/负)+幅度(离最低点多远), 
+         -critical]                                                      
+      14 +导数: [导数=函数在某点的变化率, 几何意义:切线斜率,             
+         +物理意义:瞬时速度,                                             
+         +对梯度下降的意义:告诉你两件事->方向(正/负)+幅度(离最低点多远), 
+         +feeds-更新规则:提供方向和幅度, critical]                       
+      15  导数.方向: [导数>0:函数在上升->w应该减小(往左走),              
+          导数<0:函数在下降->w应该增大(往右走), 导数=0:到达极值点->停止, 
+           更新规则w=w-α·dL/dw中的负号:自动反转方向->导数正则减-导数负则 
+          加, critical]                                                  
+      16  导数.幅度: [导数绝对值大->离最低点远->步子大,                  
+          导数绝对值小->接近最低点->步子小,                              
+          自动减速效应:越接近谷底走得越慢->天然防止冲过头,               
+          MSE对w求导:dL/dw=2/m·Σ(ŷi-yi)·xi, critical]                    
+      17  导数.偏导数: [多个参数时:对每个参数分别求导-固定其他参数,      
+          ∂L/∂w:把b当常数-只看L随w的变化,                                
+          ∂L/∂b:把w当常数-只看L随b的变化, 梯度=[∂L/∂w,∂L/∂b]:所有偏导数  
+          组成的向量->指向函数上升最快的方向, critical]                  
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      14  导数: [导数=函数在某点的变化率, 几何意义:切线斜率,             
+          物理意义:瞬时速度,                                             
+          对梯度下降的意义:告诉你两件事->方向(正/负)+幅度(离最低点多远), 
+           feeds-更新规则:提供方向和幅度, critical]                      
+      15  导数.方向: [导数>0:函数在上升->w应该减小(往左走),              
+          导数<0:函数在下降->w应该增大(往右走), 导数=0:到达极值点->停止, 
+           更新规则w=w-α·dL/dw中的负号:自动反转方向->导数正则减-导数负则 
+          加, critical]                                                  
+      16  导数.幅度: [导数绝对值大->离最低点远->步子大,                  
+          导数绝对值小->接近最低点->步子小,                              
+          自动减速效应:越接近谷底走得越慢->天然防止冲过头,               
+          MSE对w求导:dL/dw=2/m·Σ(ŷi-yi)·xi, critical]                    
+      17 -导数.偏导数: [多个参数时:对每个参数分别求导-固定其他参数,      
+         -∂L/∂w:把b当常数-只看L随w的变化, ∂L/∂b:把w当常数-只看L随b的变化,
+         - 梯度=[∂L/∂w,∂L/∂b]:所有偏导数组成的向量->指向函数上升最快的方 
+         -向, critical]                                                  
+      17 +导数.偏导数: [多个参数时:对每个参数分别求导-固定其他参数,      
+         +∂L/∂w:把b当常数-只看L随w的变化, ∂L/∂b:把w当常数-只看L随b的变化,
+         + 梯度=[∂L/∂w,∂L/∂b]:所有偏导数组成的向量->指向函数上升最快的方 
+         +向, feeds-导数.MSE求导:偏导数应用于MSE, critical]              
+      18  导数.MSE求导: [L=1/m·Σ(yi-(w·xi+b))², ∂L/∂w=-2/m·Σ(yi-ŷi)·xi,  
+          ∂L/∂b=-2/m·Σ(yi-ŷi), 含义:误差(yi-ŷi)乘以对应特征xi的加权平均- 
+          >误差大且特征值大的样本对梯度贡献最大, critical]               
+      19                                                                 
+      20  # ═══ Page 3: 更新规则 — w=w-α·∂L/∂w ═══                       
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      19                                                                 
+      20  # ═══ Page 3: 更新规则 — w=w-α·∂L/∂w ═══                       
+      21                                                                 
+      22 -更新规则: [核心公式:w_new=w_old-α·∂L/∂w,                       
+         -三个组成部分:当前位置w_old+学习率α+梯度∂L/∂w,                  
+         -负号含义:梯度指向上升方向->取负号变为下降方向,                 
+         -每次迭代同时更新w和b, critical]                                
+      22 +更新规则: [核心公式:w_new=w_old-α·∂L/∂w,                       
+         +三个组成部分:当前位置w_old+学习率α+梯度∂L/∂w,                  
+         +负号含义:梯度指向上升方向->取负号变为下降方向,                 
+         +每次迭代同时更新w和b, feeds-学习率:α控制步长决定收敛行为,      
+         +feeds-变体:公式不变-变体改变样本数, critical]                  
+      23  更新规则.思路:                                                 
+          [为什么是减不是加->梯度∂L/∂w指向loss增大最快的方向,            
+          我们要loss减小->走反方向->所以减,                              
+          类比:站在山坡上-重力方向(梯度反方向)自然把你拉向谷底,          
+          数学证明:泰勒展开L(w-α·g)≈L(w)-α·||g||²<L(w)->loss确实减小了,  
+          critical]                                                      
+      24  更新规则.单步示例: [当前w=5-α=0.1-∂L/∂w=4, w_new=5-0.1×4=4.6,  
+          导数为正->w在最优值右边->减小w->向左移动,                      
+          下一步:w=4.6时∂L/∂w=2.4->w=4.6-0.1×2.4=4.36,                   
+          导数变小->步子变小->逐渐收敛, critical]                        
+      25  更新规则.同时更新:                                             
+          [必须同时更新所有参数:先算完所有梯度->再一起更新, 错误:更新w后 
+          立刻用新w算b的梯度->b的梯度基于新w而非旧w->方向偏了,           
+          正确:temp_w=w-α·∂L/∂w->temp_b=b-α·∂L/∂b->w=temp_w->b=temp_b,   
+          important]                                                     
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      30  学习率.过大: [α太大->步子太大->跨过谷底->在两侧来回震荡->loss  
+          不降反升->发散, 极端情况:loss趋向无穷->数值溢出NaN,            
+          诊断:loss曲线剧烈波动或持续上升, critical]                     
+      31  学习率.过小: [α太小->步子太小->收敛极慢->需要几万次迭代,       
+          诊断:loss曲线缓慢下降-训练时间不可接受,                        
+          实际危害:计算资源浪费-可能被误判为已收敛, important]           
+      32  学习率.选择策略:                                               
+          [实践:从0.01开始试->loss震荡则缩小10倍->loss下降太慢则放大,    
+          观察loss曲线:理想形态是快速下降后趋于平坦,                     
+          进阶:学习率衰减-开始大步走后期小步走->兼顾速度和精度,          
+          important]                                                     
+      33 -学习率.与标准化关系: [未标准化:各特征量级不同->loss等高线是扁椭
+         -圆->梯度方向偏离谷底->需要极小α才不震荡, 标准化后:各特征量级相 
+         -同->等高线接近正圆->梯度直指谷底->较大α也能稳定收敛,           
+         -这就是为什么梯度下降前必须标准化, critical]                    
+      33 +学习率.与标准化关系: [未标准化:各特征量级不同->loss等高线是扁椭
+         +圆->梯度方向偏离谷底->需要极小α才不震荡, 标准化后:各特征量级相 
+         +同->等高线接近正圆->梯度直指谷底->较大α也能稳定收敛,           
+         +这就是为什么梯度下降前必须标准化,                              
+         +triggers-常见陷阱:未标准化是最常见收敛失败原因, critical]      
+      34                                                                 
+      35  # ═══ Page 5: 三种变体 — Batch·SGD·Mini-batch ═══              
+      36                                                                 
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      34                                                                 
+      35  # ═══ Page 5: 三种变体 — Batch·SGD·Mini-batch ═══              
+      36                                                                 
+      37 -变体: [三种梯度下降变体:区别仅在于每步用多少样本计算梯度,      
+         -Batch:全部m个样本, SGD:随机1个样本,                            
+         -Mini-batch:随机batch_size个样本, 梯度公式不变-只是求和范围不同,
+         - critical]                                                     
+      37 +变体: [三种梯度下降变体:区别仅在于每步用多少样本计算梯度,      
+         +Batch:全部m个样本, SGD:随机1个样本,                            
+         +Mini-batch:随机batch_size个样本, 梯度公式不变-只是求和范围不同,
+         + feeds-收敛:变体影响收敛速度和稳定性, critical]                
+      38  变体.Batch-GD: [每步用全部m个样本:∂L/∂w=1/m·Σ(全部样本),       
+          优点:梯度精确-下降方向稳定-必定收敛,                           
+          缺点:m很大时每步计算慢-内存占用大, 适合:小数据集(m<10000),     
+          critical]                                                      
+      39  变体.SGD: [每步随机取1个样本:∂L/∂w=(ŷi-yi)·xi,                 
+          优点:每步极快-内存极小-可在线学习,                             
+          缺点:梯度噪声大-下降路径锯齿形-在最优解附近震荡,               
+          适合:超大数据集|流式数据, critical]                            
+      40  变体.Mini-batch:                                               
+          [每步随机取batch_size个样本(常用32|64|128|256),                
+          折中:梯度比SGD稳定-比Batch快, 实践默认选择:batch_size=32或64,  
+          GPU友好:矩阵运算并行加速, critical]                            
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      46  收敛: [convergence-收敛, 定义:loss不再显著下降->参数趋于稳定,  
+          判断标准:相邻两次loss差<阈值ε(如1e-6),                         
+          或达到最大迭代次数max_iter, critical]                          
+      47  收敛.loss曲线: [横轴:迭代次数iteration, 纵轴:loss值,           
+          理想形态:快速下降->逐渐平坦->趋于水平线,                       
+          未收敛:曲线仍在明显下降->增加迭代次数,                         
+          发散:曲线上升->学习率太大, critical]                           
+      48  收敛.停止条件:                                                 
+          [条件1:loss变化<ε->tol参数(SGDRegressor默认tol=1e-3),          
+          条件2:达到max_iter(默认1000),                                  
+          条件3:梯度范数<阈值->参数几乎不再变化, 满足任一即停止,         
+          important]                                                     
+      49 -收敛.凸函数保证: [MSE是凸函数:只有一个全局最小值-无局部最小值, 
+         -凸函数+合适学习率->梯度下降必定收敛到全局最优, 非凸函数(神经网 
+         -络):有多个局部最小值->梯度下降可能陷入局部最优->这是后续课题,  
+         -critical]                                                      
+      49 +收敛.凸函数保证: [MSE是凸函数:只有一个全局最小值-无局部最小值, 
+         +凸函数+合适学习率->梯度下降必定收敛到全局最优, 非凸函数(神经网 
+         +络):有多个局部最小值->梯度下降可能陷入局部最优->这是后续课题,  
+         +constrains-常见陷阱:凸函数保证收敛但超参数不当仍失败, critical]
+      50                                                                 
+      51  # ═══ Page 7: 手写实现 vs sklearn — 代码对照 ═══               
+      52                                                                 
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Added 1 line, removed 1 line
+      53  手写实现: [用numpy实现梯度下降线性回归:20行代码,               
+          目的:理解每一步在做什么-不是黑盒调用, critical]                
+      54  手写实现.伪代码: [初始化:w=0-b=0,                              
+          循环n_iter次:{计算预测ŷ=X@w+b,                                 
+          计算梯度dw=1/m·Xᵀ@(ŷ-y)-db=1/m·sum(ŷ-y),                       
+          更新w=w-α·dw-b=b-α·db, 记录loss}, 返回w和b, critical]          
+      55  手写实现.关键代码: [import-numpy-as-np, y_pred=X_train@w+b,    
+          dw=(1/m)*(X_train.T@(y_pred-y_train)),                         
+          db=(1/m)*np.sum(y_pred-y_train), w=w-lr*dw, b=b-lr*db,         
+          loss=(1/m)*np.sum((y_pred-y_train)**2), critical]              
+      56 -手写实现.sklearn对照: [手写20行=SGDRegressor两行:model=SGDRegre
+         -ssor()->model.fit(X,y),                                        
+         -sklearn封装了:参数初始化+学习率调度+收敛判断+正则化,           
+         -手写的意义:知道fit()内部在跑什么, important]                   
+      56 +手写实现.sklearn对照: [手写20行=SGDRegressor两行:model=SGDRegre
+         +ssor()->model.fit(X,y),                                        
+         +sklearn封装了:参数初始化+学习率调度+收敛判断+正则化,           
+         +手写的意义:知道fit()内部在跑什么,                              
+         +bridges-手写实现-to-sklearn-production, important]             
+      57                                                                 
+      58  常见陷阱: [陷阱1:未标准化->loss震荡不收敛,                     
+          陷阱2:学习率太大->loss爆炸NaN,                                 
+          陷阱3:忘记同时更新参数->收敛到错误值,                          
+          陷阱4:迭代次数不够->欠收敛, critical]                          
+      59  常见陷阱.诊断清单: [loss不下降->检查学习率是否太大,            
+          loss下降太慢->检查学习率是否太小或未标准化,                    
+          loss震荡->检查是否标准化+降低学习率,                           
+          loss为NaN->学习率太大或数据有异常值, important]                
+
+● Now remove the edge section:
+
+● Update(linear-regression\gradient-descent\gradient-descent.factor)
+  ⎿  Removed 12 lines
+      58  常见陷阱: [陷阱1:未标准化->loss震荡不收敛,                     
+          陷阱2:学习率太大->loss爆炸NaN,                                 
+          陷阱3:忘记同时更新参数->收敛到错误值,                          
+          陷阱4:迭代次数不够->欠收敛, critical]                          
+      59  常见陷阱.诊断清单: [loss不下降->检查学习率是否太大,            
+          loss下降太慢->检查学习率是否太小或未标准化,                    
+          loss震荡->检查是否标准化+降低学习率,                           
+          loss为NaN->学习率太大或数据有异常值, important]                
+      60                                                                 
+      61 -# ═══ 边 ═══                                                   
+      62 -动机 -> 导数:                                                  
+         -[正规方程失效->需要迭代优化->迭代需要方向->导数提供方向,       
+         -critical]                                                      
+      63 -导数 -> 更新规则: [导数提供方向和幅度->更新规则用导数调整参数, 
+         - critical]                                                     
+      64 -导数.偏导数 -> 导数.MSE求导: [偏导数概念应用于MSE损失函数,     
+         -critical]                                                      
+      65 -更新规则 -> 学习率: [更新规则中α控制步长->α的选择决定收敛行为, 
+         - critical]                                                     
+      66 -学习率.与标准化关系 -> 常见陷阱:                               
+         -[未标准化是最常见的收敛失败原因, critical]                     
+      67 -更新规则 -> 变体: [更新规则不变-变体改变每步用多少样本算梯度,  
+         -critical]                                                      
+      68 -变体 -> 收敛: [三种变体收敛速度和稳定性不同, critical]         
+      69 -收敛.凸函数保证 -> 常见陷阱:                                   
+         -[凸函数保证收敛-但超参数不当仍会失败, important]               
+      70 -手写实现 -> 手写实现.sklearn对照:                              
+         -[手写理解原理->sklearn用于生产, important]                     
+      71 -动机.适用边界 -> 变体.sklearn实现:                             
+         -[LinearRegression用正规方程-SGDRegressor用梯度下降, important] 
+      72 -                                                               
+      61  # ~95%                                                         
+
+● Done. 边已全部嵌入对应节点的因子词中，用
+  feeds-、triggers-、constrains-、bridges-
+  等关系动词内联表达，独立边区块已删除。
+
+● Read 1 file (ctrl+o to expand)
+
+● 边已全部内联到节点因子词中，文件干净了。关系通过
+  feeds-、triggers-、constrains-、bridges- 嵌在各自节点内，不再有独立边区块。
+
+  确认这版，还是继续调？
+
+✻ Cooked for 2m 23s
+
+> 让我们开始讨论 梯度下降                                                       
+
+● 好，梯度下降的因子图谱已经就绪。我们从哪个角度切入？
+
+  7 页结构供你选：
+
+  1. 动机 — 正规方程为什么不够用
+  2. 导数 — 方向+幅度，MSE 求导
+  3. 更新规则 — w=w-α·∂L/∂w 拆解
+  4. 学习率α — 太大震荡、太小龟速
+  5. 三种变体 — Batch/SGD/Mini-batch
+  6. 收敛判断 — 什么时候停
+  7. 手写实现 vs sklearn
+
+  你可以从头开始，也可以直接跳到你觉得模糊的部分。
+
+> 为什么会出现梯度下降                                                          
+
+● 因为正规方程有天花板。
+
+  线性回归求最优 w 和 b，正规方程能一步算出精确解：
+
+  w = (XᵀX)⁻¹Xᵀy
+
+  但它要算矩阵求逆，复杂度是 O(n³)，n 是特征数。
+
+  - 3 个特征（房价预测）：27 次运算，瞬间出结果
+  - 784 个特征（MNIST）：4.8 亿次运算，还能忍
+  - 10000 个特征：10¹² 次运算，开始卡了
+  - 100000 个特征（文本 TF-IDF）：10¹⁵ 次运算，直接跑不动
+
+  而且 XᵀX 有时候不可逆（特征之间线性相关），正规方程直接废了。
+
+  梯度下降换了个思路：我不求精确解，我一步步逼近。
+
+  每步只需要算一次矩阵乘法，复杂度 O(m·n)。1000 次迭代 × 10000 维 = 10⁷
+  次运算，比正规方程快 10 万倍。
+
+  核心区别：
+  - 正规方程 = 解方程，一步到位，但变量多了算不动
+  - 梯度下降 = 下山，不需要全局地图，只看脚下哪个方向最陡，一步步走到谷底
+
+  你 day03 学的 LinearRegression().fit()
+  内部跑的就是正规方程。等数据大了、特征多了，就得换成
+  SGDRegressor()，内部跑的就是梯度下降。
+
+  那问题来了——"脚下哪个方向最陡"这件事，数学上怎么算？这就是导数要解决的。要继续
+  聊导数吗？
+
+> 正规方程 在什么情况下要换梯度下降 有什么主要判断方式吗 和哪几个特征有关？     
+  ⎿  Interrupted · What should Claude do instead?
