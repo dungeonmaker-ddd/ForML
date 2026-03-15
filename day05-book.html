@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 05 — 逻辑回归与分类评估</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f0e8;
+    --paper-dark: #e8e0d0;
+    --ink: #2c1810;
+    --ink-light: #5a4a3a;
+    --ink-faint: #9a8a7a;
+    --vermillion: #c41e3a;
+    --vermillion-soft: #d4556a;
+    --gold: #b8943e;
+    --gold-light: #d4b86a;
+    --blue-ink: #2a4a6b;
+    --green-ink: #2a6b4a;
+    --page-w: min(680px, 92vw);
+    --page-h: min(880px, 85vh);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1612;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    color: var(--ink);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, #2a2320 0%, #1a1612 70%),
+      repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(0,0,0,.03) 100px, rgba(0,0,0,.03) 101px);
+    z-index: 0;
+  }
+
+  .book-scene {
+    perspective: 1800px;
+    width: var(--page-w);
+    height: var(--page-h);
+    position: relative;
+    z-index: 1;
+  }
+
+  .book {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .page {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    border-radius: 2px 8px 8px 2px;
+    overflow: hidden;
+    transition: transform .8s cubic-bezier(.645,.045,.355,1),
+                opacity .4s ease;
+    transform-origin: left center;
+    cursor: pointer;
+  }
+
+  .page-inner {
+    width: 100%; height: 100%;
+    padding: 48px 44px 40px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-faint) transparent;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      var(--paper)
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    z-index: 0;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 24px;
+    background: linear-gradient(90deg, rgba(0,0,0,.08), transparent);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .page-inner > * { position: relative; z-index: 1; }
+
+  .page[data-state="current"] { transform: rotateY(0deg); z-index: 10; }
+  .page[data-state="flipped"]  { transform: rotateY(-180deg); z-index: 5; pointer-events: none; }
+  .page[data-state="stacked"] { transform: rotateY(0deg); z-index: 1; }
+
+  .page-num {
+    position: absolute;
+    bottom: 20px; right: 36px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
+    z-index: 3;
+  }
+  .page-num::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--ink-faint);
+    vertical-align: middle;
+    margin-right: 8px;
+    opacity: .5;
+  }
+
+  /* navigation */
+  .nav-bar {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .nav-btn {
+    background: rgba(245,240,232,.1);
+    border: 1px solid rgba(245,240,232,.15);
+    color: var(--paper-dark);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    padding: 8px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .25s;
+    letter-spacing: 1px;
+    backdrop-filter: blur(4px);
+  }
+  .nav-btn:hover { background: rgba(245,240,232,.18); color: #fff; }
+  .nav-btn:disabled { opacity: .25; cursor: default; }
+
+  .nav-dots { display: flex; gap: 6px; align-items: center; }
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(245,240,232,.15);
+    transition: all .35s;
+    cursor: pointer;
+  }
+  .nav-dot.active {
+    background: var(--vermillion);
+    box-shadow: 0 0 8px rgba(196,30,58,.4);
+    transform: scale(1.3);
+  }
+
+  /* typography */
+  .ch-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  h2.section-title {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink-faint);
+    line-height: 1.5;
+  }
+
+  .body-text {
+    font-size: 15px;
+    line-height: 2;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+  }
+  .body-text strong { color: var(--ink); font-weight: 600; }
+
+  .highlight { color: var(--vermillion); font-weight: 600; }
+  .blue { color: var(--blue-ink); font-weight: 600; }
+  .green { color: var(--green-ink); font-weight: 600; }
+  .gold { color: var(--gold); font-weight: 600; }
+
+  .note-box {
+    background: rgba(196,30,58,.04);
+    border-left: 3px solid var(--vermillion);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+  }
+  .note-box .label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--vermillion);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .insight-box {
+    background: rgba(42,74,107,.05);
+    border-left: 3px solid var(--blue-ink);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+  }
+
+  /* cover */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 48px;
+  }
+
+  .cover-ornament {
+    width: 60px; height: 1px;
+    background: var(--gold);
+    margin: 20px auto;
+    position: relative;
+  }
+  .cover-ornament::before,
+  .cover-ornament::after {
+    content: '';
+    position: absolute;
+    width: 5px; height: 5px;
+    border: 1px solid var(--gold);
+    top: -2px;
+    transform: rotate(45deg);
+  }
+  .cover-ornament::before { left: -8px; }
+  .cover-ornament::after  { right: -8px; }
+
+  .cover .ch-num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--vermillion);
+    line-height: 1;
+    opacity: .18;
+    margin-bottom: -10px;
+  }
+
+  .cover h1 {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 8px 0;
+  }
+
+  .cover .en-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+
+  .cover .toc {
+    text-align: left;
+    margin-top: 36px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .cover .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 0;
+    font-size: 14px;
+    color: var(--ink-light);
+    border-bottom: 1px dotted rgba(0,0,0,.1);
+    line-height: 1.6;
+  }
+
+  .cover .toc-item .num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--vermillion-soft);
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+
+  /* dialogue system */
+  .dialogue {
+    margin: 6px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .dialogue .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .dialogue.student .avatar {
+    background: rgba(196,30,58,.12);
+    color: var(--vermillion);
+  }
+
+  .dialogue.teacher .avatar {
+    background: rgba(42,74,107,.12);
+    color: var(--blue-ink);
+  }
+
+  .dialogue .bubble {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    padding: 10px 14px;
+    border-radius: 2px 10px 10px 10px;
+    position: relative;
+  }
+
+  .dialogue.student .bubble {
+    background: rgba(196,30,58,.04);
+    border-left: 2px solid rgba(196,30,58,.15);
+  }
+
+  .dialogue.teacher .bubble {
+    background: rgba(42,74,107,.04);
+    border-left: 2px solid rgba(42,74,107,.15);
+  }
+
+  .dialogue .speaker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .dialogue.student .speaker { color: var(--vermillion-soft); }
+  .dialogue.teacher .speaker { color: var(--blue-ink); }
+
+  .dialogue .bubble strong { color: var(--ink); }
+
+  /* compare cards */
+  .compare-row {
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+  }
+  .compare-card {
+    flex: 1;
+    padding: 16px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    line-height: 1.9;
+  }
+  .compare-card .card-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  /* data table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--ink);
+    color: var(--ink);
+  }
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* flow steps */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 10px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 0;
+  }
+  .flow-step .step-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Crimson Pro', serif;
+    font-size: 11px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .flow-step .step-icon.s1 { background: var(--blue-ink); }
+  .flow-step .step-icon.s2 { background: var(--green-ink); }
+  .flow-step .step-icon.s3 { background: var(--vermillion); }
+  .flow-step .step-icon.s4 { background: var(--gold); }
+  .flow-step .step-icon.s5 { background: var(--ink-light); }
+  .flow-step .step-icon.s6 { background: var(--ink-faint); }
+
+  .flow-step .step-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-light);
+  }
+  .flow-step .step-text strong {
+    color: var(--ink);
+    display: inline;
+    margin-right: 6px;
+  }
+
+  /* formula */
+  .formula-block {
+    text-align: center;
+    margin: 14px 0;
+    padding: 16px;
+    background: rgba(0,0,0,.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(0,0,0,.1);
+  }
+  .formula {
+    font-family: 'Crimson Pro', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: 1px;
+  }
+  .formula-desc {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    line-height: 1.8;
+  }
+
+  /* param cards */
+  .param-cards {
+    display: flex; gap: 16px;
+    margin: 14px 0;
+  }
+  .param-card {
+    flex: 1;
+    padding: 14px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .param-card .param-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .param-card .param-detail {
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.8;
+  }
+
+  /* summary list */
+  .summary-list {
+    list-style: none;
+    counter-reset: sum;
+    margin: 10px 0;
+  }
+  .summary-list li {
+    counter-increment: sum;
+    padding: 10px 0 10px 36px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+  .summary-list li::before {
+    content: counter(sum);
+    position: absolute;
+    left: 0; top: 10px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--vermillion);
+    color: #fff;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .summary-list li:last-child { border-bottom: none; }
+
+  /* code block */
+  .code-block {
+    background: rgba(44,24,16,.06);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'Crimson Pro', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    width: 100%;
+  }
+
+  /* glossary */
+  .glossary { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.08); }
+  .glossary-title { font-family: 'Crimson Pro', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .glossary-item { display: flex; gap: 8px; font-size: 12px; line-height: 1.7; padding: 2px 0; color: var(--ink-faint); }
+  .glossary-term { color: var(--ink-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
+
+  /* responsive */
+  @media (max-width: 600px) {
+    .page-inner { padding: 32px 24px 36px; }
+    h2.section-title { font-size: 19px; }
+    .cover h1 { font-size: 30px; }
+    .compare-row { flex-direction: column; }
+    .param-cards { flex-direction: column; }
+    .formula { font-size: 20px; }
+    .code-block { font-size: 11px; }
+    .dialogue .avatar { width: 26px; height: 26px; font-size: 11px; }
+  }
+
+  /* entrance animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page[data-state="current"] .page-inner > * {
+    animation: fadeUp .5s ease both;
+  }
+  .page[data-state="current"] .page-inner > *:nth-child(1) { animation-delay: .1s; }
+  .page[data-state="current"] .page-inner > *:nth-child(2) { animation-delay: .16s; }
+  .page[data-state="current"] .page-inner > *:nth-child(3) { animation-delay: .22s; }
+  .page[data-state="current"] .page-inner > *:nth-child(4) { animation-delay: .28s; }
+  .page[data-state="current"] .page-inner > *:nth-child(5) { animation-delay: .34s; }
+  .page[data-state="current"] .page-inner > *:nth-child(6) { animation-delay: .40s; }
+  .page[data-state="current"] .page-inner > *:nth-child(7) { animation-delay: .46s; }
+  .page[data-state="current"] .page-inner > *:nth-child(8) { animation-delay: .52s; }
+  .page[data-state="current"] .page-inner > *:nth-child(9) { animation-delay: .58s; }
+  .page[data-state="current"] .page-inner > *:nth-child(10) { animation-delay: .64s; }
+  .page[data-state="current"] .page-inner > *:nth-child(11) { animation-delay: .70s; }
+  .page[data-state="current"] .page-inner > *:nth-child(12) { animation-delay: .76s; }
+  .page[data-state="current"] .page-inner > *:nth-child(13) { animation-delay: .82s; }
+  .page[data-state="current"] .page-inner > *:nth-child(14) { animation-delay: .88s; }
+</style>
+</head>
+<body>
+
+<div class="book-scene">
+<div class="book">
+
+<!-- ═══════════ Page 0: 封面 ═══════════ -->
+<div class="page" data-index="0" data-state="current">
+  <div class="page-inner">
+    <div class="cover">
+      <div class="ch-num">D5</div>
+      <h1>逻辑回归与分类评估</h1>
+      <div class="en-title">Logistic Regression &amp; Classification Evaluation</div>
+      <div class="cover-ornament"></div>
+      <div style="font-size:13px; color:var(--ink-faint); font-style:italic; margin-bottom:8px;">
+        Machine Learning Notes &middot; Day 05
+      </div>
+      <div class="toc">
+        <div class="toc-item"><span class="num">1</span> 逻辑回归简介与 sigmoid 函数</div>
+        <div class="toc-item"><span class="num">2</span> 数学基础 &mdash; 概率、极大似然、对数</div>
+        <div class="toc-item"><span class="num">3</span> 逻辑回归原理 &mdash; 假设函数与交叉熵损失</div>
+        <div class="toc-item"><span class="num">4</span> API 函数与癌症分类案例</div>
+        <div class="toc-item"><span class="num">5</span> 分类评估 &mdash; 混淆矩阵、P/R/F1、ROC/AUC</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ Page 1: 逻辑回归简介与 sigmoid ═══════════ -->
+<div class="page" data-index="1" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 05 &middot; Page 1</div>
+    <h2 class="section-title">逻辑回归简介与 sigmoid 函数</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        Day 04 结尾提到逻辑回归。名字里有&ldquo;回归&rdquo;，它和线性回归是一回事吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        名字有回归，但做的是<span class="highlight">分类</span>。线性回归输出一个连续数值，逻辑回归输出一个<strong>类别</strong>。它专门解决<span class="highlight">二分类</span>问题 &mdash; 答案只有两种：是/否、0/1。
+      </div>
+    </div>
+
+    <table class="data-table">
+      <tr><th>应用场景</th><th>类别 0</th><th>类别 1</th></tr>
+      <tr><td>垃圾邮件检测</td><td>正常邮件</td><td>垃圾邮件</td></tr>
+      <tr><td>疾病诊断</td><td>良性肿瘤</td><td>恶性肿瘤</td></tr>
+      <tr><td>客户流失预测</td><td>不流失</td><td>流失</td></tr>
+      <tr><td>欺诈检测</td><td>正常交易</td><td>欺诈交易</td></tr>
+    </table>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        线性回归输出的数值直接大于某个值就算 1 类，不行吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        问题在于线性回归的输出范围是 <span class="blue">(&minus;&infin;, +&infin;)</span>，没有上下限。分类需要一个 <span class="green">0 到 1</span> 之间的概率值：0.9 表示 90% 是类别 1，0.2 表示 80% 是类别 0。我们需要一个&ldquo;压缩器&rdquo;把任意数值压到 (0,1) &mdash; 这就是 <span class="highlight">sigmoid 函数</span>。
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula">f(x) = 1 / (1 + e<sup>&minus;x</sup>)</div>
+      <div class="formula-desc">e &asymp; 2.718（自然常数，固定数字）&emsp; 输入任意实数 &rarr; 输出永远在 (0, 1) 之间</div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        sigmoid 四个关键性质：<br>
+        &bull; <strong>单调递增</strong>：x 越大，输出越接近 1<br>
+        &bull; <strong>拐点在 x=0</strong>：f(0) = 0.5，正好是&ldquo;五五开&rdquo;的分界线<br>
+        &bull; <strong>输出范围 (0,1)</strong>：永远不到 0 也不到 1，总留有余地<br>
+        &bull; <strong>导数公式</strong>：f&prime;(x) = f(x) &times; (1 &minus; f(x))，用已有的预测值就能算导数，梯度下降时很高效
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 手算示例</div>
+      sigmoid(2) = 1 / (1 + e<sup>&minus;2</sup>) = 1 / (1 + 0.135) = 1 / 1.135 &asymp; <span class="highlight">0.88</span><br>
+      &rarr; 88% 的概率是类别 1。计算机会做这步，你只需记住 sigmoid 的 S 形曲线和意义。
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">二分类</span></span> 样本只分两类（0/1），逻辑回归的核心场景</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">sigmoid</span></span> S 形激活函数，将实数映射到 (0,1) 概率区间</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">概率值</span></span> 0~1 之间的数，表示样本属于某一类的可能性</div>
+    </div>
+  </div>
+  <div class="page-num">1 / 6</div>
+</div>
+
+<!-- ═══════════ Page 2: 数学基础 ═══════════ -->
+<div class="page" data-index="2" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 05 &middot; Page 2</div>
+    <h2 class="section-title">数学基础 &mdash; 概率、极大似然、对数</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        逻辑回归的损失函数推导需要什么数学知识？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        三个概念：<span class="blue">联合概率</span>、<span class="highlight">极大似然估计</span>、<span class="green">对数函数</span>。用一副扑克牌来说明前两个。一副标准牌 52 张，4 种花色。红色牌 26 张，K 有 4 张。
+      </div>
+    </div>
+
+    <div class="compare-row">
+      <div class="compare-card" style="background:rgba(42,74,107,.06);">
+        <div class="card-title" style="color:var(--blue-ink);">联合概率</div>
+        两个独立事件<strong>同时</strong>发生<br>
+        P(红 且 K) = P(红) &times; P(K)<br>
+        = 1/2 &times; 1/13 = <span class="blue">1/26</span><br>
+        <em>概率相乘</em>
+      </div>
+      <div class="compare-card" style="background:rgba(196,30,58,.05);">
+        <div class="card-title" style="color:var(--vermillion);">条件概率</div>
+        已知 B 发生，A 的概率<br>
+        P(K | 红牌) = 2/26 = <span class="highlight">1/13</span><br>
+        P(红 | K) = 2/4 = <span class="highlight">0.5</span><br>
+        <em>缩小了范围再计算</em>
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        极大似然估计是什么？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        核心思想：<strong>什么样的参数，最可能产生观测到的数据？</strong>举个例子 &mdash; 一枚不均匀硬币抛 6 次：正、反、反、正、正、正。正面概率记为 &theta;。每次独立，所以用联合概率：
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula" style="font-size:18px;">L(&theta;) = &theta;<sup>4</sup> &times; (1&minus;&theta;)<sup>2</sup></div>
+      <div class="formula-desc">似然函数：产生观测数据的&ldquo;可能性&rdquo;&emsp; 让 L(&theta;) 最大化 &rarr; &theta; = 4/6 &asymp; 0.667</div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        对数函数在这里起什么作用？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        似然函数是概率<strong>连乘</strong>，几万个概率乘起来数值会小到计算机存不下。对数把<span class="blue">乘法变加法</span>：log(M&times;N) = log(M) + log(N)，还能把<span class="green">指数变乘法</span>：log(M<sup>n</sup>) = n&times;log(M)。取 log 后连乘变连加，数值稳定，<strong>且不改变极值位置</strong>（log 是单调递增的）。
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 为什么要学这三个概念</div>
+      逻辑回归的损失函数推导路径：<br>
+      <span class="blue">联合概率</span>（构建似然函数）&rarr; <span class="highlight">极大似然</span>（最大化）&rarr; <span class="green">取对数</span>（简化计算）&rarr; 加负号 &rarr; <strong>交叉熵损失</strong>
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">联合概率</span></span> 独立事件同时发生的概率 = 各自概率相乘</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">MLE</span></span> 极大似然估计，让观测数据出现概率最大化</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">log</span></span> 对数函数，乘法变加法的数学工具</div>
+    </div>
+  </div>
+  <div class="page-num">2 / 6</div>
+</div>
+
+<!-- ═══════════ Page 3: 逻辑回归原理 ═══════════ -->
+<div class="page" data-index="3" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 05 &middot; Page 3</div>
+    <h2 class="section-title">逻辑回归原理 &mdash; 假设函数与交叉熵损失</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        逻辑回归的完整预测流程是怎样的？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        三步：<span class="blue">线性回归算分数</span> &rarr; <span class="green">sigmoid 变概率</span> &rarr; <span class="highlight">阈值判类别</span>。假设函数写成一行就是 h(w) = sigmoid(w<sup>T</sup>x + b)。线性回归的输出就是逻辑回归的输入。
+      </div>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-icon s1">1</div>
+        <div class="step-text"><strong>线性计算</strong>z = w<sub>1</sub>&times;x<sub>1</sub> + w<sub>2</sub>&times;x<sub>2</sub> + b &emsp; 输出一个实数（logits）</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s2">2</div>
+        <div class="step-text"><strong>sigmoid 变概率</strong>p = 1/(1+e<sup>&minus;z</sup>) &emsp; 输出 0~1 之间的概率</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s3">3</div>
+        <div class="step-text"><strong>阈值判断</strong>p &gt; 0.5 &rarr; 类别 1 &emsp; p &le; 0.5 &rarr; 类别 0</div>
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        logits 是什么？阈值 0.5 可以改吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        <span class="blue">logits</span> 就是 w<sup>T</sup>x + b 的输出值，还没过 sigmoid 的原始分数，可以是任意实数。阈值可以调：<span class="highlight">医学场景降到 0.3</span>（宁可误报不要漏掉患者），<span class="green">垃圾邮件提高到 0.7</span>（宁可漏几封也不要误判正常邮件）。
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        损失函数为什么不能用 Day 03 学的 MSE？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        sigmoid 是非线性的，MSE + sigmoid 会产生很多局部最小值，梯度下降会走到错误的谷底。所以用<span class="highlight">二分类交叉熵</span>。推导用 Day 05 Page 2 学的数学：
+      </div>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-icon s1">1</div>
+        <div class="step-text"><strong>单样本正确概率</strong>P = p<sup>y</sup> &times; (1&minus;p)<sup>(1&minus;y)</sup> &emsp; y=1 时只剩 p，y=0 时只剩 1&minus;p</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s2">2</div>
+        <div class="step-text"><strong>n 个样本联合概率</strong>L = &prod; p<sub>i</sub><sup>y<sub>i</sub></sup> (1&minus;p<sub>i</sub>)<sup>(1&minus;y<sub>i</sub>)</sup> &emsp; 联合概率 = 各自相乘</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s3">3</div>
+        <div class="step-text"><strong>取对数</strong>log L = &sum;[ y<sub>i</sub> log(p<sub>i</sub>) + (1&minus;y<sub>i</sub>) log(1&minus;p<sub>i</sub>) ] &emsp; 连乘变连加</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s4">4</div>
+        <div class="step-text"><strong>加负号</strong>Loss = &minus;&sum;[ y log(p) + (1&minus;y) log(1&minus;p) ] &emsp; 最大化变最小化</div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 优化方式</div>
+      交叉熵损失没有解析解（不能用正规方程），<strong>只能用梯度下降</strong>迭代优化。<br>
+      Day 04 提到过：&ldquo;逻辑回归没有正规方程 &mdash; 这就是为什么要先学梯度下降。&rdquo;
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">logits</span></span> 线性部分 w<sup>T</sup>x + b 的输出，未经 sigmoid 的原始分数</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">交叉熵</span></span> Binary Cross-Entropy，逻辑回归的标准损失函数</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">阈值</span></span> 概率分界线，默认 0.5，可按业务场景调整</div>
+    </div>
+  </div>
+  <div class="page-num">3 / 6</div>
+</div>
+
+<!-- ═══════════ Page 4: API 与案例 ═══════════ -->
+<div class="page" data-index="4" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 05 &middot; Page 4</div>
+    <h2 class="section-title">API 函数与癌症分类案例</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        逻辑回归的 API 和线性回归差别大吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        接口几乎一样 &mdash; fit/predict/score 三件套不变。多了一个 <span class="highlight">predict_proba()</span> 返回每个类别的概率值，这是分类模型特有的。
+      </div>
+    </div>
+
+    <div class="code-block">from sklearn.linear_model import LogisticRegression
+
+lr = LogisticRegression(
+    solver='liblinear',    # 求解引擎
+    penalty='l2',          # 正则化类型
+    C=1.0                  # 正则化力度（C 越小惩罚越重）
+)
+lr.fit(X_train, y_train)          # 训练
+y_pred = lr.predict(X_test)       # 预测类别
+y_prob = lr.predict_proba(X_test) # 预测概率 [P(0类), P(1类)]</div>
+
+    <table class="data-table">
+      <tr><th>solver</th><th>适用场景</th><th>支持的正则化</th></tr>
+      <tr><td><span class="blue">liblinear</span></td><td>小数据集</td><td>L1, L2</td></tr>
+      <tr><td><span class="green">sag / saga</span></td><td>大数据集</td><td>L2 / L1+L2</td></tr>
+      <tr><td><span class="gold">lbfgs</span></td><td>中等数据集</td><td>L2</td></tr>
+    </table>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        solver 是什么？penalty 和 C 参数是什么意思？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        <span class="blue">solver</span> 是用什么算法做梯度下降，不同算法适合不同数据量。<span class="highlight">penalty</span> 是正则化类型，L1 可以让某些权重归零（自动选特征），L2 让所有权重变小。<span class="green">C</span> 控制正则化力度 &mdash; 注意 sklearn 里 <strong>C 越大惩罚越轻</strong>，和教科书的 &lambda;（越大惩罚越重）方向相反。
+      </div>
+    </div>
+
+    <div class="code-block"># ═══ 癌症分类完整流程（sklearn 内置数据集）═══
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+data = load_breast_cancer()          # 569样本, 30特征
+X_train, X_test, y_train, y_test = train_test_split(
+    data.data, data.target, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)  # 训练集 fit+transform
+X_test  = scaler.transform(X_test)       # 测试集只 transform
+
+lr = LogisticRegression(solver='liblinear')
+lr.fit(X_train, y_train)
+print(f"准确率：{lr.score(X_test, y_test):.4f}")
+# &asymp; 0.9737</div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 流程和线性回归完全一致</div>
+      加载数据 &rarr; 切分 &rarr; <span class="highlight">标准化</span>（梯度下降必须）&rarr; fit 训练 &rarr; predict 预测 &rarr; score 评估<br>
+      只是把 <span class="blue">LinearRegression</span> 换成了 <span class="highlight">LogisticRegression</span>
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">predict_proba</span></span> 返回概率值而非类别，分类模型特有</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">C 参数</span></span> 正则化力度，C 越小 &rarr; 惩罚越重 &rarr; w 越受限</div>
+    </div>
+  </div>
+  <div class="page-num">4 / 6</div>
+</div>
+
+<!-- ═══════════ Page 5: 分类评估 ═══════════ -->
+<div class="page" data-index="5" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 05 &middot; Page 5</div>
+    <h2 class="section-title">分类评估 &mdash; 混淆矩阵、P/R/F1、ROC/AUC</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        准确率不够用吗？1000 个样本判对 990 个，准确率 99% 不是很高吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        如果 1000 个样本里 990 个健康、10 个患病，模型全预测&ldquo;健康&rdquo;准确率也是 99% &mdash; 但<span class="highlight">一个患者都没找到</span>。准确率在样本不均衡时会骗人，所以需要<strong>混淆矩阵</strong>做更细致的拆解。
+      </div>
+    </div>
+
+    <table class="data-table">
+      <tr><th></th><th>预测：正例</th><th>预测：反例</th><th>记忆</th></tr>
+      <tr><td><strong>真实：正例</strong></td><td><span class="green">TP 真正例</span></td><td><span class="highlight">FN 伪反例</span></td><td>漏掉了</td></tr>
+      <tr><td><strong>真实：反例</strong></td><td><span class="highlight">FP 伪正例</span></td><td><span class="green">TN 真反例</span></td><td>误报了</td></tr>
+    </table>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        记忆口诀：第一个字 T/F = 判对/判错，第二个字 P/N = 模型说的是正/反。基于这四个值计算三个核心指标：
+      </div>
+    </div>
+
+    <div class="param-cards">
+      <div class="param-card" style="background:rgba(42,74,107,.06);">
+        <div class="param-name" style="color:var(--blue-ink);">精确率 P</div>
+        <div class="param-detail">
+          TP / (TP + FP)<br>
+          <strong>找出来的阳性，有多少是对的</strong><br>
+          关注：避免误报<br>
+          场景：垃圾邮件
+        </div>
+      </div>
+      <div class="param-card" style="background:rgba(42,107,74,.06);">
+        <div class="param-name" style="color:var(--green-ink);">召回率 R</div>
+        <div class="param-detail">
+          TP / (TP + FN)<br>
+          <strong>真正的阳性，你找到了多少</strong><br>
+          关注：避免漏报<br>
+          场景：癌症诊断
+        </div>
+      </div>
+      <div class="param-card" style="background:rgba(196,30,58,.05);">
+        <div class="param-name" style="color:var(--vermillion);">F1-score</div>
+        <div class="param-detail">
+          2&times;P&times;R / (P+R)<br>
+          <strong>精确率和召回率的调和平均</strong><br>
+          任一方低 &rarr; F1 被拉低<br>
+          要求两者均衡时用
+        </div>
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        ROC 曲线和 AUC 又是什么？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        ROC 曲线以 <span class="blue">FPR</span>（负样本被误判为正的比率）为 x 轴，<span class="green">TPR</span>（正样本被正确找到的比率，就是召回率）为 y 轴。改变阈值会改变 FPR 和 TPR 的值，每个阈值画一个点，连起来就是 ROC 曲线。<span class="highlight">AUC</span> = 曲线下面积，AUC=1 完美，AUC=0.5 等于随机猜，越大越好。曲线越靠近左上角 (0,1) 点，模型辨别能力越强。
+      </div>
+    </div>
+
+    <div class="code-block">from sklearn.metrics import classification_report, roc_auc_score
+
+# 完整分类报告（精确率/召回率/F1/support 一次输出）
+print(classification_report(y_test, y_pred,
+    labels=[0,1], target_names=['良性','恶性']))
+
+# AUC 值
+auc = roc_auc_score(y_test, lr.predict_proba(X_test)[:,1])
+print(f"AUC = {auc:.4f}")</div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">Precision</span></span> 精确率，避免误报，TP/(TP+FP)</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">Recall</span></span> 召回率，避免漏报，TP/(TP+FN)</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">AUC</span></span> ROC 曲线下面积，0.5~1，越大分类能力越强</div>
+    </div>
+  </div>
+  <div class="page-num">5 / 6</div>
+</div>
+
+<!-- ═══════════ Page 6: 小结 ═══════════ -->
+<div class="page" data-index="6" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 05 &middot; Summary</div>
+    <h2 class="section-title">章节小结</h2>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        今天从回归走到了分类，梳理核心知识：
+      </div>
+    </div>
+
+    <ol class="summary-list">
+      <li><strong>逻辑回归 = 线性回归 + sigmoid</strong> &mdash; 把线性输出压缩为 (0,1) 概率值，解决二分类问题。</li>
+      <li><strong>sigmoid 函数</strong> &mdash; f(x) = 1/(1+e<sup>&minus;x</sup>)，S 形曲线，拐点 x=0 时 f=0.5，导数 f&prime;=f(1&minus;f)。</li>
+      <li><strong>交叉熵损失</strong> &mdash; Loss = &minus;&sum;[y&middot;log(p) + (1&minus;y)&middot;log(1&minus;p)]，由极大似然法推导，只能用梯度下降优化。</li>
+      <li><strong>API</strong> &mdash; LogisticRegression(solver, penalty, C)，流程和线性回归一致，多了 predict_proba()。</li>
+      <li><strong>混淆矩阵</strong> &mdash; TP/FN/FP/TN 四个格子，第一个字 T/F = 对/错，第二个字 P/N = 模型说正/反。</li>
+      <li><strong>P/R/F1</strong> &mdash; 精确率避免误报，召回率避免漏报，F1 是两者的调和平均。准确率在不均衡数据上会骗人。</li>
+      <li><strong>ROC/AUC</strong> &mdash; 不同阈值下 TPR vs FPR 的曲线。AUC 越大越好，0.5=随机，1=完美。</li>
+    </ol>
+
+    <div class="note-box">
+      <div class="label">Error Log &mdash; 易错清单</div>
+      &bull; 逻辑回归名字有&ldquo;回归&rdquo;但做的是<strong>分类</strong> &mdash; 因为它用了回归的思想来输出概率<br>
+      &bull; MSE <strong>不能用于</strong>逻辑回归 &mdash; sigmoid 的非线性让 MSE 产生多个局部最小值<br>
+      &bull; sklearn 的 <strong>C 越大惩罚越轻</strong> &mdash; 和教科书 &lambda;（越大惩罚越重）方向相反<br>
+      &bull; 准确率高 &ne; 模型好 &mdash; 样本不均衡时全猜多数类也能准确率 99%
+    </div>
+
+    <div class="insight-box">
+      <strong>实战案例 &mdash; 电信客户流失预测</strong><br>
+      用逻辑回归预测客户是否流失（二分类），流程：缺失值处理 &rarr; 标签编码 &rarr; 特征选择 &rarr; 切分 &rarr; 标准化 &rarr; 训练 &rarr; classification_report + AUC 评估。
+      只用 3 个特征时 Recall &asymp; 33%（漏掉 2/3 流失客户），需要加入更多特征或调低阈值来提高召回率。
+    </div>
+
+    <div class="insight-box">
+      <strong>Day 06 预告</strong>：决策树 &mdash; 不依赖线性假设的分类/回归模型 &rarr; 信息增益 &rarr; 剪枝 &rarr; 随机森林初步。
+    </div>
+  </div>
+  <div class="page-num">6 / 6</div>
+</div>
+
+</div><!-- /book -->
+</div><!-- /book-scene -->
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn">&larr; 上一页</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn" id="nextBtn">下一页 &rarr;</button>
+</div>
+
+<script>
+(function() {
+  const pages = document.querySelectorAll('.page');
+  const total = pages.length;
+  let current = 0;
+
+  const dotsContainer = document.getElementById('navDots');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function updatePages() {
+    pages.forEach((p, i) => {
+      if (i < current) p.dataset.state = 'flipped';
+      else if (i === current) p.dataset.state = 'current';
+      else p.dataset.state = 'stacked';
+    });
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    current = idx;
+    updatePages();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  let startX = 0;
+  document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>

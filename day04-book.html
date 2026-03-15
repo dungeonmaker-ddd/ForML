@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 04 — 梯度下降与模型评估</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f5f0e8;
+    --paper-dark: #e8e0d0;
+    --ink: #2c1810;
+    --ink-light: #5a4a3a;
+    --ink-faint: #9a8a7a;
+    --vermillion: #c41e3a;
+    --vermillion-soft: #d4556a;
+    --gold: #b8943e;
+    --gold-light: #d4b86a;
+    --blue-ink: #2a4a6b;
+    --green-ink: #2a6b4a;
+    --page-w: min(680px, 92vw);
+    --page-h: min(880px, 85vh);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1612;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    color: var(--ink);
+    overflow: hidden;
+    user-select: none;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 40%, #2a2320 0%, #1a1612 70%),
+      repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(0,0,0,.03) 100px, rgba(0,0,0,.03) 101px);
+    z-index: 0;
+  }
+
+  .book-scene {
+    perspective: 1800px;
+    width: var(--page-w);
+    height: var(--page-h);
+    position: relative;
+    z-index: 1;
+  }
+
+  .book {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  .page {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    border-radius: 2px 8px 8px 2px;
+    overflow: hidden;
+    transition: transform .8s cubic-bezier(.645,.045,.355,1),
+                opacity .4s ease;
+    transform-origin: left center;
+    cursor: pointer;
+  }
+
+  .page-inner {
+    width: 100%; height: 100%;
+    padding: 48px 44px 40px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink-faint) transparent;
+  }
+
+  .page::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      var(--paper)
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    z-index: 0;
+  }
+
+  .page::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 24px;
+    background: linear-gradient(90deg, rgba(0,0,0,.08), transparent);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .page-inner > * { position: relative; z-index: 1; }
+
+  .page[data-state="current"] { transform: rotateY(0deg); z-index: 10; }
+  .page[data-state="flipped"]  { transform: rotateY(-180deg); z-index: 5; pointer-events: none; }
+  .page[data-state="stacked"] { transform: rotateY(0deg); z-index: 1; }
+
+  .page-num {
+    position: absolute;
+    bottom: 20px; right: 36px;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
+    z-index: 3;
+  }
+  .page-num::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1px;
+    background: var(--ink-faint);
+    vertical-align: middle;
+    margin-right: 8px;
+    opacity: .5;
+  }
+
+  /* navigation */
+  .nav-bar {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .nav-btn {
+    background: rgba(245,240,232,.1);
+    border: 1px solid rgba(245,240,232,.15);
+    color: var(--paper-dark);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    padding: 8px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .25s;
+    letter-spacing: 1px;
+    backdrop-filter: blur(4px);
+  }
+  .nav-btn:hover { background: rgba(245,240,232,.18); color: #fff; }
+  .nav-btn:disabled { opacity: .25; cursor: default; }
+
+  .nav-dots { display: flex; gap: 6px; align-items: center; }
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(245,240,232,.15);
+    transition: all .35s;
+    cursor: pointer;
+  }
+  .nav-dot.active {
+    background: var(--vermillion);
+    box-shadow: 0 0 8px rgba(196,30,58,.4);
+    transform: scale(1.3);
+  }
+
+  /* typography */
+  .ch-label {
+    font-family: 'Crimson Pro', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  h2.section-title {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--ink);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink-faint);
+    line-height: 1.5;
+  }
+
+  .body-text {
+    font-size: 15px;
+    line-height: 2;
+    color: var(--ink-light);
+    margin-bottom: 16px;
+  }
+  .body-text strong { color: var(--ink); font-weight: 600; }
+
+  .highlight { color: var(--vermillion); font-weight: 600; }
+  .blue { color: var(--blue-ink); font-weight: 600; }
+  .green { color: var(--green-ink); font-weight: 600; }
+  .gold { color: var(--gold); font-weight: 600; }
+
+  .note-box {
+    background: rgba(196,30,58,.04);
+    border-left: 3px solid var(--vermillion);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+  }
+  .note-box .label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--vermillion);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .insight-box {
+    background: rgba(42,74,107,.05);
+    border-left: 3px solid var(--blue-ink);
+    padding: 14px 18px;
+    margin: 14px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+  }
+
+  /* cover */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 48px;
+  }
+
+  .cover-ornament {
+    width: 60px; height: 1px;
+    background: var(--gold);
+    margin: 20px auto;
+    position: relative;
+  }
+  .cover-ornament::before,
+  .cover-ornament::after {
+    content: '';
+    position: absolute;
+    width: 5px; height: 5px;
+    border: 1px solid var(--gold);
+    top: -2px;
+    transform: rotate(45deg);
+  }
+  .cover-ornament::before { left: -8px; }
+  .cover-ornament::after  { right: -8px; }
+
+  .cover .ch-num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--vermillion);
+    line-height: 1;
+    opacity: .18;
+    margin-bottom: -10px;
+  }
+
+  .cover h1 {
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 8px 0;
+  }
+
+  .cover .en-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+
+  .cover .toc {
+    text-align: left;
+    margin-top: 36px;
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .cover .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 0;
+    font-size: 14px;
+    color: var(--ink-light);
+    border-bottom: 1px dotted rgba(0,0,0,.1);
+    line-height: 1.6;
+  }
+
+  .cover .toc-item .num {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    color: var(--vermillion-soft);
+    min-width: 20px;
+    flex-shrink: 0;
+  }
+
+  /* dialogue system */
+  .dialogue {
+    margin: 6px 0;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .dialogue .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .dialogue.student .avatar {
+    background: rgba(196,30,58,.12);
+    color: var(--vermillion);
+  }
+
+  .dialogue.teacher .avatar {
+    background: rgba(42,74,107,.12);
+    color: var(--blue-ink);
+  }
+
+  .dialogue .bubble {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    padding: 10px 14px;
+    border-radius: 2px 10px 10px 10px;
+    position: relative;
+  }
+
+  .dialogue.student .bubble {
+    background: rgba(196,30,58,.04);
+    border-left: 2px solid rgba(196,30,58,.15);
+  }
+
+  .dialogue.teacher .bubble {
+    background: rgba(42,74,107,.04);
+    border-left: 2px solid rgba(42,74,107,.15);
+  }
+
+  .dialogue .speaker {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .dialogue.student .speaker { color: var(--vermillion-soft); }
+  .dialogue.teacher .speaker { color: var(--blue-ink); }
+
+  .dialogue .bubble strong { color: var(--ink); }
+
+  /* compare cards */
+  .compare-row {
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+  }
+  .compare-card {
+    flex: 1;
+    padding: 16px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    line-height: 1.9;
+  }
+  .compare-card .card-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  /* data table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--ink);
+    color: var(--ink);
+  }
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  /* flow steps */
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 10px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 0;
+  }
+  .flow-step .step-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Crimson Pro', serif;
+    font-size: 11px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .flow-step .step-icon.s1 { background: var(--blue-ink); }
+  .flow-step .step-icon.s2 { background: var(--green-ink); }
+  .flow-step .step-icon.s3 { background: var(--vermillion); }
+  .flow-step .step-icon.s4 { background: var(--gold); }
+  .flow-step .step-icon.s5 { background: var(--ink-light); }
+  .flow-step .step-icon.s6 { background: var(--ink-faint); }
+
+  .flow-step .step-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-light);
+  }
+  .flow-step .step-text strong {
+    color: var(--ink);
+    display: inline;
+    margin-right: 6px;
+  }
+
+  /* formula */
+  .formula-block {
+    text-align: center;
+    margin: 14px 0;
+    padding: 16px;
+    background: rgba(0,0,0,.02);
+    border-radius: 8px;
+    border: 1px dashed rgba(0,0,0,.1);
+  }
+  .formula {
+    font-family: 'Crimson Pro', serif;
+    font-size: 24px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: 1px;
+  }
+  .formula-desc {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    line-height: 1.8;
+  }
+
+  /* param cards */
+  .param-cards {
+    display: flex; gap: 16px;
+    margin: 14px 0;
+  }
+  .param-card {
+    flex: 1;
+    padding: 14px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .param-card .param-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .param-card .param-detail {
+    font-size: 12.5px;
+    color: var(--ink-light);
+    line-height: 1.8;
+  }
+
+  /* summary list */
+  .summary-list {
+    list-style: none;
+    counter-reset: sum;
+    margin: 10px 0;
+  }
+  .summary-list li {
+    counter-increment: sum;
+    padding: 10px 0 10px 36px;
+    position: relative;
+    font-size: 14.5px;
+    line-height: 1.9;
+    color: var(--ink-light);
+    border-bottom: 1px solid rgba(0,0,0,.04);
+  }
+  .summary-list li::before {
+    content: counter(sum);
+    position: absolute;
+    left: 0; top: 10px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--vermillion);
+    color: #fff;
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .summary-list li:last-child { border-bottom: none; }
+
+  /* code block */
+  .code-block {
+    background: rgba(44,24,16,.06);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'Crimson Pro', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    width: 100%;
+  }
+
+  /* glossary */
+  .glossary { margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.08); }
+  .glossary-title { font-family: 'Crimson Pro', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px; }
+  .glossary-item { display: flex; gap: 8px; font-size: 12px; line-height: 1.7; padding: 2px 0; color: var(--ink-faint); }
+  .glossary-term { color: var(--ink-light); font-weight: 600; white-space: nowrap; flex-shrink: 0; min-width: 80px; }
+
+  /* responsive */
+  @media (max-width: 600px) {
+    .page-inner { padding: 32px 24px 36px; }
+    h2.section-title { font-size: 19px; }
+    .cover h1 { font-size: 30px; }
+    .compare-row { flex-direction: column; }
+    .param-cards { flex-direction: column; }
+    .formula { font-size: 20px; }
+    .code-block { font-size: 11px; }
+    .dialogue .avatar { width: 26px; height: 26px; font-size: 11px; }
+  }
+
+  /* entrance animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page[data-state="current"] .page-inner > * {
+    animation: fadeUp .5s ease both;
+  }
+  .page[data-state="current"] .page-inner > *:nth-child(1) { animation-delay: .1s; }
+  .page[data-state="current"] .page-inner > *:nth-child(2) { animation-delay: .16s; }
+  .page[data-state="current"] .page-inner > *:nth-child(3) { animation-delay: .22s; }
+  .page[data-state="current"] .page-inner > *:nth-child(4) { animation-delay: .28s; }
+  .page[data-state="current"] .page-inner > *:nth-child(5) { animation-delay: .34s; }
+  .page[data-state="current"] .page-inner > *:nth-child(6) { animation-delay: .40s; }
+  .page[data-state="current"] .page-inner > *:nth-child(7) { animation-delay: .46s; }
+  .page[data-state="current"] .page-inner > *:nth-child(8) { animation-delay: .52s; }
+  .page[data-state="current"] .page-inner > *:nth-child(9) { animation-delay: .58s; }
+  .page[data-state="current"] .page-inner > *:nth-child(10) { animation-delay: .64s; }
+  .page[data-state="current"] .page-inner > *:nth-child(11) { animation-delay: .70s; }
+  .page[data-state="current"] .page-inner > *:nth-child(12) { animation-delay: .76s; }
+  .page[data-state="current"] .page-inner > *:nth-child(13) { animation-delay: .82s; }
+  .page[data-state="current"] .page-inner > *:nth-child(14) { animation-delay: .88s; }
+</style>
+</head>
+<body>
+
+<div class="book-scene">
+<div class="book">
+
+<!-- ═══════════ Page 0: 封面 ═══════════ -->
+<div class="page" data-index="0" data-state="current">
+  <div class="page-inner">
+    <div class="cover">
+      <div class="ch-num">D4</div>
+      <h1>梯度下降与模型评估</h1>
+      <div class="en-title">Gradient Descent &amp; Model Evaluation</div>
+      <div class="cover-ornament"></div>
+      <div style="font-size:13px; color:var(--ink-faint); font-style:italic; margin-bottom:8px;">
+        Machine Learning Notes &middot; Day 04
+      </div>
+      <div class="toc">
+        <div class="toc-item"><span class="num">1</span> 正规方程 vs 梯度下降 &mdash; 什么时候换</div>
+        <div class="toc-item"><span class="num">2</span> 计算过程 &mdash; 正向传播与反向传播</div>
+        <div class="toc-item"><span class="num">3</span> 学习率与标准化 &mdash; 两个必调的旋钮</div>
+        <div class="toc-item"><span class="num">4</span> 评估指标 &mdash; R&sup2; + RMSE 双视角</div>
+        <div class="toc-item"><span class="num">5</span> 拟合诊断与正则化 &mdash; L1 &amp; L2</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ Page 1: 正规方程 vs 梯度下降 ═══════════ -->
+<div class="page" data-index="1" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 04 &middot; Page 1</div>
+    <h2 class="section-title">正规方程 vs 梯度下降 &mdash; 什么时候换</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        Day 03 学了正规方程一步出结果，那梯度下降存在的意义是什么？正规方程不是更好吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        正规方程的瓶颈在矩阵求逆 <span class="blue">(X<sup>T</sup>X)<sup>&minus;1</sup></span>，复杂度是 <span class="highlight">O(n&sup3;)</span>。n 翻倍，计算量变 <strong>8 倍</strong>。梯度下降对 n 只是线性 O(n)，翻倍只变 2 倍。
+      </div>
+    </div>
+
+    <table class="data-table">
+      <tr><th></th><th>复杂度</th><th>n=10000 时</th></tr>
+      <tr><td><span class="blue">正规方程</span></td><td>O(n&sup3; + m&middot;n&sup2;)</td><td>10<sup>12</sup> + 10<sup>14</sup></td></tr>
+      <tr><td><span class="green">梯度下降</span></td><td>O(m&middot;n&middot;k)，k=1000</td><td>10<sup>9</sup> &times; 10<sup>3</sup> = 10<sup>12</sup></td></tr>
+    </table>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        那特征数没那么多的时候也可以用梯度下降吧？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        可以，结果几乎一样（MSE 是凸函数，全局最优只有一个）。但多了调学习率、迭代次数的麻烦。相当于家离超市 200 米，走路 3 分钟到，你非要开车 &mdash; <strong>能到，但还得找车位</strong>。
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        学梯度下降不是为了线性回归本身。<span class="highlight">逻辑回归没有正规方程</span>，<span class="highlight">神经网络没有正规方程</span>。后面所有模型的优化方式都是梯度下降，线性回归只是最简单的练习场。
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 判断流程</div>
+      特征数 n &gt; 10000？&rarr; <span class="highlight">梯度下降</span>（SGDRegressor）<br>
+      需要在线学习？&rarr; <span class="highlight">梯度下降</span>（partial_fit）<br>
+      都不是？&rarr; <span class="blue">正规方程</span>（LinearRegression）就够了
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">Batch GD</span></span> 全梯度下降，每步用全部样本，精确但慢</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">SGD</span></span> 随机梯度下降，每步用 1 个样本，快但抖</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">Mini-batch</span></span> 小批量，每步 64 个样本，工业默认选择</div>
+    </div>
+  </div>
+  <div class="page-num">1 / 6</div>
+</div>
+
+<!-- ═══════════ Page 2: 计算过程 ═══════════ -->
+<div class="page" data-index="2" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 04 &middot; Page 2</div>
+    <h2 class="section-title">计算过程 &mdash; 正向传播与反向传播</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        梯度下降的计算过程是什么样的？应该没有脱离人类计算的范畴吧？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        完全没有，每一步都是加减乘除。先<span class="blue">正向</span>算 loss，再<span class="highlight">反向</span>算梯度。
+      </div>
+    </div>
+
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="step-icon s1">1</div>
+        <div class="step-text"><strong>正向 &mdash; 算预测</strong>&ycirc; = w&middot;x + b = 1&times;2 + 3 = <span class="blue">5</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s2">2</div>
+        <div class="step-text"><strong>正向 &mdash; 算误差</strong>e = &ycirc; &minus; y = 5 &minus; 7 = <span class="green">&minus;2</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s3">3</div>
+        <div class="step-text"><strong>正向 &mdash; 算损失</strong>L = e&sup2; = (&minus;2)&sup2; = <span class="highlight">4</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s4">4</div>
+        <div class="step-text"><strong>反向 &mdash; 链式法则</strong>&part;L/&part;e = 2e = &minus;4 &emsp; &part;e/&part;z = 1 &emsp; &part;z/&part;w = x = 2</div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s5">5</div>
+        <div class="step-text"><strong>乘起来</strong>dw = &minus;4 &times; 1 &times; 2 = <span class="highlight">&minus;8</span> &emsp; db = &minus;4 &times; 1 &times; 1 = <span class="highlight">&minus;4</span></div>
+      </div>
+      <div class="flow-step">
+        <div class="step-icon s6">6</div>
+        <div class="step-text"><strong>更新参数</strong>w = 1 &minus; 0.1&times;(&minus;8) = <span class="blue">1.8</span> &emsp; b = 3 &minus; 0.1&times;(&minus;4) = <span class="blue">3.4</span></div>
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        链式法则是什么？L 不直接含 w，怎么对 w 求导？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        <strong>L 不认识 w</strong>，但 L 认识 e，e 认识 z，z 认识 w。一层层问：L 对 e 怎么变？e 对 z 怎么变？z 对 w 怎么变？每层的&ldquo;放大倍数&rdquo;乘起来就是答案。
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula" style="font-size:18px;">&part;L/&part;w = &part;L/&part;e &times; &part;e/&part;z &times; &part;z/&part;w = 2e &times; 1 &times; x</div>
+      <div class="formula-desc">每层都是最基础的求导：e&sup2;&rarr;2e &emsp; z&minus;y&rarr;1 &emsp; wx&rarr;x<br>链式法则只是把它们串起来的方式</div>
+    </div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 多样本 &amp; 多维推广</div>
+      多样本：每个样本算一组 dw、db，<strong>取平均</strong><br>
+      多维：n 个特征 &rarr; n 个 dw，每个 dw<sub>j</sub> = 误差 &times; 对应的 x<sub>j</sub><br>
+      矩阵写法：<span class="blue">dw = 1/m &times; X<sup>T</sup> @ e</span> &mdash; 不管 n 多大，代码不变
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">Forward</span></span> 正向传播，从参数算到 loss</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">Backward</span></span> 反向传播，从 loss 算回梯度 dw、db</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">Chain Rule</span></span> 链式法则，嵌套函数逐层求导再相乘</div>
+    </div>
+  </div>
+  <div class="page-num">2 / 6</div>
+</div>
+
+<!-- ═══════════ Page 3: 学习率与标准化 ═══════════ -->
+<div class="page" data-index="3" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 04 &middot; Page 3</div>
+    <h2 class="section-title">学习率与标准化 &mdash; 两个必调的旋钮</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        学习率就是对算出来的 dw 和 db 乘这个值吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        对。<span class="blue">w = w &minus; &alpha; &times; dw</span>，&alpha; 就是那个乘数。同样 dw=&minus;8：&alpha;=0.01 变化 0.08（小碎步），&alpha;=0.1 变化 0.8（正常步），&alpha;=10 变化 80（飞出去了）。
+      </div>
+    </div>
+
+    <div class="compare-row">
+      <div class="compare-card" style="background:rgba(42,106,74,.06);">
+        <div class="card-title" style="color:var(--green-ink);">&alpha; 合适</div>
+        loss 稳步下降后走平<br>
+        w: 0 &rarr; 1.2 &rarr; 2.8 &rarr; 4.7 &rarr; <span class="green">5.0</span> &check;
+      </div>
+      <div class="compare-card" style="background:rgba(196,30,58,.05);">
+        <div class="card-title" style="color:var(--vermillion);">&alpha; 太大</div>
+        loss 震荡或爆炸<br>
+        w: 0 &rarr; 8 &rarr; &minus;3 &rarr; 12 &rarr; <span class="highlight">NaN</span> &cross;
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        梯度下降的标准化和正规方程的标准化不一样吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        <strong>操作完全一样</strong>，都是 StandardScaler。区别是：正规方程<span class="blue">不需要</span>标准化（直接解方程不受量级影响），梯度下降<span class="highlight">必须</span>标准化。因为梯度 = 误差 &times; 特征值，特征值大的方向梯度就大、步子就大，各方向不均匀就会震荡。
+      </div>
+    </div>
+
+    <div class="code-block"># ═══ 正规方程（不需要标准化）═══
+model1 = LinearRegression()
+model1.fit(X_train, y_train)
+
+# ═══ 梯度下降（必须标准化）═══
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+model2 = SGDRegressor(max_iter=1000, eta0=0.01)
+model2.fit(X_train_s, y_train)
+
+# 结果几乎相同，R&sup2; 差距 < 0.01</div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 标准化 &ne; 治异常值</div>
+      标准化管<strong>特征间的尺度差异</strong>（面积 vs 收入）<br>
+      异常值管<strong>样本间的偏离程度</strong>（房价 30 万 vs 打错的 300 万）<br>
+      标准化后异常值还是异常值，只是数字刻度变了
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">&alpha; (eta)</span></span> 学习率，控制参数每步更新幅度</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">loss curve</span></span> 损失曲线，判断学习率是否合适的核心工具</div>
+    </div>
+  </div>
+  <div class="page-num">3 / 6</div>
+</div>
+
+<!-- ═══════════ Page 4: 评估指标 ═══════════ -->
+<div class="page" data-index="4" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 04 &middot; Page 4</div>
+    <h2 class="section-title">评估指标 &mdash; R&sup2; + RMSE 双视角</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        评估的方式有几种？都是对 w 和 b 进行评估的吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        <strong>不是评估 w 和 b 本身</strong>，是评估用这组 w 和 b 算出来的<span class="highlight">预测准不准</span>。你不关心 w 是 2.3 还是 2.7，只关心预测偏差有多大。
+      </div>
+    </div>
+
+    <table class="data-table">
+      <tr><th>指标</th><th>公式</th><th>看什么</th><th>用途</th></tr>
+      <tr><td><span class="blue">MSE</span></td><td>1/m &times; &Sigma;(&ycirc;&minus;y)&sup2;</td><td>放大大误差，单位 y&sup2;</td><td>损失函数</td></tr>
+      <tr><td><span class="green">RMSE</span></td><td>&radic;MSE</td><td>偏差约几万，好解释</td><td>汇报结果</td></tr>
+      <tr><td><span class="gold">MAE</span></td><td>1/m &times; &Sigma;|&ycirc;&minus;y|</td><td>不放大，一视同仁</td><td>有异常值时</td></tr>
+      <tr><td><span class="highlight">R&sup2;</span></td><td>1 &minus; MSE/Var</td><td>比猜平均值好多少</td><td>整体判断</td></tr>
+    </table>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        R 平方是什么？跟其他指标有什么区别？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        MSE/RMSE/MAE 告诉你&ldquo;偏了多少&rdquo;，但你不知道好不好 &mdash; RMSE=3 万在 500 万房价里很准，在 10 万房价里太离谱。<span class="highlight">R&sup2;</span> 不看具体偏差，看&ldquo;你比无脑猜平均值好了百分之几&rdquo;，<strong>0.95 就是消除了 95% 的误差</strong>。
+      </div>
+    </div>
+
+    <div class="formula-block">
+      <div class="formula" style="font-size:18px;">R&sup2; = 1 &minus; &Sigma;(&ycirc;<sub>i</sub> &minus; y<sub>i</sub>)&sup2; / &Sigma;(&#x0233; &minus; y<sub>i</sub>)&sup2;</div>
+      <div class="formula-desc">你的模型误差 / 猜平均值的误差 &emsp; R&sup2;=1 完美 &emsp; R&sup2;=0 跟猜一样差 &emsp; R&sup2;&lt;0 比猜还差</div>
+    </div>
+
+    <div class="note-box">
+      <div class="label">Key &mdash; 两层评估</div>
+      <strong>训练过程中</strong>：看 loss 曲线（MSE 随迭代次数变化）&rarr; 学习率对不对<br>
+      <strong>训练完之后</strong>：看 R&sup2; + RMSE &rarr; 模型好不好<br>
+      先保证 loss 曲线正常收敛，再看评估指标才有意义
+    </div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">R&sup2;</span></span> 决定系数，0~1 刻度，不同数据集间可比</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">Cross-Val</span></span> 交叉验证，K 折轮流测试，小数据集更可信</div>
+    </div>
+  </div>
+  <div class="page-num">4 / 6</div>
+</div>
+
+<!-- ═══════════ Page 5: 拟合诊断与正则化 ═══════════ -->
+<div class="page" data-index="5" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 04 &middot; Page 5</div>
+    <h2 class="section-title">拟合诊断与正则化 &mdash; L1 &amp; L2</h2>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        怎么判断模型是欠拟合还是过拟合？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        <strong>比两个数字</strong>：训练集 R&sup2; 和测试集 R&sup2;。
+      </div>
+    </div>
+
+    <table class="data-table">
+      <tr><th>训练集 R&sup2;</th><th>测试集 R&sup2;</th><th>诊断</th><th>操作</th></tr>
+      <tr><td>0.50</td><td>0.48</td><td><span class="blue">欠拟合</span></td><td>加多项式 / 加特征 / 换模型</td></tr>
+      <tr><td>0.90</td><td>0.88</td><td><span class="green">正好</span></td><td>不用动</td></tr>
+      <tr><td>0.99</td><td>0.65</td><td><span class="highlight">过拟合</span></td><td>加正则化 / 减特征 / 加数据</td></tr>
+    </table>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        正则化是如何影响学习的？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        在 loss 里加一个惩罚项：<span class="blue">L = MSE + &lambda; &times; (w 的大小)</span>。误差推着 w 往上走，正则化拉着 w 往下 &mdash; 就像<span class="highlight">地心引力</span>，w 越大引力越强，最终在平衡点稳定。
+      </div>
+    </div>
+
+    <div class="param-cards">
+      <div class="param-card" style="background:rgba(42,74,107,.06);">
+        <div class="param-name" style="color:var(--blue-ink);">L2 Ridge &mdash; 弹簧</div>
+        <div class="param-detail">
+          惩罚 &Sigma;w<sub>j</sub>&sup2;<br>
+          w 大 &rarr; 拉力大<br>
+          w 小 &rarr; 拉力也小<br>
+          <strong>全部变小，不会归零</strong><br>
+          特征都有用时选
+        </div>
+      </div>
+      <div class="param-card" style="background:rgba(196,30,58,.05);">
+        <div class="param-name" style="color:var(--vermillion);">L1 Lasso &mdash; 刀</div>
+        <div class="param-detail">
+          惩罚 &Sigma;|w<sub>j</sub>|<br>
+          不管 w 多大多小<br>
+          每次砍固定的量<br>
+          <strong>小的 w 直接归零 = 自动选特征</strong><br>
+          怀疑有垃圾特征时选
+        </div>
+      </div>
+    </div>
+
+    <div class="dialogue student">
+      <div class="avatar">小弟</div>
+      <div class="bubble">
+        <div class="speaker">Claude的小弟</div>
+        正则化只在训练过程中起作用吗？
+      </div>
+    </div>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        对，<strong>只介入两处</strong>：loss 多了 &lambda;&times;&Sigma;w&sup2; &rarr; dw 自动多了 &lambda;&times;w。正向传播不变，更新公式不变，训练完之后不参与。就像引力只在球上升时拉它，球落地后任务就完成了。
+      </div>
+    </div>
+
+    <div class="code-block">from sklearn.linear_model import Ridge, Lasso
+
+Ridge(alpha=1.0)    # L2: 全部压小，不归零
+Lasso(alpha=0.1)    # L1: 没用的 w 直接归零
+
+# alpha 就是 &lambda;，控制惩罚力度
+# &lambda;=0 无惩罚(可能过拟合) | 适中刚好 | 太大欠拟合</div>
+
+    <div class="glossary">
+      <div class="glossary-title">Glossary</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="blue">Ridge</span></span> L2 正则化，弹簧，全部保留全部压小</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="highlight">Lasso</span></span> L1 正则化，刀，自动特征选择</div>
+      <div class="glossary-item"><span class="glossary-term"><span class="green">ElasticNet</span></span> L1+L2 混合，不确定时用</div>
+    </div>
+  </div>
+  <div class="page-num">5 / 6</div>
+</div>
+
+<!-- ═══════════ Page 6: 小结 ═══════════ -->
+<div class="page" data-index="6" data-state="stacked">
+  <div class="page-inner">
+    <div class="ch-label">Day 04 &middot; Summary</div>
+    <h2 class="section-title">章节小结</h2>
+
+    <div class="dialogue teacher">
+      <div class="avatar">C</div>
+      <div class="bubble">
+        <div class="speaker">Claude</div>
+        来，今天学了很多，梳理一下核心知识：
+      </div>
+    </div>
+
+    <ol class="summary-list">
+      <li><strong>正规方程 vs 梯度下降</strong> &mdash; 不是递进关系，n &gt; 10000 或需要在线学习时换梯度下降。</li>
+      <li><strong>计算过程</strong> &mdash; 正向传播算 loss &rarr; 反向传播算 dw（链式法则）&rarr; 更新参数。每步都是加减乘除。</li>
+      <li><strong>学习率 &alpha;</strong> &mdash; 看 loss 曲线调。稳步下降=合适，震荡=太大，龟速=太小。</li>
+      <li><strong>标准化对梯度下降必须</strong> &mdash; 让各方向步长均匀，直奔谷底不震荡。</li>
+      <li><strong>评估用 R&sup2; + RMSE</strong> &mdash; R&sup2; 定性判断好不好，RMSE 定量感受偏差多大。</li>
+      <li><strong>拟合诊断</strong> &mdash; 比训练集和测试集的 R&sup2;。都低=欠拟合，训练高测试低=过拟合。</li>
+      <li><strong>正则化 = 给 w 加引力</strong> &mdash; L2 弹簧压所有人，L1 刀砍弱者。</li>
+    </ol>
+
+    <div class="note-box">
+      <div class="label">Error Log &mdash; 易错清单</div>
+      &bull; loss 曲线管&ldquo;训练过程对不对&rdquo;，R&sup2; 管&ldquo;模型选择对不对&rdquo;&mdash; <strong>两个层面不能混</strong><br>
+      &bull; 标准化治不了异常值 &mdash; 标准化管特征间尺度，异常值管样本间偏离<br>
+      &bull; 一次方程调到死也达不到三次的效果 &mdash; 这是<strong>模型能力上限</strong>不是训练问题<br>
+      &bull; R&sup2; 不是&ldquo;误差占平均值的比&rdquo;&mdash; 是你的模型误差 vs 猜平均值误差的比
+    </div>
+
+    <div class="formula-block">
+      <div class="formula" style="font-size:16px; line-height:1.8;">
+        w = w &minus; &alpha; &middot; dw &emsp;
+        dw = 1/m &middot; X<sup>T</sup>(&#x177; &minus; y)
+      </div>
+      <div class="formula-desc">
+        R&sup2; = 1 &minus; &Sigma;(&ycirc;&minus;y)&sup2; / &Sigma;(&#x0233;&minus;y)&sup2;
+        &emsp;|&emsp;
+        Ridge: L + &lambda;&Sigma;w&sup2;
+        &emsp;|&emsp;
+        Lasso: L + &lambda;&Sigma;|w|
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <strong>Day 05 预告</strong>：逻辑回归 &mdash; 从回归到分类 &rarr; sigmoid 函数 &rarr; 交叉熵损失 &rarr; 分类评估指标（准确率、精确率、召回率、F1）。
+    </div>
+  </div>
+  <div class="page-num">6 / 6</div>
+</div>
+
+</div><!-- /book -->
+</div><!-- /book-scene -->
+
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn">&larr; 上一页</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn" id="nextBtn">下一页 &rarr;</button>
+</div>
+
+<script>
+(function() {
+  const pages = document.querySelectorAll('.page');
+  const total = pages.length;
+  let current = 0;
+
+  const dotsContainer = document.getElementById('navDots');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function updatePages() {
+    pages.forEach((p, i) => {
+      if (i < current) p.dataset.state = 'flipped';
+      else if (i === current) p.dataset.state = 'current';
+      else p.dataset.state = 'stacked';
+    });
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= total || idx === current) return;
+    current = idx;
+    updatePages();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  let startX = 0;
+  document.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 50) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
