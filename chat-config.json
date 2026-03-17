@@ -1,0 +1,5 @@
+{
+  "repos": [
+    { "owner": "dungeonmaker-ddd", "repo": "ForML", "branch": "main", "label": "ML笔记" }
+  ]
+}

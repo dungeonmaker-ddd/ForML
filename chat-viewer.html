@@ -71,6 +71,19 @@ body {
 }
 .file-item.expanded .fname { -webkit-line-clamp: unset; }
 .file-item .fpath { color: #555; font-size: 0.85em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-item .fdate {
+  color: #4fc3f7; font-size: 0.75em; opacity: 0.7; margin-top: 1px;
+}
+.repo-group { margin-bottom: 8px; }
+.repo-group-title {
+  padding: 8px 10px 4px; color: #666; font-size: 0.68em;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.repo-tag {
+  display: inline-block; font-size: 0.68em; padding: 1px 5px;
+  border-radius: 3px; background: rgba(201,160,255,0.15); color: #c9a0ff;
+  margin-right: 6px; vertical-align: middle;
+}
 
 /* ── Left sub-sidebar: questions ── */
 .sidebar-questions {
@@ -130,6 +143,22 @@ body {
   display: flex; align-items: center; justify-content: center;
   height: 100%; color: #444; font-size: 0.95em;
 }
+.main-empty-guide {
+  align-items: center; justify-content: center; padding: 20px;
+}
+.guide-card {
+  width: min(100%, 520px); background: #1e1e3a; border: 1px solid #2a2a4a;
+  border-radius: 14px; padding: 24px; box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+}
+.guide-card h3 { color: #c9a0ff; font-size: 1.2em; margin-bottom: 12px; }
+.guide-card ol {
+  padding-left: 1.2em; color: #cfcfe6; margin-bottom: 18px;
+}
+.guide-card li { margin: 6px 0; }
+.guide-actions {
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+.guide-actions .sb-btn { flex: 0 0 auto; min-width: 150px; }
 .msg { margin: 10px 0; padding: 14px 18px; border-radius: 10px; }
 .label {
   font-size: 0.72em; font-weight: 600; text-transform: uppercase;
@@ -191,6 +220,84 @@ strong { color: #ffd54f; }
   padding: 60px 80px; border: 2px dashed #c9a0ff; border-radius: 16px;
   color: #c9a0ff; font-size: 1.2em;
 }
+.settings-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(8,8,18,0.78); align-items: center; justify-content: center;
+  padding: 20px;
+}
+.settings-overlay.show { display: flex; }
+.settings-modal {
+  width: min(100%, 480px); max-width: 480px; max-height: min(88vh, 780px);
+  overflow-y: auto; background: #1e1e3a; border-radius: 12px; padding: 24px;
+  border: 1px solid #2a2a4a; box-shadow: 0 18px 40px rgba(0,0,0,0.42);
+}
+.settings-modal::-webkit-scrollbar { width: 6px; }
+.settings-modal::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+.settings-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 18px;
+}
+.settings-header h3 { color: #c9a0ff; font-size: 1.05em; }
+.settings-close {
+  background: none; border: none; color: #888; cursor: pointer;
+  font-size: 1.25em; line-height: 1; padding: 2px 6px; border-radius: 4px;
+}
+.settings-close:hover { color: #c9a0ff; background: rgba(201,160,255,0.08); }
+.settings-section { margin-bottom: 18px; }
+.settings-section h4 {
+  color: #4fc3f7; font-size: 0.84em; margin-bottom: 8px;
+}
+.settings-help { color: #8c8ca8; font-size: 0.75em; margin-bottom: 10px; }
+.settings-row {
+  display: flex; gap: 8px; align-items: center; margin-bottom: 8px;
+}
+.settings-input,
+.settings-modal input {
+  width: 100%; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid #2a2a4a; background: #0e0e22; color: #e5e5f0;
+  outline: none; font-size: 0.82em;
+}
+.settings-input:focus,
+.settings-modal input:focus { border-color: #4fc3f7; }
+.token-row .sb-btn,
+.settings-actions .sb-btn,
+.guide-actions .sb-btn { flex: 0 0 auto; }
+.token-status {
+  min-height: 1.4em; font-size: 0.76em; color: #8c8ca8;
+}
+.token-status.success { color: #66bb6a; }
+.token-status.error { color: #ef5350; }
+.repo-check-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.repo-check-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; background: rgba(14,14,34,0.9);
+  border: 1px solid #2a2a4a;
+}
+.repo-check-item label {
+  display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0;
+  cursor: default;
+}
+.repo-check-item input[type="checkbox"] {
+  margin-top: 2px; accent-color: #4fc3f7;
+}
+.repo-check-main { color: #ddd; font-size: 0.8em; }
+.repo-check-meta { color: #777; font-size: 0.72em; margin-top: 2px; }
+.repo-remove {
+  border: 1px solid #3a3a58; background: #1a1a3a; color: #aaa;
+  border-radius: 6px; padding: 4px 8px; font-size: 0.72em; cursor: pointer;
+}
+.repo-remove:hover { color: #ef5350; border-color: #ef5350; }
+.settings-form {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+}
+.settings-empty {
+  color: #666; font-size: 0.78em; padding: 10px 0;
+}
+.settings-actions {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end;
+}
 </style>
 </head>
 <body>
@@ -202,8 +309,10 @@ strong { color: #ffd54f; }
     <h2>对话记录</h2>
     <input class="file-search" id="fileSearch" placeholder="搜索文件…">
     <div class="sb-actions">
+      <button class="sb-btn" id="refreshBtn">刷新</button>
       <button class="sb-btn" id="scanBtn">选择目录</button>
       <button class="sb-btn" id="dropBtn">拖入文件</button>
+      <button class="sb-btn" id="settingsBtn" title="设置">⚙</button>
     </div>
     <div class="sb-status" id="sbStatus">正在扫描…</div>
   </div>
@@ -241,12 +350,67 @@ strong { color: #ffd54f; }
   <div class="drop-box">拖放 .txt 文件到此处</div>
 </div>
 
+<!-- Settings modal -->
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="settings-header">
+      <h3 id="settingsTitle">GitHub 设置</h3>
+      <button class="settings-close" id="settingsClose" title="关闭">×</button>
+    </div>
+
+    <div class="settings-section">
+      <h4>访问 Token</h4>
+      <div class="settings-help">输入 GitHub PAT 后即可访问私有仓库聊天记录。未设置时仍可浏览公开仓库。</div>
+      <div class="settings-row token-row">
+        <input class="settings-input" id="tokenInput" type="password" placeholder="粘贴 GitHub Token">
+        <button class="sb-btn" id="toggleTokenBtn">显示</button>
+      </div>
+      <div class="settings-row">
+        <button class="sb-btn" id="testTokenBtn">测试连接</button>
+        <button class="sb-btn" id="clearTokenBtn">清除 Token</button>
+      </div>
+      <div class="token-status" id="tokenStatus"></div>
+    </div>
+
+    <div class="settings-section">
+      <h4>预设仓库</h4>
+      <div class="settings-help">以下仓库来自 `chat-config.json`，会在设置好 Token 后自动扫描。</div>
+      <div class="repo-check-list" id="defaultRepoList"></div>
+    </div>
+
+    <div class="settings-section">
+      <h4>自定义仓库</h4>
+      <div class="repo-check-list" id="customRepoList"></div>
+    </div>
+
+    <div class="settings-section">
+      <h4>添加自定义仓库</h4>
+      <div class="settings-form">
+        <input class="settings-input" id="customOwnerInput" placeholder="owner">
+        <input class="settings-input" id="customRepoInput" placeholder="repo">
+        <input class="settings-input" id="customBranchInput" placeholder="branch（默认 main）">
+        <input class="settings-input" id="customLabelInput" placeholder="标签（可选）">
+      </div>
+      <div class="settings-row" style="margin-top:10px;">
+        <button class="sb-btn" id="addRepoBtn">添加仓库</button>
+      </div>
+    </div>
+
+    <div class="settings-actions">
+      <button class="sb-btn" id="saveSettingsBtn">保存</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// === DOM refs ===
 const fileItems = document.getElementById('fileItems');
 const fileSearch = document.getElementById('fileSearch');
 const sbStatus = document.getElementById('sbStatus');
 const scanBtn = document.getElementById('scanBtn');
 const dropBtn = document.getElementById('dropBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+const settingsBtn = document.getElementById('settingsBtn');
 const fileInput = document.getElementById('fileInput');
 const qItems = document.getElementById('qItems');
 const qCount = document.getElementById('qCount');
@@ -259,13 +423,38 @@ const sidebarFiles = document.getElementById('sidebarFiles');
 const sidebarQuestions = document.getElementById('sidebarQuestions');
 const toggleFiles = document.getElementById('toggleFiles');
 const toggleQuestions = document.getElementById('toggleQuestions');
-let scannedFiles = [], currentMessages = [], activeFileEl = null;
+const currentQBar = document.getElementById('currentQBar');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const settingsClose = document.getElementById('settingsClose');
+const tokenInput = document.getElementById('tokenInput');
+const toggleTokenBtn = document.getElementById('toggleTokenBtn');
+const testTokenBtn = document.getElementById('testTokenBtn');
+const clearTokenBtn = document.getElementById('clearTokenBtn');
+const tokenStatus = document.getElementById('tokenStatus');
+const defaultRepoList = document.getElementById('defaultRepoList');
+const customRepoList = document.getElementById('customRepoList');
+const customOwnerInput = document.getElementById('customOwnerInput');
+const customRepoInput = document.getElementById('customRepoInput');
+const customBranchInput = document.getElementById('customBranchInput');
+const customLabelInput = document.getElementById('customLabelInput');
+const addRepoBtn = document.getElementById('addRepoBtn');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 
-// ── Sidebar toggles ──
+// === State ===
+const CONFIG_FILE = 'chat-config.json';
+const TOKEN_KEY = 'chat-viewer-token';
+const REPOS_KEY = 'chat-viewer-repos';
+const CACHE_PREFIX = 'chat-files-';
+let scannedFiles = [], currentMessages = [], activeFileEl = null, activeFileKey = '';
+let isClickScrolling = false, lastStuckIndex = -1, scrollObserver = null;
+let configLoaded = false, configRepos = [], customRepos = loadStoredRepos(), mergedRepos = mergeRepoLists([], customRepos);
+let tokenGuideDismissed = false;
+
+// === Sidebar toggles ===
 toggleFiles.addEventListener('click', () => sidebarFiles.classList.toggle('collapsed'));
 toggleQuestions.addEventListener('click', () => sidebarQuestions.classList.toggle('collapsed'));
 
-// ── Persist directory handle via IndexedDB ──
+// === IndexedDB for FS handles ===
 const DB_NAME = 'chat-viewer', STORE = 'handles', KEY = 'lastDir';
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -282,6 +471,7 @@ async function loadDirHandle() {
   try { const db = await openDB(); return new Promise(r => { const tx = db.transaction(STORE); const req = tx.objectStore(STORE).get(KEY); req.onsuccess = () => r(req.result || null); req.onerror = () => r(null); }); } catch(e) { return null; }
 }
 
+// === Text helpers ===
 function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 function fmtInline(t) {
   t = esc(t);
@@ -289,109 +479,577 @@ function fmtInline(t) {
   return t.replace(/`([^`]+)`/g, '<code>$1</code>');
 }
 
-// ── Auto-scan: 3-tier strategy ──
-async function autoScan() {
-  sbStatus.textContent = '正在扫描…';
+// === Date helpers ===
+function parseFileDate(name) {
+  const m = name.match(/^(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(\d{2})/);
+  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]);
+  return null;
+}
+function formatDate(d) {
+  if (!d) return '';
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  return d.getFullYear() + '-' + mm + '-' + dd + ' ' + hh + ':' + mi;
+}
 
-  // 1) GitHub Pages: use GitHub API to list all .txt files
+// === Hosting platform detection ===
+function detectHosting() {
+  // GitHub Pages: username.github.io
   const ghMatch = location.hostname.match(/^(.+)\.github\.io$/);
   if (ghMatch) {
     const owner = ghMatch[1];
-    // detect repo from pathname: /RepoName/... or root (user.github.io)
     const pathParts = location.pathname.split('/').filter(Boolean);
-    const repo = pathParts.length > 1 ? pathParts[0] : owner + '.github.io';
-    const found = await scanGitHub(owner, repo);
-    if (found.length) {
-      scannedFiles = found;
-      renderFileItems();
-      sbStatus.textContent = found.length + ' 个文件 (GitHub)';
+    let repo, siteBase;
+    if (pathParts.length >= 1 && !pathParts[0].includes('.')) {
+      repo = pathParts[0];
+      siteBase = location.origin + '/' + repo + '/';
+    } else {
+      repo = owner + '.github.io';
+      siteBase = location.origin + '/';
+    }
+    return { type: 'github', owner, repo, siteBase };
+  }
+  // Gitee Pages: username.gitee.io
+  const geMatch = location.hostname.match(/^(.+)\.gitee\.io$/);
+  if (geMatch) {
+    const owner = geMatch[1];
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    let repo, siteBase;
+    if (pathParts.length >= 1 && !pathParts[0].includes('.')) {
+      repo = pathParts[0];
+      siteBase = location.origin + '/' + repo + '/';
+    } else {
+      repo = owner;
+      siteBase = location.origin + '/';
+    }
+    return { type: 'gitee', owner, repo, siteBase };
+  }
+  return null;
+}
+
+// === URL query params ===
+function getUrlParam(key) {
+  return new URLSearchParams(location.search).get(key);
+}
+
+// === Repo config helpers ===
+function normalizeRepoConfig(repo) {
+  if (!repo || !repo.owner || !repo.repo) return null;
+  const owner = String(repo.owner).trim();
+  const name = String(repo.repo).trim();
+  if (!owner || !name) return null;
+  const branch = String(repo.branch || 'main').trim() || 'main';
+  const label = String(repo.label || name).trim() || name;
+  return { owner, repo: name, branch, label };
+}
+function repoIdentity(repo) {
+  return String(repo.owner || '').toLowerCase() + '/' + String(repo.repo || '').toLowerCase();
+}
+function repoStorageKey(repo) {
+  return repoIdentity(repo) + '@' + String(repo.branch || '').toLowerCase();
+}
+function mergeRepoLists(defaultRepos, extraRepos) {
+  const map = new Map();
+  [...defaultRepos, ...extraRepos].forEach(repo => {
+    const normalized = normalizeRepoConfig(repo);
+    if (!normalized) return;
+    const key = repoStorageKey(normalized);
+    if (!map.has(key)) map.set(key, normalized);
+  });
+  return [...map.values()];
+}
+function loadStoredRepos() {
+  try {
+    const raw = localStorage.getItem(REPOS_KEY);
+    if (!raw) return [];
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data)) return [];
+    return data.map(normalizeRepoConfig).filter(Boolean);
+  } catch (e) {
+    return [];
+  }
+}
+function saveStoredRepos(repos) {
+  localStorage.setItem(REPOS_KEY, JSON.stringify(mergeRepoLists([], repos)));
+}
+function getStoredToken() {
+  return (localStorage.getItem(TOKEN_KEY) || '').trim();
+}
+function setStoredToken(token) {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  else localStorage.removeItem(TOKEN_KEY);
+}
+function getRepoLabel(item) {
+  return item.repoLabel || item.label || item.repo || '默认仓库';
+}
+function getRepoGroupKey(file) {
+  if (file.owner && file.repo) return 'repo:' + repoIdentity(file);
+  return 'label:' + getRepoLabel(file);
+}
+function getFileKey(file) {
+  return [file.owner || '', file.repo || '', file.branch || '', file.path].join('::');
+}
+function getDisplayName(file) {
+  return file.name.replace(/\.txt$/i, '').replace(/^\d{4}-\d{2}-\d{2}-\d{6}-?/, '') || file.name.replace(/\.txt$/i, '');
+}
+function encodePathSegments(path) {
+  return String(path || '').split('/').map(part => encodeURIComponent(part)).join('/');
+}
+function buildGitHubTreeUrl(owner, repo, branch) {
+  return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo)
+    + '/git/trees/' + encodeURIComponent(branch) + '?recursive=1';
+}
+function buildGitHubRawUrl(owner, repo, branch, path) {
+  return 'https://raw.githubusercontent.com/' + encodeURIComponent(owner) + '/'
+    + encodeURIComponent(repo) + '/' + encodeURIComponent(branch) + '/' + encodePathSegments(path);
+}
+function buildGitHubContentUrl(owner, repo, branch, path) {
+  return 'https://api.github.com/repos/' + encodeURIComponent(owner) + '/'
+    + encodeURIComponent(repo) + '/contents/' + encodePathSegments(path)
+    + '?ref=' + encodeURIComponent(branch);
+}
+function getPublicCacheKey(hosting) {
+  return CACHE_PREFIX + 'host-' + hosting.type + '-' + hosting.owner + '-' + hosting.repo;
+}
+function getAuthCacheKey(owner, repo, branch) {
+  return CACHE_PREFIX + 'auth-github-' + owner + '-' + repo + '-' + branch;
+}
+function enrichFile(file, meta) {
+  return {
+    name: file.name,
+    path: file.path,
+    url: file.url,
+    source: file.source,
+    handle: file.handle,
+    repoLabel: meta && meta.repoLabel ? meta.repoLabel : (file.repoLabel || ''),
+    owner: meta && meta.owner ? meta.owner : (file.owner || ''),
+    repo: meta && meta.repo ? meta.repo : (file.repo || ''),
+    branch: meta && meta.branch ? meta.branch : (file.branch || '')
+  };
+}
+async function loadChatConfig() {
+  try {
+    const r = await fetch(CONFIG_FILE, { cache: 'no-cache' });
+    if (!r.ok) return [];
+    const data = await r.json();
+    const repos = Array.isArray(data.repos) ? data.repos : [];
+    return repos.map(normalizeRepoConfig).filter(Boolean);
+  } catch (e) {
+    return [];
+  }
+}
+async function ensureConfigLoaded(force) {
+  if (force || !configLoaded) {
+    configRepos = await loadChatConfig();
+    configLoaded = true;
+  }
+  mergedRepos = mergeRepoLists(configRepos, customRepos);
+  renderSettingsLists();
+  return configRepos;
+}
+function setTokenStatus(message, type) {
+  tokenStatus.textContent = message || '';
+  tokenStatus.className = 'token-status' + (type ? ' ' + type : '');
+}
+function renderRepoList(container, repos, removable) {
+  container.innerHTML = '';
+  if (!repos.length) {
+    container.innerHTML = '<div class="settings-empty">' + (removable ? '尚未添加自定义仓库' : '未在配置文件中找到仓库') + '</div>';
+    return;
+  }
+  repos.forEach(repo => {
+    const row = document.createElement('div');
+    row.className = 'repo-check-item';
+    row.innerHTML = '<label><input type="checkbox" checked disabled>'
+      + '<span><div class="repo-check-main">' + esc(repo.label) + '</div>'
+      + '<div class="repo-check-meta">' + esc(repo.owner + '/' + repo.repo + ' @ ' + repo.branch) + '</div></span></label>';
+    if (removable) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'repo-remove';
+      btn.textContent = '删除';
+      btn.addEventListener('click', () => {
+        customRepos = customRepos.filter(item => repoStorageKey(item) !== repoStorageKey(repo));
+        mergedRepos = mergeRepoLists(configRepos, customRepos);
+        renderSettingsLists();
+      });
+      row.appendChild(btn);
+    }
+    container.appendChild(row);
+  });
+}
+function renderSettingsLists() {
+  renderRepoList(defaultRepoList, configRepos, false);
+  renderRepoList(customRepoList, customRepos, true);
+}
+function openSettingsModal() {
+  tokenInput.type = 'password';
+  toggleTokenBtn.textContent = '显示';
+  tokenInput.value = getStoredToken();
+  renderSettingsLists();
+  setTokenStatus(getStoredToken() ? '已保存 Token，可直接测试或覆盖。' : '未设置 Token。', '');
+  settingsOverlay.classList.add('show');
+}
+function closeSettingsModal() {
+  settingsOverlay.classList.remove('show');
+}
+async function testGitHubConnection(token) {
+  const r = await fetch('https://api.github.com/user', {
+    headers: {
+      'Accept': 'application/vnd.github+json',
+      'Authorization': 'Bearer ' + token
+    },
+    cache: 'no-cache'
+  });
+  if (!r.ok) throw new Error('GitHub 返回 ' + r.status);
+  return r.json();
+}
+function readCustomRepoForm() {
+  return normalizeRepoConfig({
+    owner: customOwnerInput.value,
+    repo: customRepoInput.value,
+    branch: customBranchInput.value || 'main',
+    label: customLabelInput.value || customRepoInput.value
+  });
+}
+function resetCustomRepoForm() {
+  customOwnerInput.value = '';
+  customRepoInput.value = '';
+  customBranchInput.value = '';
+  customLabelInput.value = '';
+}
+function addCustomRepoFromForm() {
+  const hasAny = [customOwnerInput.value, customRepoInput.value, customBranchInput.value, customLabelInput.value]
+    .some(v => String(v || '').trim());
+  if (!hasAny) return true;
+  const repo = readCustomRepoForm();
+  if (!repo) {
+    setTokenStatus('自定义仓库至少需要 owner 和 repo。', 'error');
+    return false;
+  }
+  customRepos = mergeRepoLists([], customRepos.filter(item => repoStorageKey(item) !== repoStorageKey(repo)).concat(repo));
+  mergedRepos = mergeRepoLists(configRepos, customRepos);
+  renderSettingsLists();
+  resetCustomRepoForm();
+  setTokenStatus('已加入自定义仓库列表，点击“保存”后生效。', 'success');
+  return true;
+}
+function resetConversationView() {
+  if (activeFileEl) activeFileEl.classList.remove('active');
+  activeFileEl = null;
+  activeFileKey = '';
+  currentMessages = [];
+  titleEl.textContent = 'Claude Code 对话查看器';
+  metaEl.textContent = '';
+  qItems.innerHTML = '<div class="q-empty">选择一个对话文件</div>';
+  qCount.textContent = '';
+  sidebarQuestions.classList.add('collapsed');
+  currentQBar.className = 'current-q-bar';
+  currentQBar.innerHTML = '';
+  while (mainBody.children.length > 1) mainBody.removeChild(mainBody.lastChild);
+}
+function showSimpleEmpty(text) {
+  resetConversationView();
+  const box = document.createElement('div');
+  box.className = 'main-empty';
+  box.textContent = text;
+  mainBody.appendChild(box);
+}
+function showTokenGuide() {
+  resetConversationView();
+  const wrap = document.createElement('div');
+  wrap.className = 'main-empty main-empty-guide';
+  wrap.innerHTML = '<div class="guide-card">'
+    + '<h3>配置 GitHub Token 开始使用</h3>'
+    + '<ol><li>向管理员索取 Token</li><li>点击左上角 ⚙ 输入 Token</li><li>即可浏览所有聊天记录</li></ol>'
+    + '<div class="guide-actions">'
+    + '<button class="sb-btn" type="button" data-guide-action="skip">跳过，仅浏览公开仓库</button>'
+    + '<button class="sb-btn" type="button" data-guide-action="settings">打开设置</button>'
+    + '</div></div>';
+  mainBody.appendChild(wrap);
+  mainBody.scrollTop = 0;
+  wrap.querySelector('[data-guide-action="skip"]').addEventListener('click', () => {
+    tokenGuideDismissed = true;
+    if (scannedFiles.length) autoLoadFile(getUrlParam('file'));
+    else showSimpleEmpty('未找到公开仓库聊天记录');
+  });
+  wrap.querySelector('[data-guide-action="settings"]').addEventListener('click', async () => {
+    await ensureConfigLoaded();
+    openSettingsModal();
+  });
+}
+
+// === Manifest loading ===
+async function loadManifest(siteBase, meta) {
+  try {
+    const r = await fetch(siteBase + 'chat-manifest.json', { cache: 'no-cache' });
+    if (!r.ok) return [];
+    const data = await r.json();
+    const paths = Array.isArray(data) ? data : (data.files || []);
+    return paths.filter(p => {
+      const s = typeof p === 'string' ? p : (p && p.path);
+      return s && s.endsWith('.txt');
+    }).map(p => {
+      const path = typeof p === 'string' ? p : p.path;
+      const name = path.split('/').pop();
+      return enrichFile({ name, path, url: siteBase + encodeURI(path), source: 'http' }, meta);
+    });
+  } catch(e) { return []; }
+}
+
+// === localStorage cache (1 hour TTL) ===
+const CACHE_TTL = 3600000;
+function loadCache(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data.ts && Date.now() - data.ts < CACHE_TTL && data.files && data.files.length)
+      return data.files;
+    localStorage.removeItem(key);
+  } catch(e) {}
+  return null;
+}
+function saveCache(key, files) {
+  try {
+    const clean = files.map(f => ({
+      name: f.name,
+      path: f.path,
+      url: f.url,
+      source: f.source,
+      repoLabel: f.repoLabel || '',
+      owner: f.owner || '',
+      repo: f.repo || '',
+      branch: f.branch || ''
+    }));
+    localStorage.setItem(key, JSON.stringify({ files: clean, ts: Date.now() }));
+  } catch(e) {}
+}
+function clearScanCaches() {
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+  keys.forEach(key => {
+    if (key && key.startsWith(CACHE_PREFIX)) localStorage.removeItem(key);
+  });
+}
+
+// === GitHub API: try main → master → gh-pages ===
+function getBranchCandidates(preferred) {
+  return [...new Set([preferred, 'main', 'master', 'gh-pages'].filter(Boolean))];
+}
+async function scanGitHubAPI(owner, repo, siteBase, options) {
+  const token = options && options.token ? options.token : '';
+  const meta = options && options.meta ? options.meta : {};
+  const headers = { 'Accept': 'application/vnd.github+json' };
+  if (token) headers.Authorization = 'Bearer ' + token;
+  const branches = getBranchCandidates(meta.branch);
+  for (const branch of branches) {
+    try {
+      const r = await fetch(buildGitHubTreeUrl(owner, repo, branch), { headers, cache: 'no-cache' });
+      if (!r.ok) continue;
+      const data = await r.json();
+      const results = [];
+      for (const item of (data.tree || [])) {
+        if (item.type === 'blob' && item.path.endsWith('.txt')) {
+          const name = item.path.split('/').pop();
+          results.push(enrichFile({
+            name,
+            path: item.path,
+            url: siteBase ? siteBase + encodeURI(item.path) : buildGitHubRawUrl(owner, repo, branch, item.path),
+            source: token ? 'github' : 'http'
+          }, {
+            repoLabel: meta.repoLabel || meta.label || repo,
+            owner,
+            repo,
+            branch
+          }));
+        }
+      }
+      if (results.length) return results;
+    } catch(e) { continue; }
+  }
+  return [];
+}
+
+// === Gitee API ===
+async function scanGiteeAPI(owner, repo, siteBase, meta) {
+  const branches = [...new Set([meta && meta.branch, 'main', 'master'].filter(Boolean))];
+  for (const branch of branches) {
+    try {
+      const r = await fetch(
+        'https://gitee.com/api/v5/repos/' + owner + '/' + repo + '/git/trees/' + branch + '?recursive=1',
+        { cache: 'no-cache' }
+      );
+      if (!r.ok) continue;
+      const data = await r.json();
+      const results = [];
+      for (const item of (data.tree || [])) {
+        if (item.type === 'blob' && item.path.endsWith('.txt')) {
+          const name = item.path.split('/').pop();
+          results.push(enrichFile({
+            name,
+            path: item.path,
+            url: siteBase + encodeURI(item.path),
+            source: 'http'
+          }, {
+            repoLabel: meta && meta.repoLabel ? meta.repoLabel : repo,
+            owner: '',
+            repo: '',
+            branch
+          }));
+        }
+      }
+      if (results.length) return results;
+    } catch(e) { continue; }
+  }
+  return [];
+}
+
+function getPublicRepoMeta(hosting) {
+  const matched = hosting && hosting.type === 'github'
+    ? mergedRepos.find(repo => repoIdentity(repo) === repoIdentity(hosting))
+    : null;
+  return {
+    repoLabel: matched ? matched.label : (hosting ? hosting.repo : '公开仓库'),
+    owner: hosting && hosting.type === 'github' ? hosting.owner : '',
+    repo: hosting && hosting.type === 'github' ? hosting.repo : '',
+    branch: matched ? matched.branch : ''
+  };
+}
+async function scanConfiguredRepo(repo, token) {
+  const cacheKey = getAuthCacheKey(repo.owner, repo.repo, repo.branch);
+  const cached = loadCache(cacheKey);
+  if (cached && cached.length) {
+    return cached.map(file => enrichFile(file, {
+      repoLabel: repo.label,
+      owner: repo.owner,
+      repo: repo.repo,
+      branch: file.branch || repo.branch
+    }));
+  }
+  const files = await scanGitHubAPI(repo.owner, repo.repo, '', {
+    token,
+    meta: { repoLabel: repo.label, owner: repo.owner, repo: repo.repo, branch: repo.branch }
+  });
+  if (files.length) saveCache(cacheKey, files);
+  return files;
+}
+function compareFiles(a, b) {
+  const da = parseFileDate(a.name), db = parseFileDate(b.name);
+  if (da && db) return db - da;
+  if (da) return -1;
+  if (db) return 1;
+  return a.path.localeCompare(b.path);
+}
+
+// === Main auto-scan: 5-tier strategy ===
+async function autoScan() {
+  sbStatus.textContent = '正在扫描…';
+  await ensureConfigLoaded();
+  const targetFile = getUrlParam('file');
+  const token = getStoredToken();
+
+  if (!token) {
+    const publicFiles = await scanCurrentPublicRepo(targetFile, tokenGuideDismissed || !mergedRepos.length);
+    if (mergedRepos.length && !tokenGuideDismissed) {
+      sbStatus.textContent = publicFiles.length
+        ? publicFiles.length + ' 个公开文件，可配置 Token 浏览全部仓库'
+        : '配置 Token 后可浏览私有仓库';
+      showTokenGuide();
+      return;
+    }
+    if (!publicFiles.length && !mergedRepos.length) showSimpleEmpty('请选择左侧文件开始浏览');
+    return;
+  }
+
+  if (!mergedRepos.length) {
+    const publicFiles = await scanCurrentPublicRepo(targetFile, true);
+    if (!publicFiles.length) showSimpleEmpty('未配置仓库，请先修改 chat-config.json 或添加自定义仓库');
+    return;
+  }
+
+  sbStatus.textContent = '正在扫描 ' + mergedRepos.length + ' 个仓库…';
+  const repoResults = await Promise.all(mergedRepos.map(repo => scanConfiguredRepo(repo, token)));
+  scannedFiles = repoResults.flat().sort(compareFiles);
+  renderFileItems(fileSearch.value);
+  if (scannedFiles.length) {
+    sbStatus.textContent = scannedFiles.length + ' 个文件';
+    autoLoadFile(targetFile);
+  } else {
+    sbStatus.textContent = '未找到聊天记录';
+    showSimpleEmpty('未找到可访问的聊天记录，请检查 Token 是否有效，以及仓库配置是否正确。');
+  }
+}
+
+// === Background API refresh (non-blocking) ===
+async function refreshFromAPI(hosting, cacheKey, meta) {
+  try {
+    const files = hosting.type === 'github'
+      ? await scanGitHubAPI(hosting.owner, hosting.repo, hosting.siteBase, { meta })
+      : await scanGiteeAPI(hosting.owner, hosting.repo, hosting.siteBase, meta);
+    if (!files.length) return;
+    const oldKeys = new Set(scannedFiles.map(file => getFileKey(file)));
+    const newKeys = new Set(files.map(file => getFileKey(file)));
+    const changed = files.length !== scannedFiles.length
+      || files.some(file => !oldKeys.has(getFileKey(file)))
+      || scannedFiles.some(file => !newKeys.has(getFileKey(file)));
+    if (changed) {
+      scannedFiles = files;
+      saveCache(cacheKey, files);
+      renderFileItems(fileSearch.value);
+      if (!activeFileKey && !tokenGuideDismissed && !getStoredToken() && mergedRepos.length) showTokenGuide();
+    } else {
+      saveCache(cacheKey, files);
+    }
+  } catch(e) {}
+}
+
+// === Auto-load: by ?file= param or latest by date ===
+function fileMatchesTarget(file, target) {
+  const normalized = decodeURIComponent(target || '').replace(/^\/+/, '').toLowerCase();
+  if (!normalized) return false;
+  const aliases = [
+    file.path,
+    file.name,
+    (file.owner && file.repo ? file.owner + '/' + file.repo + '/' + file.path : ''),
+    (file.owner && file.repo ? file.owner + '/' + file.repo + '@' + (file.branch || '') + '/' + file.path : '')
+  ].filter(Boolean).map(item => item.toLowerCase());
+  return aliases.includes(normalized);
+}
+function autoLoadFile(targetPath) {
+  if (!scannedFiles.length) return;
+  let target = null;
+  if (targetPath) target = scannedFiles.find(file => fileMatchesTarget(file, targetPath));
+  if (!target) {
+    const withDates = scannedFiles
+      .map(file => ({ file, date: parseFileDate(file.name) }))
+      .filter(item => item.date)
+      .sort((a, b) => b.date - a.date);
+    target = withDates.length ? withDates[0].file : [...scannedFiles].sort(compareFiles)[0];
+  }
+  if (!target) return;
+  const targetKey = getFileKey(target);
+  const items = fileItems.querySelectorAll('.file-item');
+  for (const el of items) {
+    if (el.dataset.fileKey === targetKey) {
+      selectFile(target, el);
       return;
     }
   }
-
-  // 2) HTTP server: crawl directory index
-  if (location.protocol.startsWith('http')) {
-    try {
-      const base = new URL('.', location.href).href;
-      const found = await crawlIndex(base, '');
-      if (found.length) {
-        scannedFiles = found;
-        renderFileItems();
-        sbStatus.textContent = found.length + ' 个文件';
-        return;
-      }
-    } catch (e) {}
-  }
-
-  // 3) file:// or fallback: try saved handle, then prompt
-  if (window.showDirectoryPicker) {
-    // Try restoring persisted directory handle
-    const saved = await loadDirHandle();
-    if (saved) {
-      try {
-        const perm = await saved.requestPermission({ mode: 'read' });
-        if (perm === 'granted') {
-          sbStatus.textContent = '扫描中…';
-          scannedFiles = await fsWalk(saved, '');
-          renderFileItems();
-          sbStatus.textContent = scannedFiles.length + ' 个文件 (已记住)';
-          return;
-        }
-      } catch (e) {}
-    }
-    // No saved handle or permission denied — prompt picker
-    if (location.protocol === 'file:') {
-      sbStatus.textContent = '本地模式，请选择项目目录';
-      try {
-        const dh = await window.showDirectoryPicker({ mode: 'read' });
-        sbStatus.textContent = '扫描中…';
-        scannedFiles = await fsWalk(dh, '');
-        await saveDirHandle(dh);
-        renderFileItems();
-        sbStatus.textContent = scannedFiles.length + ' 个文件';
-        return;
-      } catch (e) {
-        if (e.name === 'AbortError') {
-          sbStatus.textContent = '已取消，可点击「选择目录」重试';
-          return;
-        }
-      }
-    }
-  }
-
-  sbStatus.textContent = '请手动选择目录或拖入文件';
 }
 
-// ── GitHub API: get full tree in one request ──
-async function scanGitHub(owner, repo) {
-  const results = [];
-  try {
-    const apiUrl = 'https://api.github.com/repos/' + owner + '/' + repo + '/git/trees/main?recursive=1';
-    const r = await fetch(apiUrl);
-    if (!r.ok) return results;
-    const data = await r.json();
-    const siteBase = location.origin + '/' + (repo === owner + '.github.io' ? '' : repo + '/');
-    for (const item of data.tree || []) {
-      if (item.type === 'blob' && item.path.endsWith('.txt')) {
-        const name = item.path.split('/').pop();
-        results.push({ name, path: item.path, url: siteBase + item.path, source: 'http' });
-      }
-    }
-  } catch (e) {}
-  return results;
-}
-
-async function crawlIndex(baseUrl, prefix) {
+// === Directory index crawling ===
+async function crawlIndex(baseUrl, prefix, meta) {
   const results = [];
   try {
     const url = baseUrl + (prefix ? prefix + '/' : '');
-    const r = await fetch(url);
+    const r = await fetch(url, { cache: 'no-cache' });
     if (!r.ok) return results;
     const ct = r.headers.get('content-type') || '';
-    // Only parse if it looks like a directory listing (not an HTML page)
     if (!ct.includes('text/html')) return results;
     const html = await r.text();
-    // Heuristic: directory listings have <pre> or "Index of" in title
     if (!html.includes('Index of') && !html.includes('<pre>')) return results;
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const links = [...doc.querySelectorAll('a')]
@@ -401,71 +1059,238 @@ async function crawlIndex(baseUrl, prefix) {
       const clean = href.replace(/\/$/, '');
       const rel = prefix ? prefix + '/' + clean : clean;
       if (href.endsWith('/')) {
-        results.push(...await crawlIndex(baseUrl, rel));
+        results.push(...await crawlIndex(baseUrl, rel, meta));
       } else if (clean.endsWith('.txt')) {
-        results.push({ name: clean, path: rel, url: baseUrl + rel, source: 'http' });
+        results.push(enrichFile({ name: clean, path: rel, url: baseUrl + encodeURI(rel), source: 'http' }, meta));
       }
     }
   } catch (e) {}
   return results;
 }
 
-// ── Manual directory scan ──
+// === Manual directory scan ===
 async function manualScan() {
   if (!window.showDirectoryPicker) { alert('请使用 Chrome / Edge'); return; }
   try {
     const dh = await window.showDirectoryPicker();
     sbStatus.textContent = '扫描中…';
-    scannedFiles = await fsWalk(dh, '');
+    scannedFiles = await fsWalk(dh, '', '本地目录');
     await saveDirHandle(dh);
-    renderFileItems();
+    renderFileItems(fileSearch.value);
     sbStatus.textContent = scannedFiles.length + ' 个文件';
   } catch (e) { if (e.name !== 'AbortError') sbStatus.textContent = '扫描失败'; }
 }
-async function fsWalk(dh, prefix) {
+async function fsWalk(dh, prefix, repoLabel) {
   const r = [];
   for await (const [name, handle] of dh) {
     const rel = prefix ? prefix + '/' + name : name;
     if (handle.kind === 'file' && name.endsWith('.txt'))
-      r.push({ name, path: rel, handle, source: 'fs' });
+      r.push(enrichFile({ name, path: rel, handle, source: 'fs', url: '' }, { repoLabel }));
     else if (handle.kind === 'directory')
-      r.push(...await fsWalk(handle, rel));
+      r.push(...await fsWalk(handle, rel, repoLabel));
   }
   return r;
 }
 
-// ── File list rendering ──
+async function scanCurrentPublicRepo(targetFile, autoLoadAfterScan) {
+  const hosting = detectHosting();
+  if (hosting) {
+    const meta = getPublicRepoMeta(hosting);
+    const cacheKey = getPublicCacheKey(hosting);
+    sbStatus.textContent = '加载清单…';
+    const manifestFiles = await loadManifest(hosting.siteBase, meta);
+    if (manifestFiles.length) {
+      scannedFiles = manifestFiles;
+      renderFileItems(fileSearch.value);
+      sbStatus.textContent = manifestFiles.length + ' 个文件';
+      if (autoLoadAfterScan) autoLoadFile(targetFile);
+      return manifestFiles;
+    }
+    const cached = loadCache(cacheKey);
+    if (cached && cached.length) {
+      scannedFiles = cached.map(file => enrichFile(file, meta));
+      renderFileItems(fileSearch.value);
+      sbStatus.textContent = scannedFiles.length + ' 个文件 (缓存)';
+      if (autoLoadAfterScan) autoLoadFile(targetFile);
+      refreshFromAPI(hosting, cacheKey, meta);
+      return scannedFiles;
+    }
+    sbStatus.textContent = '查询 ' + (hosting.type === 'github' ? 'GitHub' : 'Gitee') + ' API…';
+    const apiFiles = hosting.type === 'github'
+      ? await scanGitHubAPI(hosting.owner, hosting.repo, hosting.siteBase, { meta })
+      : await scanGiteeAPI(hosting.owner, hosting.repo, hosting.siteBase, meta);
+    if (apiFiles.length) {
+      scannedFiles = apiFiles;
+      saveCache(cacheKey, apiFiles);
+      renderFileItems(fileSearch.value);
+      sbStatus.textContent = apiFiles.length + ' 个文件';
+      if (autoLoadAfterScan) autoLoadFile(targetFile);
+      return apiFiles;
+    }
+    sbStatus.textContent = 'API 未返回结果，尝试其他方式…';
+  }
+
+  if (location.protocol.startsWith('http')) {
+    try {
+      const base = new URL('.', location.href).href;
+      const found = await crawlIndex(base, '', getPublicRepoMeta(hosting));
+      if (found.length) {
+        scannedFiles = found;
+        renderFileItems(fileSearch.value);
+        sbStatus.textContent = found.length + ' 个文件';
+        if (autoLoadAfterScan) autoLoadFile(targetFile);
+        return found;
+      }
+    } catch (e) {}
+  }
+
+  if (window.showDirectoryPicker) {
+    const saved = await loadDirHandle();
+    if (saved) {
+      try {
+        const perm = await saved.requestPermission({ mode: 'read' });
+        if (perm === 'granted') {
+          sbStatus.textContent = '扫描本地目录…';
+          scannedFiles = await fsWalk(saved, '', '本地目录');
+          renderFileItems(fileSearch.value);
+          sbStatus.textContent = scannedFiles.length + ' 个文件';
+          if (autoLoadAfterScan) autoLoadFile(targetFile);
+          return scannedFiles;
+        }
+      } catch (e) {}
+    }
+    if (location.protocol === 'file:') {
+      sbStatus.textContent = '本地模式，请选择项目目录';
+      try {
+        const dh = await window.showDirectoryPicker({ mode: 'read' });
+        sbStatus.textContent = '扫描中…';
+        scannedFiles = await fsWalk(dh, '', '本地目录');
+        await saveDirHandle(dh);
+        renderFileItems(fileSearch.value);
+        sbStatus.textContent = scannedFiles.length + ' 个文件';
+        if (autoLoadAfterScan) autoLoadFile(targetFile);
+        return scannedFiles;
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          sbStatus.textContent = '已取消，可点击「选择目录」重试';
+          return [];
+        }
+      }
+    }
+  }
+
+  scannedFiles = [];
+  renderFileItems(fileSearch.value);
+  sbStatus.textContent = '请手动选择目录或拖入文件';
+  return [];
+}
+async function fetchFileText(file) {
+  if (file.source === 'fs') return (await file.handle.getFile()).text();
+  const token = getStoredToken();
+  const headers = {};
+  if (file.owner && file.repo && token) headers.Authorization = 'Bearer ' + token;
+  const r = await fetch(file.url, { headers, cache: 'no-cache' });
+  if (r.ok) return r.text();
+  if (file.owner && file.repo && token) {
+    const fallback = await fetch(buildGitHubContentUrl(file.owner, file.repo, file.branch || 'main', file.path), {
+      headers: {
+        'Accept': 'application/vnd.github.raw+json',
+        'Authorization': 'Bearer ' + token
+      },
+      cache: 'no-cache'
+    });
+    if (fallback.ok) return fallback.text();
+  }
+  throw new Error('文件加载失败');
+}
+
+// === File list rendering ===
 function renderFileItems(filter) {
   fileItems.innerHTML = '';
-  const kw = (filter || '').toLowerCase();
-  const list = kw ? scannedFiles.filter(f => f.path.toLowerCase().includes(kw)) : scannedFiles;
-  list.sort((a, b) => a.path.localeCompare(b.path));
-  for (const f of list) {
-    const div = document.createElement('div');
-    div.className = 'file-item';
-    div.innerHTML = '<div class="fname">' + esc(f.name.replace(/\.txt$/, ''))
-      + '</div><div class="fpath">' + esc(f.path) + '</div>';
-    div.addEventListener('click', () => selectFile(f, div));
-    div.addEventListener('dblclick', e => { e.stopPropagation(); div.classList.toggle('expanded'); });
-    fileItems.appendChild(div);
+  activeFileEl = null;
+  const kw = String(filter || '').trim().toLowerCase();
+  const list = kw
+    ? scannedFiles.filter(file => [file.path, file.name, getRepoLabel(file)]
+      .some(text => String(text || '').toLowerCase().includes(kw)))
+    : [...scannedFiles];
+  list.sort(compareFiles);
+  if (!list.length) {
+    fileItems.innerHTML = '<div class="q-empty">未找到文件</div>';
+    return;
   }
-  // Auto-expand file sidebar when files found
+
+  const repoOrder = new Map();
+  mergedRepos.forEach((repo, index) => repoOrder.set(repoIdentity(repo), index));
+  const groups = new Map();
+  list.forEach(file => {
+    const key = getRepoGroupKey(file);
+    if (!groups.has(key)) {
+      groups.set(key, {
+        label: getRepoLabel(file),
+        owner: file.owner || '',
+        repo: file.repo || '',
+        files: []
+      });
+    }
+    groups.get(key).files.push(file);
+  });
+
+  const sortedGroups = [...groups.values()].sort((a, b) => {
+    const ai = a.owner && a.repo && repoOrder.has(repoIdentity(a)) ? repoOrder.get(repoIdentity(a)) : Number.MAX_SAFE_INTEGER;
+    const bi = b.owner && b.repo && repoOrder.has(repoIdentity(b)) ? repoOrder.get(repoIdentity(b)) : Number.MAX_SAFE_INTEGER;
+    if (ai !== bi) return ai - bi;
+    return a.label.localeCompare(b.label);
+  });
+
+  sortedGroups.forEach(group => {
+    const groupEl = document.createElement('div');
+    groupEl.className = 'repo-group';
+    const title = document.createElement('div');
+    title.className = 'repo-group-title';
+    title.textContent = group.owner && group.repo ? group.label + ' · ' + group.owner + '/' + group.repo : group.label;
+    groupEl.appendChild(title);
+
+    group.files.forEach(file => {
+      const div = document.createElement('div');
+      const fileKey = getFileKey(file);
+      div.className = 'file-item' + (activeFileKey === fileKey ? ' active' : '');
+      div.dataset.fileKey = fileKey;
+      const d = parseFileDate(file.name);
+      const dateStr = formatDate(d);
+      div.innerHTML = '<div class="fname"><span class="repo-tag">' + esc(getRepoLabel(file)) + '</span>'
+        + esc(getDisplayName(file)) + '</div>'
+        + (dateStr ? '<div class="fdate">' + esc(dateStr) + '</div>' : '')
+        + '<div class="fpath">' + esc(file.path) + '</div>';
+      div.addEventListener('click', () => selectFile(file, div));
+      div.addEventListener('dblclick', e => { e.stopPropagation(); div.classList.toggle('expanded'); });
+      if (activeFileKey === fileKey) activeFileEl = div;
+      groupEl.appendChild(div);
+    });
+
+    fileItems.appendChild(groupEl);
+  });
+
   if (list.length) sidebarFiles.classList.remove('collapsed');
 }
 
 async function selectFile(f, el) {
-  if (activeFileEl) activeFileEl.classList.remove('active');
-  el.classList.add('active'); activeFileEl = el;
-  let text;
-  if (f.source === 'http') text = await (await fetch(f.url)).text();
-  else { text = await (await f.handle.getFile()).text(); }
-  const msgs = parseConversation(text);
-  renderMessages(msgs, f.name.replace(/\.txt$/, ''));
-  renderQuestions(msgs);
-  sidebarQuestions.classList.remove('collapsed');
+  try {
+    if (activeFileEl) activeFileEl.classList.remove('active');
+    el.classList.add('active');
+    activeFileEl = el;
+    activeFileKey = getFileKey(f);
+    const text = await fetchFileText(f);
+    const msgs = parseConversation(text);
+    renderMessages(msgs, f.name.replace(/\.txt$/i, ''), f);
+    renderQuestions(msgs);
+    sidebarQuestions.classList.remove('collapsed');
+  } catch (e) {
+    showSimpleEmpty('文件加载失败，请检查 Token 或仓库权限。');
+    sbStatus.textContent = '文件加载失败';
+  }
 }
 
-// ── Questions sidebar ──
+// === Questions sidebar ===
 function renderQuestions(msgs) {
   qItems.innerHTML = '';
   const um = msgs.filter(m => m.role === 'user');
@@ -502,9 +1327,20 @@ qExport.addEventListener('click', () => {
   a.click(); URL.revokeObjectURL(a.href);
 });
 
-// ── Events ──
+// === Events ===
 scanBtn.addEventListener('click', manualScan);
 dropBtn.addEventListener('click', () => fileInput.click());
+refreshBtn.addEventListener('click', async () => {
+  clearScanCaches();
+  scannedFiles = [];
+  fileItems.innerHTML = '';
+  tokenGuideDismissed = false;
+  await autoScan();
+});
+settingsBtn.addEventListener('click', async () => {
+  await ensureConfigLoaded();
+  openSettingsModal();
+});
 fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
 fileSearch.addEventListener('input', e => renderFileItems(e.target.value));
 document.addEventListener('dragover', e => { e.preventDefault(); dropOverlay.classList.add('show'); });
@@ -513,19 +1349,65 @@ dropOverlay.addEventListener('drop', e => {
   e.preventDefault(); dropOverlay.classList.remove('show');
   if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
 });
+settingsClose.addEventListener('click', closeSettingsModal);
+settingsOverlay.addEventListener('click', e => {
+  if (e.target === settingsOverlay) closeSettingsModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) closeSettingsModal();
+});
+toggleTokenBtn.addEventListener('click', () => {
+  const nextType = tokenInput.type === 'password' ? 'text' : 'password';
+  tokenInput.type = nextType;
+  toggleTokenBtn.textContent = nextType === 'password' ? '显示' : '隐藏';
+});
+testTokenBtn.addEventListener('click', async () => {
+  const token = tokenInput.value.trim();
+  if (!token) {
+    setTokenStatus('请先输入 Token。', 'error');
+    return;
+  }
+  setTokenStatus('正在测试连接…', '');
+  try {
+    const user = await testGitHubConnection(token);
+    setTokenStatus('连接成功：' + user.login, 'success');
+  } catch (e) {
+    setTokenStatus('连接失败：' + e.message, 'error');
+  }
+});
+clearTokenBtn.addEventListener('click', async () => {
+  tokenInput.value = '';
+  setStoredToken('');
+  clearScanCaches();
+  tokenGuideDismissed = false;
+  closeSettingsModal();
+  await autoScan();
+});
+addRepoBtn.addEventListener('click', () => {
+  addCustomRepoFromForm();
+});
+saveSettingsBtn.addEventListener('click', async () => {
+  if (!addCustomRepoFromForm()) return;
+  setStoredToken(tokenInput.value.trim());
+  saveStoredRepos(customRepos);
+  clearScanCaches();
+  tokenGuideDismissed = false;
+  closeSettingsModal();
+  await autoScan();
+});
 
 function loadFile(file) {
   const reader = new FileReader();
   reader.onload = e => {
     const msgs = parseConversation(e.target.result);
-    renderMessages(msgs, file.name.replace(/\.txt$/, ''));
+    renderMessages(msgs, file.name.replace(/\.txt$/i, ''), { repoLabel: '临时文件' });
     renderQuestions(msgs);
     sidebarQuestions.classList.remove('collapsed');
   };
   reader.readAsText(file, 'utf-8');
 }
 
-// ── Parser ──
+// === Parser ===
 function parseConversation(text) {
   const lines = text.split('\n'), msgs = [];
   let cur = null, started = false;
@@ -584,11 +1466,13 @@ function renderAssistant(text) {
   flush(); return html;
 }
 
-function renderMessages(msgs, filename) {
-  let uc = 0, ac = 0, qi = 0;
-  msgs.forEach(m => { if (m.role==='user') uc++; if (m.role==='assistant') ac++; });
+function renderMessages(msgs, filename, fileMeta) {
+  let uc = 0, qi = 0;
+  msgs.forEach(m => { if (m.role === 'user') uc++; });
   titleEl.textContent = filename;
-  metaEl.textContent = msgs.length + ' 条消息 | ' + uc + ' 轮对话';
+  const metaParts = [msgs.length + ' 条消息', uc + ' 轮对话'];
+  if (fileMeta && fileMeta.repoLabel) metaParts.push(fileMeta.repoLabel);
+  metaEl.textContent = metaParts.join(' | ');
   let out = '';
   for (const msg of msgs) {
     const text = msg.lines.join('\n').trim(); if (!text) continue;
@@ -603,10 +1487,7 @@ function renderMessages(msgs, filename) {
     else if (msg.role==='tool_output') out += '<div class="msg tool-out"><pre>'+esc(text)+'</pre></div>';
     else if (msg.role==='thinking') out += '<div class="msg thinking">'+esc(text)+'</div>';
   }
-  // Keep the bar, replace everything after it
-  const bar = document.getElementById('currentQBar');
-  bar.className = 'current-q-bar'; bar.innerHTML = '';
-  // Remove all children except the bar
+  currentQBar.className = 'current-q-bar'; currentQBar.innerHTML = '';
   while (mainBody.children.length > 1) mainBody.removeChild(mainBody.lastChild);
   mainBody.insertAdjacentHTML('beforeend', out);
   currentMessages = msgs;
@@ -614,11 +1495,7 @@ function renderMessages(msgs, filename) {
   setupScrollSync();
 }
 
-// ── Scroll sync: right side scroll → left sidebar highlight ──
-let scrollObserver = null;
-let isClickScrolling = false;
-let lastStuckIndex = -1;
-
+// === Scroll sync ===
 function setupScrollSync() {
   if (scrollObserver) scrollObserver.disconnect();
   lastStuckIndex = -1;
@@ -660,7 +1537,6 @@ function syncQSidebar(index) {
   items.forEach(q => q.classList.remove('active'));
   if (items[index]) {
     items[index].classList.add('active');
-    // Scroll the sidebar item into view if needed
     const container = qItems;
     const item = items[index];
     const cRect = container.getBoundingClientRect();
@@ -671,11 +1547,12 @@ function syncQSidebar(index) {
   }
 }
 
-// Click to expand/collapse current-q-bar
 document.getElementById('currentQBar').addEventListener('click', function() {
   this.classList.toggle('expanded');
 });
 
+// === Launch ===
+renderSettingsLists();
 autoScan();
 </script>
 </body>
